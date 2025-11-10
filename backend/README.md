@@ -1,98 +1,370 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend - Aplicación de Gimnasio
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend construido con NestJS, TypeORM y PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Características
 
-## Description
+- Autenticación con JWT (access token + refresh token)
+- Autorización basada en roles (SOCIO, ADMIN, ENTRENADOR, RECEPCIONISTA)
+- TypeORM con PostgreSQL
+- Validación de DTOs con class-validator
+- Guards globales para protección de rutas
+- Exception filters personalizados
+- Logging de requests
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📋 Requisitos
 
-## Project setup
+- Node.js 18+
+- npm o yarn
+- Docker y Docker Compose (para PostgreSQL)
+- PostgreSQL 15+ (si no usas Docker)
 
+## 🛠 Instalación
+
+1. Instalar dependencias:
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
-
+2. Configurar variables de entorno:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
+# Editar .env con tus configuraciones
 ```
 
-## Run tests
-
+3. Iniciar PostgreSQL con Docker (desde la raíz del proyecto):
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up -d
 ```
 
-## Deployment
+O si tienes PostgreSQL instalado localmente, asegúrate de que esté corriendo y configura el .env apropiadamente.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+4. Ejecutar migraciones (cuando estén creadas):
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run migration:run
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+5. (Opcional) Ejecutar seeds:
+```bash
+npm run seed
+```
 
-## Resources
+## 🏃‍♂️ Ejecución
 
-Check out a few resources that may come in handy when working with NestJS:
+### Desarrollo
+```bash
+npm run start:dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+La API estará disponible en `http://localhost:3000/api`
 
-## Support
+### Producción
+```bash
+npm run build
+npm run start:prod
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 📚 Estructura del Proyecto
 
-## Stay in touch
+```
+src/
+├── auth/              # Módulo de autenticación
+│   ├── dto/          # Data Transfer Objects
+│   ├── strategies/   # Estrategias de Passport (JWT)
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   └── auth.module.ts
+│
+├── users/            # Módulo de usuarios
+│   └── entities/     # Entidad User
+│
+├── memberships/      # Módulo de membresías
+│   └── entities/     # Entidad Membership
+│
+├── attendance/       # Módulo de asistencia
+│   └── entities/     # Entidad Attendance
+│
+├── exercises/        # Módulo de ejercicios
+│   └── entities/     # Entidad Exercise
+│
+├── routines/         # Módulo de rutinas
+│   └── entities/     # Entidades Routine, RoutineExercise, UserFavoriteRoutine
+│
+├── classes/          # Módulo de clases grupales
+│   └── entities/     # Entidad Class
+│
+├── bookings/         # Módulo de reservas
+│   └── entities/     # Entidad Booking
+│
+├── payments/         # Módulo de pagos
+│   └── entities/     # Entidad Payment
+│
+├── announcements/    # Módulo de anuncios
+│   └── entities/     # Entidad Announcement
+│
+├── common/           # Utilidades compartidas
+│   ├── decorators/   # Decoradores personalizados (@Public, @Roles, @CurrentUser)
+│   ├── guards/       # Guards (JwtAuthGuard, RolesGuard)
+│   ├── interceptors/ # Interceptors (Transform, Logging)
+│   ├── filters/      # Exception filters
+│   ├── dto/          # DTOs comunes (Pagination)
+│   └── types/        # Tipos TypeScript
+│
+├── config/           # Configuraciones
+│   ├── database.config.ts
+│   └── jwt.config.ts
+│
+├── app.module.ts     # Módulo principal
+└── main.ts          # Entry point
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🔐 Autenticación
 
-## License
+### Endpoints Públicos
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+#### POST /api/auth/register
+Registrar nuevo usuario.
+
+**Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!",
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "telefono": "+54911234567"
+}
+```
+
+**Response:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "rol": "SOCIO",
+    "qrCode": "uuid",
+    "estado": "ACTIVO"
+  },
+  "accessToken": "jwt-token",
+  "refreshToken": "refresh-token"
+}
+```
+
+#### POST /api/auth/login
+Iniciar sesión.
+
+**Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Response:** Same as register
+
+#### POST /api/auth/refresh
+Renovar access token.
+
+**Body:**
+```json
+{
+  "refreshToken": "refresh-token"
+}
+```
+
+**Response:**
+```json
+{
+  "accessToken": "new-jwt-token"
+}
+```
+
+### Endpoints Protegidos
+
+#### GET /api/auth/me
+Obtener perfil del usuario actual.
+
+**Headers:**
+```
+Authorization: Bearer {access-token}
+```
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "rol": "SOCIO",
+  "estado": "ACTIVO",
+  "qrCode": "uuid"
+}
+```
+
+#### POST /api/auth/logout
+Cerrar sesión.
+
+**Headers:**
+```
+Authorization: Bearer {access-token}
+```
+
+## 🎯 Guards y Decoradores
+
+### @Public()
+Marca un endpoint como público (no requiere autenticación).
+
+```typescript
+@Public()
+@Get('public')
+async publicEndpoint() {
+  return { message: 'Este endpoint es público' };
+}
+```
+
+### @Roles(...roles)
+Restringe acceso a ciertos roles.
+
+```typescript
+@Roles(UserRole.ADMIN, UserRole.ENTRENADOR)
+@Get('admin-only')
+async adminEndpoint() {
+  return { message: 'Solo admins y entrenadores' };
+}
+```
+
+### @CurrentUser()
+Obtiene el usuario actual del request.
+
+```typescript
+@Get('profile')
+async getProfile(@CurrentUser() user: User) {
+  return user;
+}
+```
+
+## 🗄️ Base de Datos
+
+### Entidades
+
+- **User**: Usuarios del sistema
+- **Membership**: Membresías de socios
+- **Attendance**: Asistencias al gimnasio
+- **Exercise**: Biblioteca de ejercicios
+- **Routine**: Rutinas de entrenamiento
+- **RoutineExercise**: Ejercicios dentro de una rutina
+- **UserFavoriteRoutine**: Rutinas favoritas de usuarios
+- **Class**: Clases grupales
+- **Booking**: Reservas de clases
+- **Payment**: Pagos registrados
+- **Announcement**: Anuncios del gimnasio
+
+### Migraciones
+
+Crear una migración:
+```bash
+npm run migration:generate -- src/migrations/MigrationName
+```
+
+Ejecutar migraciones:
+```bash
+npm run migration:run
+```
+
+Revertir última migración:
+```bash
+npm run migration:revert
+```
+
+## 🧪 Testing
+
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## 📝 Scripts Disponibles
+
+- `npm run start`: Iniciar en modo producción
+- `npm run start:dev`: Iniciar en modo desarrollo (watch mode)
+- `npm run start:debug`: Iniciar en modo debug
+- `npm run build`: Compilar para producción
+- `npm run test`: Ejecutar tests unitarios
+- `npm run test:e2e`: Ejecutar tests E2E
+- `npm run lint`: Linter
+- `npm run format`: Formatear código con Prettier
+
+## 🌍 Variables de Entorno
+
+Ver `.env.example` para la lista completa de variables requeridas.
+
+### Principales:
+
+- `DB_HOST`: Host de PostgreSQL
+- `DB_PORT`: Puerto de PostgreSQL
+- `DB_USERNAME`: Usuario de PostgreSQL
+- `DB_PASSWORD`: Contraseña de PostgreSQL
+- `DB_DATABASE`: Nombre de la base de datos
+- `JWT_SECRET`: Secret para access tokens
+- `JWT_REFRESH_SECRET`: Secret para refresh tokens
+- `JWT_EXPIRES_IN`: Expiración de access token (ej: "15m")
+- `JWT_REFRESH_EXPIRES_IN`: Expiración de refresh token (ej: "7d")
+- `PORT`: Puerto del servidor (default: 3000)
+- `NODE_ENV`: Entorno (development, production)
+- `FRONTEND_URL`: URL del frontend para CORS
+
+## 🚧 Estado Actual
+
+✅ Configuración base de NestJS
+✅ TypeORM con PostgreSQL
+✅ Todas las entidades creadas
+✅ Módulo de autenticación con JWT
+✅ Guards globales (JWT + Roles)
+✅ Decoradores personalizados
+✅ Exception filters
+✅ Validación global de DTOs
+✅ CORS configurado
+
+### Por Implementar (según TODO.md):
+
+- [ ] Módulos de negocio (Users, Memberships, Attendance, etc.)
+- [ ] Endpoints CRUD para cada entidad
+- [ ] Sistema de notificaciones
+- [ ] Seeds de datos iniciales
+- [ ] Tests unitarios y E2E
+- [ ] Documentación Swagger
+- [ ] OAuth (Google, Apple)
+
+## 📖 Documentación API
+
+La documentación completa de la API está disponible en `MVP_PLAN.md` en la raíz del proyecto.
+
+## 🐛 Debugging
+
+Para debuggear en VSCode, usa la siguiente configuración en `.vscode/launch.json`:
+
+```json
+{
+  "type": "node",
+  "request": "launch",
+  "name": "Debug NestJS",
+  "runtimeExecutable": "npm",
+  "runtimeArgs": ["run", "start:debug"],
+  "console": "integratedTerminal"
+}
+```
+
+## 📄 Licencia
+
+MIT

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../stores/authStore';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -12,7 +13,7 @@ export const api = axios.create({
 // Request interceptor para agregar el token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = useAuthStore.getState().accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,7 +35,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = useAuthStore.getState().refreshToken;
 
         if (!refreshToken) {
           throw new Error('No refresh token');
@@ -46,16 +47,14 @@ api.interceptors.response.use(
         });
 
         const { accessToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
+        useAuthStore.getState().setAccessToken(accessToken);
 
         // Reintentar la petición original
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         // Si falla el refresh, limpiar y redirigir al login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        useAuthStore.getState().clearAuth();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

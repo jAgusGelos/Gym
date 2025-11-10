@@ -6,8 +6,14 @@ import { ProfilePage } from './routes/profile';
 import { QRPage } from './routes/qr';
 import { ClassesPage } from './routes/classes';
 import { RoutinesPage } from './routes/routines';
+import { AdminDashboard } from './routes/admin/dashboard';
+import { MembersPage } from './routes/admin/members';
+import { AdminClassesPage } from './routes/admin/classes';
+import { AttendancePage } from './routes/admin/attendance';
+import { PaymentsPage } from './routes/admin/payments';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { MobileLayout } from './components/layouts/MobileLayout';
+import { AdminLayout } from './components/layouts/AdminLayout';
 import { UserRole } from './types/user.types';
 
 // Root route
@@ -99,31 +105,61 @@ const routinesRoute = createRoute({
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
-  component: () => <div>Admin</div>,
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
+      <AdminLayout>
+        <AdminDashboard />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const adminMembersRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/members',
-  component: () => <div>Gestión de Socios</div>,
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
+      <AdminLayout>
+        <MembersPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const adminClassesRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/classes',
-  component: () => <div>Gestión de Clases</div>,
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
+      <AdminLayout>
+        <AdminClassesPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const adminAttendanceRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/attendance',
-  component: () => <div>Control de Asistencia</div>,
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
+      <AdminLayout>
+        <AttendancePage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const adminPaymentsRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/payments',
-  component: () => <div>Gestión de Pagos</div>,
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+      <AdminLayout>
+        <PaymentsPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
 });
 
 // Route tree

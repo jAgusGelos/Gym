@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useAdmin';
 import { Button, Card, CardContent, Input, Loading, Modal } from '../../components/ui';
 import { MemberForm } from '../../components/forms/MemberForm';
+import { useToast } from '../../stores/toastStore';
 import { Search, UserPlus, Edit, Trash2, CheckCircle, XCircle, Mail, Phone } from 'lucide-react';
 import { User, UserRole } from '../../types/user.types';
 
@@ -15,6 +16,7 @@ export const MembersPage = () => {
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
+  const toast = useToast();
 
   const filteredUsers = usersData?.data.filter((user) => {
     const matchesSearch =
@@ -34,12 +36,26 @@ export const MembersPage = () => {
     updateUser.mutate({
       id: userId,
       data: { activo: !currentStatus },
+    }, {
+      onSuccess: () => {
+        toast.success(currentStatus ? 'Socio desactivado' : 'Socio activado');
+      },
+      onError: () => {
+        toast.error('Error al cambiar el estado del socio');
+      },
     });
   };
 
   const handleDeleteUser = (userId: string, userName: string) => {
     if (confirm(`¿Estás seguro de que querés eliminar a ${userName}?`)) {
-      deleteUser.mutate(userId);
+      deleteUser.mutate(userId, {
+        onSuccess: () => {
+          toast.success('Socio eliminado correctamente');
+        },
+        onError: () => {
+          toast.error('Error al eliminar el socio');
+        },
+      });
     }
   };
 
@@ -47,8 +63,9 @@ export const MembersPage = () => {
     try {
       await createUser.mutateAsync(data);
       setIsModalOpen(false);
-    } catch (error) {
-      // Error handling
+      toast.success('Socio creado correctamente');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al crear el socio');
     }
   };
 
@@ -61,8 +78,9 @@ export const MembersPage = () => {
       });
       setIsModalOpen(false);
       setEditingUser(null);
-    } catch (error) {
-      // Error handling
+      toast.success('Socio actualizado correctamente');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al actualizar el socio');
     }
   };
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { usePayments, useCreatePayment } from '../../hooks/useAdmin';
 import { Button, Card, CardContent, Loading, Modal } from '../../components/ui';
 import { PaymentForm } from '../../components/forms/PaymentForm';
+import { useToast } from '../../stores/toastStore';
 import { DollarSign, Plus, Calendar, CreditCard, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { PaymentStatus, PaymentMethod } from '../../types/payment.types';
 
@@ -11,6 +12,7 @@ export const PaymentsPage = () => {
 
   const { data: paymentsData, isLoading } = usePayments(1, 50);
   const createPayment = useCreatePayment();
+  const toast = useToast();
 
   const filteredPayments = paymentsData?.data.filter((payment) => {
     if (filterStatus === 'all') return true;
@@ -55,8 +57,9 @@ export const PaymentsPage = () => {
     try {
       await createPayment.mutateAsync(data);
       setIsModalOpen(false);
-    } catch (error) {
-      // Error handling
+      toast.success('Pago registrado correctamente');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al registrar el pago');
     }
   };
 

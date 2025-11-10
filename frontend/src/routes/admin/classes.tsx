@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAdminClasses, useCreateClass, useUpdateClass, useDeleteClass } from '../../hooks/useAdminClasses';
 import { Button, Card, CardContent, Loading, Modal } from '../../components/ui';
 import { ClassForm } from '../../components/forms/ClassForm';
+import { useToast } from '../../stores/toastStore';
 import { Calendar, Plus, Edit, Trash2, Users, Clock, User } from 'lucide-react';
 import { Class } from '../../types/class.types';
 
@@ -13,17 +14,32 @@ export const AdminClassesPage = () => {
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
+  const toast = useToast();
 
   const handleToggleStatus = (classId: string, currentStatus: boolean) => {
     updateClass.mutate({
       id: classId,
       data: { activo: !currentStatus },
+    }, {
+      onSuccess: () => {
+        toast.success(currentStatus ? 'Clase desactivada' : 'Clase activada');
+      },
+      onError: () => {
+        toast.error('Error al cambiar el estado de la clase');
+      },
     });
   };
 
   const handleDeleteClass = (classId: string, className: string) => {
     if (confirm(`¿Estás seguro de que querés eliminar la clase "${className}"?`)) {
-      deleteClass.mutate(classId);
+      deleteClass.mutate(classId, {
+        onSuccess: () => {
+          toast.success('Clase eliminada correctamente');
+        },
+        onError: () => {
+          toast.error('Error al eliminar la clase');
+        },
+      });
     }
   };
 
@@ -31,8 +47,9 @@ export const AdminClassesPage = () => {
     try {
       await createClass.mutateAsync(data);
       setIsModalOpen(false);
-    } catch (error) {
-      // Error handling
+      toast.success('Clase creada correctamente');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al crear la clase');
     }
   };
 
@@ -45,8 +62,9 @@ export const AdminClassesPage = () => {
       });
       setIsModalOpen(false);
       setEditingClass(null);
-    } catch (error) {
-      // Error handling
+      toast.success('Clase actualizada correctamente');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al actualizar la clase');
     }
   };
 

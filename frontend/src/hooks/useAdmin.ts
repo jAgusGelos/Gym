@@ -57,6 +57,21 @@ export const useUser = (id: string) => {
   });
 };
 
+export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Partial<User> & { password: string }) => {
+      const response = await api.post<User>('/auth/register', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+  });
+};
+
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
@@ -68,6 +83,7 @@ export const useUpdateUser = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
     },
   });
 };

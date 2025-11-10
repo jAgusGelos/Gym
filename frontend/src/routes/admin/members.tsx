@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import { useUsers, useUpdateUser, useDeleteUser } from '../../hooks/useAdmin';
-import { Button, Card, CardHeader, CardTitle, CardContent, Input, Loading } from '../../components/ui';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useAdmin';
+import { Button, Card, CardContent, Input, Loading, Modal } from '../../components/ui';
+import { MemberForm } from '../../components/forms/MemberForm';
 import { Search, UserPlus, Edit, Trash2, CheckCircle, XCircle, Mail, Phone } from 'lucide-react';
-import { User, UserRole, UserStatus } from '../../types/user.types';
+import { User, UserRole } from '../../types/user.types';
 
 export const MembersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
   const { data: usersData, isLoading } = useUsers(1, 50);
+  const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
 
@@ -38,6 +43,44 @@ export const MembersPage = () => {
     }
   };
 
+  const handleCreateUser = async (data: any) => {
+    try {
+      await createUser.mutateAsync(data);
+      setIsModalOpen(false);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleEditUser = async (data: any) => {
+    if (!editingUser) return;
+    try {
+      await updateUser.mutateAsync({
+        id: editingUser.id,
+        data,
+      });
+      setIsModalOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const openCreateModal = () => {
+    setEditingUser(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user: User) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+  };
+
   const getRoleBadgeColor = (rol: UserRole) => {
     switch (rol) {
       case UserRole.ADMIN:
@@ -62,7 +105,7 @@ export const MembersPage = () => {
             {usersData?.total || 0} socios registrados
           </p>
         </div>
-        <Button>
+        <Button onClick={openCreateModal}>
           <UserPlus className="w-4 h-4 mr-2" />
           Nuevo Socio
         </Button>
@@ -169,7 +212,7 @@ export const MembersPage = () => {
                   >
                     {user.activo ? 'Desactivar' : 'Activar'}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => openEditModal(user)}>
                     <Edit className="w-4 h-4 mr-1" />
                     Editar
                   </Button>
@@ -196,6 +239,28 @@ export const MembersPage = () => {
           )}
         </div>
       )}
+
+      {/* Modal de crear/editar socio */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingUser ? 'Editar Socio' : 'Nuevo Socio'}
+        size="lg"
+      >
+        <MemberForm
+          onSubmit={editingUser ? handleEditUser : handleCreateUser}
+          onCancel={closeModal}
+          isLoading={editingUser ? updateUser.isPending : createUser.isPending}
+          initialData={editingUser ? {
+            nombre: editingUser.nombre,
+            apellido: editingUser.apellido,
+            email: editingUser.email,
+            telefono: editingUser.telefono,
+            rol: editingUser.rol,
+          } : undefined}
+          isEdit={!!editingUser}
+        />
+      </Modal>
     </div>
   );
 };

@@ -1,10 +1,16 @@
 import { useState } from 'react';
-import { useAdminClasses, useUpdateClass, useDeleteClass } from '../../hooks/useAdminClasses';
-import { Button, Card, CardContent, Loading } from '../../components/ui';
+import { useAdminClasses, useCreateClass, useUpdateClass, useDeleteClass } from '../../hooks/useAdminClasses';
+import { Button, Card, CardContent, Loading, Modal } from '../../components/ui';
+import { ClassForm } from '../../components/forms/ClassForm';
 import { Calendar, Plus, Edit, Trash2, Users, Clock, User } from 'lucide-react';
+import { Class } from '../../types/class.types';
 
 export const AdminClassesPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
+
   const { data: classesData, isLoading } = useAdminClasses(1, 50);
+  const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
 
@@ -19,6 +25,44 @@ export const AdminClassesPage = () => {
     if (confirm(`¿Estás seguro de que querés eliminar la clase "${className}"?`)) {
       deleteClass.mutate(classId);
     }
+  };
+
+  const handleCreateClass = async (data: any) => {
+    try {
+      await createClass.mutateAsync(data);
+      setIsModalOpen(false);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleEditClass = async (data: any) => {
+    if (!editingClass) return;
+    try {
+      await updateClass.mutateAsync({
+        id: editingClass.id,
+        data,
+      });
+      setIsModalOpen(false);
+      setEditingClass(null);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const openCreateModal = () => {
+    setEditingClass(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (classItem: Class) => {
+    setEditingClass(classItem);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingClass(null);
   };
 
   const upcomingClasses = classesData?.data.filter(
@@ -40,7 +84,7 @@ export const AdminClassesPage = () => {
             {classesData?.total || 0} clases programadas
           </p>
         </div>
-        <Button>
+        <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4 mr-2" />
           Nueva Clase
         </Button>
@@ -144,7 +188,7 @@ export const AdminClassesPage = () => {
                       >
                         {classItem.activo ? 'Desactivar' : 'Activar'}
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => openEditModal(classItem)}>
                         <Edit className="w-4 h-4 mr-1" />
                         Editar
                       </Button>
@@ -210,6 +254,29 @@ export const AdminClassesPage = () => {
           )}
         </>
       )}
+
+      {/* Modal de crear/editar clase */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingClass ? 'Editar Clase' : 'Nueva Clase'}
+        size="lg"
+      >
+        <ClassForm
+          onSubmit={editingClass ? handleEditClass : handleCreateClass}
+          onCancel={closeModal}
+          isLoading={editingClass ? updateClass.isPending : createClass.isPending}
+          initialData={editingClass ? {
+            nombre: editingClass.nombre,
+            descripcion: editingClass.descripcion,
+            duracion: editingClass.duracion,
+            cupoMaximo: editingClass.cupoMaximo,
+            fechaHora: new Date(editingClass.fechaHora).toISOString().slice(0, 16),
+            instructorId: editingClass.instructorId,
+          } : undefined}
+          isEdit={!!editingClass}
+        />
+      </Modal>
     </div>
   );
 };

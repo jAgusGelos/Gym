@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { usePayments } from '../../hooks/useAdmin';
-import { Button, Card, CardHeader, CardTitle, CardContent, Loading } from '../../components/ui';
+import { usePayments, useCreatePayment } from '../../hooks/useAdmin';
+import { Button, Card, CardContent, Loading, Modal } from '../../components/ui';
+import { PaymentForm } from '../../components/forms/PaymentForm';
 import { DollarSign, Plus, Calendar, CreditCard, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { PaymentStatus, PaymentMethod } from '../../types/payment.types';
 
 export const PaymentsPage = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | PaymentStatus>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { data: paymentsData, isLoading } = usePayments(1, 50);
+  const createPayment = useCreatePayment();
 
   const filteredPayments = paymentsData?.data.filter((payment) => {
     if (filterStatus === 'all') return true;
@@ -47,6 +51,23 @@ export const PaymentsPage = () => {
     return <CreditCard className="w-4 h-4" />;
   };
 
+  const handleCreatePayment = async (data: any) => {
+    try {
+      await createPayment.mutateAsync(data);
+      setIsModalOpen(false);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const openCreateModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -58,7 +79,7 @@ export const PaymentsPage = () => {
             {paymentsData?.total || 0} pagos registrados
           </p>
         </div>
-        <Button>
+        <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Pago
         </Button>
@@ -218,6 +239,20 @@ export const PaymentsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Modal de registrar pago */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title="Registrar Nuevo Pago"
+        size="lg"
+      >
+        <PaymentForm
+          onSubmit={handleCreatePayment}
+          onCancel={closeModal}
+          isLoading={createPayment.isPending}
+        />
+      </Modal>
     </div>
   );
 };

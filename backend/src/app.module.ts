@@ -6,6 +6,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { getDatabaseConfig } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { MembershipsModule } from './memberships/memberships.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -22,6 +25,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
       inject: [ConfigService],
     }),
     AuthModule,
+    UsersModule,
+    MembershipsModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [

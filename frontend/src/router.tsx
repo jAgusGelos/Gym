@@ -2,7 +2,12 @@ import { createRouter, createRootRoute, createRoute, Outlet, Navigate } from '@t
 import { LoginPage } from './routes/login';
 import { RegisterPage } from './routes/register';
 import { DashboardPage } from './routes/dashboard';
+import { ProfilePage } from './routes/profile';
+import { QRPage } from './routes/qr';
+import { ClassesPage } from './routes/classes';
+import { RoutinesPage } from './routes/routines';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { MobileLayout } from './components/layouts/MobileLayout';
 import { UserRole } from './types/user.types';
 
 // Root route
@@ -35,7 +40,9 @@ const dashboardRoute = createRoute({
   path: '/dashboard',
   component: () => (
     <ProtectedRoute>
-      <DashboardPage />
+      <MobileLayout>
+        <DashboardPage />
+      </MobileLayout>
     </ProtectedRoute>
   ),
 });
@@ -43,25 +50,49 @@ const dashboardRoute = createRoute({
 const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
-  component: () => <div>Profile</div>,
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <ProfilePage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const qrRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/qr',
-  component: () => <div>Mi QR</div>,
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <QRPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const classesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/classes',
-  component: () => <div>Clases</div>,
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <ClassesPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
 });
 
 const routinesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/routines',
-  component: () => <div>Rutinas</div>,
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <RoutinesPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
 });
 
 // Admin routes

@@ -7,6 +7,9 @@ import { QRPage } from './routes/qr';
 import { ClassesPage } from './routes/classes';
 import { RoutinesPage } from './routes/routines';
 import { NewsPage } from './routes/news';
+import { PlansPage } from './routes/plans';
+import { PaymentSuccessPage } from './routes/payment-success';
+import { PaymentFailurePage } from './routes/payment-failure';
 import { AdminDashboard } from './routes/admin/dashboard';
 import { MembersPage } from './routes/admin/members';
 import { AdminClassesPage } from './routes/admin/classes';
@@ -117,6 +120,30 @@ const newsRoute = createRoute({
   ),
 });
 
+const plansRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/plans',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <PlansPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const paymentSuccessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/payment/success',
+  component: PaymentSuccessPage,
+});
+
+const paymentFailureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/payment/failure',
+  component: PaymentFailurePage,
+});
+
 // Admin routes
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -225,6 +252,9 @@ const routeTree = rootRoute.addChildren([
   classesRoute,
   routinesRoute,
   newsRoute,
+  plansRoute,
+  paymentSuccessRoute,
+  paymentFailureRoute,
   adminRoute.addChildren([
     adminMembersRoute,
     adminClassesRoute,

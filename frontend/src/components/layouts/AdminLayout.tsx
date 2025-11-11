@@ -11,7 +11,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Dumbbell,
+  ClipboardList
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui';
@@ -51,6 +53,16 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       path: '/admin/payments',
       icon: CreditCard,
       label: 'Pagos',
+    },
+    {
+      path: '/admin/exercises',
+      icon: Dumbbell,
+      label: 'Ejercicios',
+    },
+    {
+      path: '/admin/routines',
+      icon: ClipboardList,
+      label: 'Rutinas',
     },
     {
       path: '/admin/announcements',

@@ -6,11 +6,15 @@ import { ProfilePage } from './routes/profile';
 import { QRPage } from './routes/qr';
 import { ClassesPage } from './routes/classes';
 import { RoutinesPage } from './routes/routines';
+import { NewsPage } from './routes/news';
 import { AdminDashboard } from './routes/admin/dashboard';
 import { MembersPage } from './routes/admin/members';
 import { AdminClassesPage } from './routes/admin/classes';
 import { AttendancePage } from './routes/admin/attendance';
 import { PaymentsPage } from './routes/admin/payments';
+import { ExercisesPage } from './routes/admin/exercises';
+import { AdminRoutinesPage } from './routes/admin/routines';
+import { AnnouncementsPage } from './routes/admin/announcements';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { MobileLayout } from './components/layouts/MobileLayout';
 import { AdminLayout } from './components/layouts/AdminLayout';
@@ -101,6 +105,18 @@ const routinesRoute = createRoute({
   ),
 });
 
+const newsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/news',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <NewsPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
 // Admin routes
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -162,6 +178,42 @@ const adminPaymentsRoute = createRoute({
   ),
 });
 
+const adminExercisesRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/exercises',
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.ENTRENADOR]}>
+      <AdminLayout>
+        <ExercisesPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const adminRoutinesRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/routines',
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.ENTRENADOR]}>
+      <AdminLayout>
+        <AdminRoutinesPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const adminAnnouncementsRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/announcements',
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+      <AdminLayout>
+        <AnnouncementsPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
+});
+
 // Route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -172,11 +224,15 @@ const routeTree = rootRoute.addChildren([
   qrRoute,
   classesRoute,
   routinesRoute,
+  newsRoute,
   adminRoute.addChildren([
     adminMembersRoute,
     adminClassesRoute,
     adminAttendanceRoute,
     adminPaymentsRoute,
+    adminExercisesRoute,
+    adminRoutinesRoute,
+    adminAnnouncementsRoute,
   ]),
 ]);
 

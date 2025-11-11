@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
-import { Home, Calendar, Dumbbell, QrCode, User } from 'lucide-react';
+import { Home, Calendar, Dumbbell, QrCode, User, Megaphone } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface MobileLayoutProps {
@@ -17,14 +17,14 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       label: 'Inicio',
     },
     {
+      path: '/news',
+      icon: Megaphone,
+      label: 'Noticias',
+    },
+    {
       path: '/classes',
       icon: Calendar,
       label: 'Clases',
-    },
-    {
-      path: '/qr',
-      icon: QrCode,
-      label: 'QR',
     },
     {
       path: '/routines',

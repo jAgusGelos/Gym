@@ -55,6 +55,11 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       label: 'Pagos',
     },
     {
+      path: '/admin/plans',
+      icon: CreditCard,
+      label: 'Planes',
+    },
+    {
       path: '/admin/exercises',
       icon: Dumbbell,
       label: 'Ejercicios',

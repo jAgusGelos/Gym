@@ -40,3 +40,45 @@ export const useAdminPayments = () => {
     },
   });
 };
+
+// Admin Plan Management
+export const useCreatePlan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Partial<MembershipPlan>) => {
+      const response = await api.post<MembershipPlan>('/mercadopago/plans', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+    },
+  });
+};
+
+export const useUpdatePlan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<MembershipPlan> }) => {
+      const response = await api.patch<MembershipPlan>(`/mercadopago/plans/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+    },
+  });
+};
+
+export const useDeletePlan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/mercadopago/plans/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+    },
+  });
+};

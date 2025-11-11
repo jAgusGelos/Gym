@@ -18,6 +18,7 @@ import { PaymentsPage } from './routes/admin/payments';
 import { ExercisesPage } from './routes/admin/exercises';
 import { AdminRoutinesPage } from './routes/admin/routines';
 import { AnnouncementsPage } from './routes/admin/announcements';
+import { AdminPlansPage } from './routes/admin/plans';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { MobileLayout } from './components/layouts/MobileLayout';
 import { AdminLayout } from './components/layouts/AdminLayout';
@@ -205,6 +206,18 @@ const adminPaymentsRoute = createRoute({
   ),
 });
 
+const adminPlansRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/plans',
+  component: () => (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+      <AdminLayout>
+        <AdminPlansPage />
+      </AdminLayout>
+    </ProtectedRoute>
+  ),
+});
+
 const adminExercisesRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/exercises',
@@ -260,6 +273,7 @@ const routeTree = rootRoute.addChildren([
     adminClassesRoute,
     adminAttendanceRoute,
     adminPaymentsRoute,
+    adminPlansRoute,
     adminExercisesRoute,
     adminRoutinesRoute,
     adminAnnouncementsRoute,

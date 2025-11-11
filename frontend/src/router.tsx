@@ -8,6 +8,7 @@ import { ClassesPage } from './routes/classes';
 import { RoutinesPage } from './routes/routines';
 import { NewsPage } from './routes/news';
 import { PlansPage } from './routes/plans';
+import { ProgressPage } from './routes/progress';
 import { PaymentSuccessPage } from './routes/payment-success';
 import { PaymentFailurePage } from './routes/payment-failure';
 import { AdminDashboard } from './routes/admin/dashboard';
@@ -128,6 +129,18 @@ const plansRoute = createRoute({
     <ProtectedRoute>
       <MobileLayout>
         <PlansPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const progressRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/progress',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <ProgressPage />
       </MobileLayout>
     </ProtectedRoute>
   ),
@@ -266,6 +279,7 @@ const routeTree = rootRoute.addChildren([
   routinesRoute,
   newsRoute,
   plansRoute,
+  progressRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   adminRoute.addChildren([

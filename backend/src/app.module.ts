@@ -16,6 +16,7 @@ import { ClassesModule } from './classes/classes.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { RoutinesModule } from './routines/routines.module';
 import { MercadopagoModule } from './mercadopago/mercadopago.module';
+import { ProgressTrackingModule } from './progress-tracking/progress-tracking.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -42,6 +43,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     BookingsModule,
     RoutinesModule,
     MercadopagoModule,
+    ProgressTrackingModule,
   ],
   controllers: [AppController],
   providers: [

@@ -60,4 +60,28 @@ export class BookingsController {
   async checkIn(@Param('id') classId: string, @Body('qrCode') qrCode: string) {
     return this.bookingsService.checkInWithQR(qrCode, classId);
   }
+
+  @Get('history')
+  async getHistory(
+    @CurrentUser() user: User,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.bookingsService.findUserHistory(user.id, paginationDto);
+  }
+
+  @Get('stats')
+  async getAttendanceStats(@CurrentUser() user: User) {
+    return this.bookingsService.getUserAttendanceStats(user.id);
+  }
+
+  @Get('monthly-attendance')
+  async getMonthlyAttendance(
+    @CurrentUser() user: User,
+    @Query('months') months?: string,
+  ) {
+    return this.bookingsService.getUserMonthlyAttendance(
+      user.id,
+      months ? parseInt(months) : 6,
+    );
+  }
 }

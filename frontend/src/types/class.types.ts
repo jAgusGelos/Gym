@@ -38,3 +38,22 @@ export enum BookingStatus {
 export interface CreateBookingDto {
   classId: string;
 }
+
+export interface AttendanceStats {
+  totalBookings: number;
+  attendedClasses: number;
+  canceledClasses: number;
+  noShowClasses: number;
+  attendanceRate: number;
+  currentStreak: number;
+  favoriteInstructor: {
+    id: string;
+    nombre: string;
+    classCount: number;
+  } | null;
+}
+
+export interface MonthlyAttendance {
+  month: string;
+  count: number;
+}

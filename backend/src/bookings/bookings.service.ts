@@ -257,4 +257,180 @@ export class BookingsService {
     booking.estado = BookingStatus.ASISTIDO;
     return await this.bookingRepository.save(booking);
   }
+
+  // Obtener historial completo de clases del usuario
+  async findUserHistory(
+    userId: string,
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResult<Booking>> {
+    const { page = 1, limit = 20 } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.bookingRepository
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.class', 'class')
+      .leftJoinAndSelect('class.instructor', 'instructor')
+      .where('booking.userId = :userId', { userId })
+      .andWhere('booking.estado IN (:...estados)', {
+        estados: [BookingStatus.ASISTIDO, BookingStatus.CANCELADO, BookingStatus.NO_ASISTIDO],
+      })
+      .skip(skip)
+      .take(limit)
+      .orderBy('class.fechaHoraInicio', 'DESC');
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // Obtener estadísticas de asistencia del usuario
+  async getUserAttendanceStats(userId: string) {
+    // Total de bookings realizados (excluyendo lista de espera que nunca se concretó)
+    const totalBookings = await this.bookingRepository.count({
+      where: {
+        userId,
+        enListaEspera: false,
+      },
+    });
+
+    // Clases asistidas
+    const attendedClasses = await this.bookingRepository.count({
+      where: {
+        userId,
+        estado: BookingStatus.ASISTIDO,
+      },
+    });
+
+    // Clases canceladas
+    const canceledClasses = await this.bookingRepository.count({
+      where: {
+        userId,
+        estado: BookingStatus.CANCELADO,
+      },
+    });
+
+    // Clases no asistidas (no shows)
+    const noShowClasses = await this.bookingRepository.count({
+      where: {
+        userId,
+        estado: BookingStatus.NO_ASISTIDO,
+      },
+    });
+
+    // Calcular tasa de asistencia
+    const totalCompleted = attendedClasses + noShowClasses;
+    const attendanceRate = totalCompleted > 0 ? (attendedClasses / totalCompleted) * 100 : 0;
+
+    // Obtener últimas clases asistidas para calcular racha
+    const recentBookings = await this.bookingRepository.find({
+      where: {
+        userId,
+        estado: BookingStatus.ASISTIDO,
+      },
+      relations: ['class'],
+      order: {
+        createdAt: 'DESC',
+      },
+      take: 50,
+    });
+
+    // Calcular racha actual (días consecutivos con al menos una clase)
+    let currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const attendanceDates = new Set(
+      recentBookings.map((booking) => {
+        const date = new Date(booking.class.fechaHoraInicio);
+        date.setHours(0, 0, 0, 0);
+        return date.getTime();
+      }),
+    );
+
+    const sortedDates = Array.from(attendanceDates).sort((a, b) => b - a);
+
+    let checkDate = today.getTime();
+    for (const date of sortedDates) {
+      const diffDays = Math.floor((checkDate - date) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0 || diffDays === 1) {
+        currentStreak++;
+        checkDate = date;
+      } else {
+        break;
+      }
+    }
+
+    // Obtener clase favorita (instructor más frecuente)
+    const instructorFrequency = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .select('class.instructorId', 'instructorId')
+      .addSelect('instructor.nombre', 'instructorName')
+      .addSelect('COUNT(*)', 'count')
+      .innerJoin('booking.class', 'class')
+      .innerJoin('class.instructor', 'instructor')
+      .where('booking.userId = :userId', { userId })
+      .andWhere('booking.estado = :estado', { estado: BookingStatus.ASISTIDO })
+      .groupBy('class.instructorId')
+      .addGroupBy('instructor.nombre')
+      .orderBy('count', 'DESC')
+      .getRawOne();
+
+    return {
+      totalBookings,
+      attendedClasses,
+      canceledClasses,
+      noShowClasses,
+      attendanceRate: Math.round(attendanceRate * 10) / 10,
+      currentStreak,
+      favoriteInstructor: instructorFrequency
+        ? {
+            id: instructorFrequency.instructorId,
+            nombre: instructorFrequency.instructorName,
+            classCount: parseInt(instructorFrequency.count),
+          }
+        : null,
+    };
+  }
+
+  // Obtener historial mensual de asistencia (para gráficos)
+  async getUserMonthlyAttendance(userId: string, months: number = 6) {
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - months);
+
+    const bookings = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .innerJoin('booking.class', 'class')
+      .where('booking.userId = :userId', { userId })
+      .andWhere('booking.estado = :estado', { estado: BookingStatus.ASISTIDO })
+      .andWhere('class.fechaHoraInicio >= :startDate', { startDate })
+      .select('class.fechaHoraInicio', 'fecha')
+      .getRawMany();
+
+    // Agrupar por mes
+    const monthlyData = new Map<string, number>();
+
+    bookings.forEach((booking) => {
+      const date = new Date(booking.fecha);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+      monthlyData.set(monthKey, (monthlyData.get(monthKey) || 0) + 1);
+    });
+
+    // Convertir a array ordenado
+    const result = Array.from(monthlyData.entries())
+      .map(([month, count]) => ({
+        month,
+        count,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    return result;
+  }
 }

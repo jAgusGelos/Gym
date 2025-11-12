@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { useClasses, useMyBookings, useCreateBooking, useCancelBooking } from '../hooks/useClasses';
 import { Button, Card, CardHeader, CardTitle, CardContent, Loading } from '../components/ui';
-import { Calendar, Clock, Users, UserCheck, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, Users, UserCheck, AlertCircle, History } from 'lucide-react';
 import { Class } from '../types/class.types';
 
 export const ClassesPage = () => {
@@ -37,9 +38,18 @@ export const ClassesPage = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <div className="bg-primary-600 text-white p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Calendar className="w-8 h-8" />
-          <h1 className="text-2xl font-bold">Clases</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <Calendar className="w-8 h-8" />
+            <h1 className="text-2xl font-bold">Clases</h1>
+          </div>
+          <Link
+            to="/classes/history"
+            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+          >
+            <History className="w-4 h-4" />
+            <span className="text-sm font-medium">Ver Historial</span>
+          </Link>
         </div>
         <p className="text-primary-100">
           Reservá tu lugar en las clases disponibles

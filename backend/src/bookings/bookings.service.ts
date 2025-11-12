@@ -3,6 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
@@ -11,6 +13,9 @@ import { Class } from '../classes/entities/class.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 @Injectable()
 export class BookingsService {
@@ -21,6 +26,8 @@ export class BookingsService {
     private classRepository: Repository<Class>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -100,6 +107,39 @@ export class BookingsService {
 
     const savedBooking = await this.bookingRepository.save(booking);
 
+    // Enviar notificaciones
+    try {
+      const fechaClase = format(new Date(classEntity.fechaHoraInicio), "dd 'de' MMMM 'a las' HH:mm", {
+        locale: es,
+      });
+
+      if (savedBooking.enListaEspera) {
+        // Notificación de lista de espera
+        await this.notificationsService.create({
+          userId,
+          type: 'WAITLIST_PROMOTED',
+          priority: 'MEDIUM',
+          title: 'En Lista de Espera',
+          message: `Estás en la posición ${savedBooking.posicionListaEspera} de la lista de espera para ${classEntity.nombre} el ${fechaClase}.`,
+          actionUrl: '/classes',
+          actionLabel: 'Ver Clases',
+        });
+      } else {
+        // Notificación de confirmación de reserva
+        await this.notificationsService.create({
+          userId,
+          type: 'BOOKING_CONFIRMED',
+          priority: 'HIGH',
+          title: 'Reserva Confirmada',
+          message: `Tu reserva para ${classEntity.nombre} el ${fechaClase} fue confirmada exitosamente.`,
+          actionUrl: '/classes',
+          actionLabel: 'Ver Mis Reservas',
+        });
+      }
+    } catch (error) {
+      console.error('Error enviando notificación de booking:', error);
+    }
+
     return await this.bookingRepository.findOne({
       where: { id: savedBooking.id },
       relations: ['class', 'class.instructor', 'user'],
@@ -164,7 +204,24 @@ export class BookingsService {
         booking.class.cupoActual += 1;
         await this.classRepository.save(booking.class);
 
-        // TODO: Enviar notificación al usuario promovido
+        // Enviar notificación al usuario promovido
+        try {
+          const fechaClase = format(new Date(booking.class.fechaHoraInicio), "dd 'de' MMMM 'a las' HH:mm", {
+            locale: es,
+          });
+
+          await this.notificationsService.create({
+            userId: nextInWaitlist.userId,
+            type: 'WAITLIST_PROMOTED',
+            priority: 'URGENT',
+            title: '¡Promovido de Lista de Espera!',
+            message: `¡Buenas noticias! Se liberó un cupo para ${booking.class.nombre} el ${fechaClase}. Tu reserva está confirmada.`,
+            actionUrl: '/classes',
+            actionLabel: 'Ver Mis Reservas',
+          });
+        } catch (error) {
+          console.error('Error enviando notificación de promoción:', error);
+        }
       }
     }
 

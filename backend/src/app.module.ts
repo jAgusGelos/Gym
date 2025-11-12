@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,6 +27,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TrainersModule } from './trainers/trainers.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
+import { RemindersModule } from './reminders/reminders.module';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { BodyMeasurementsModule } from './body-measurements/body-measurements.mo
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     MembershipsModule,
@@ -56,6 +59,7 @@ import { BodyMeasurementsModule } from './body-measurements/body-measurements.mo
     TrainersModule,
     NotificationsModule,
     BodyMeasurementsModule,
+    RemindersModule,
   ],
   controllers: [AppController],
   providers: [

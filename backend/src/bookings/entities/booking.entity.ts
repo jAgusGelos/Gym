@@ -49,6 +49,12 @@ export class Booking {
   @Column({ type: 'boolean', default: false })
   enListaEspera: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  reminder24hSent: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  reminder2hSent: boolean;
+
   @CreateDateColumn()
   fechaReserva: Date;
 

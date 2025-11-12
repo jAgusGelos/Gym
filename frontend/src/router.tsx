@@ -9,6 +9,7 @@ import { RoutinesPage } from './routes/routines';
 import { NewsPage } from './routes/news';
 import { PlansPage } from './routes/plans';
 import { ProgressPage } from './routes/progress';
+import { AchievementsPage } from './routes/achievements';
 import { PaymentSuccessPage } from './routes/payment-success';
 import { PaymentFailurePage } from './routes/payment-failure';
 import { AdminDashboard } from './routes/admin/dashboard';
@@ -141,6 +142,18 @@ const progressRoute = createRoute({
     <ProtectedRoute>
       <MobileLayout>
         <ProgressPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const achievementsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/achievements',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <AchievementsPage />
       </MobileLayout>
     </ProtectedRoute>
   ),
@@ -280,6 +293,7 @@ const routeTree = rootRoute.addChildren([
   newsRoute,
   plansRoute,
   progressRoute,
+  achievementsRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   adminRoute.addChildren([

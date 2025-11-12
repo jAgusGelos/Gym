@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
-import { Home, Calendar, Dumbbell, QrCode, User, Megaphone, TrendingUp } from 'lucide-react';
+import { Home, Calendar, Dumbbell, QrCode, User, Megaphone, TrendingUp, Trophy } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface MobileLayoutProps {
@@ -37,6 +37,11 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       label: 'Progreso',
     },
     {
+      path: '/achievements',
+      icon: Trophy,
+      label: 'Logros',
+    },
+    {
       path: '/profile',
       icon: User,
       label: 'Perfil',
@@ -52,7 +57,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-area-inset-bottom">
-        <div className="grid grid-cols-6 h-16">
+        <div className="grid grid-cols-7 h-16">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;

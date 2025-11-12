@@ -17,6 +17,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { RoutinesModule } from './routines/routines.module';
 import { MercadopagoModule } from './mercadopago/mercadopago.module';
 import { ProgressTrackingModule } from './progress-tracking/progress-tracking.module';
+import { AchievementsModule } from './achievements/achievements.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -44,6 +45,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     RoutinesModule,
     MercadopagoModule,
     ProgressTrackingModule,
+    AchievementsModule,
   ],
   controllers: [AppController],
   providers: [

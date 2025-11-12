@@ -14,6 +14,8 @@ import { GoalsPage } from './routes/goals';
 import { PaymentSuccessPage } from './routes/payment-success';
 import { PaymentFailurePage } from './routes/payment-failure';
 import NotificationsPage from './routes/notifications';
+import MeasurementsIndexPage from './routes/measurements.index';
+import NewMeasurementPage from './routes/measurements.new';
 import { AdminDashboard } from './routes/admin/dashboard';
 import { MembersPage } from './routes/admin/members';
 import { AdminClassesPage } from './routes/admin/classes';
@@ -185,6 +187,30 @@ const notificationsRoute = createRoute({
   ),
 });
 
+const measurementsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/measurements',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <MeasurementsIndexPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const newMeasurementRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/measurements/new',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <NewMeasurementPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
 const paymentSuccessRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/payment/success',
@@ -322,6 +348,8 @@ const routeTree = rootRoute.addChildren([
   achievementsRoute,
   goalsRoute,
   notificationsRoute,
+  measurementsRoute,
+  newMeasurementRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   adminRoute.addChildren([

@@ -25,6 +25,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TrainersModule } from './trainers/trainers.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     WorkoutLogsModule,
     TrainersModule,
     NotificationsModule,
+    BodyMeasurementsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -10,6 +10,7 @@ import { NewsPage } from './routes/news';
 import { PlansPage } from './routes/plans';
 import { ProgressPage } from './routes/progress';
 import { AchievementsPage } from './routes/achievements';
+import { GoalsPage } from './routes/goals';
 import { PaymentSuccessPage } from './routes/payment-success';
 import { PaymentFailurePage } from './routes/payment-failure';
 import { AdminDashboard } from './routes/admin/dashboard';
@@ -159,6 +160,18 @@ const achievementsRoute = createRoute({
   ),
 });
 
+const goalsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/goals',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <GoalsPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
 const paymentSuccessRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/payment/success',
@@ -294,6 +307,7 @@ const routeTree = rootRoute.addChildren([
   plansRoute,
   progressRoute,
   achievementsRoute,
+  goalsRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   adminRoute.addChildren([

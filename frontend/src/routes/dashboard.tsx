@@ -68,17 +68,19 @@ export const DashboardPage = () => {
             </Card>
           </Link>
 
-          <Card className="h-full">
-            <CardContent className="pt-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">Progreso</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Próximamente
-              </p>
-            </CardContent>
-          </Card>
+          <Link to="/workouts">
+            <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mx-auto mb-3">
+                  <TrendingUp className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Entrenamientos</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Registrar progreso
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Próximas clases */}

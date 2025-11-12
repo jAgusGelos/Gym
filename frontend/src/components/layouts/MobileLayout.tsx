@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import { Home, Calendar, Dumbbell, QrCode, User, Megaphone, TrendingUp, Trophy } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -50,6 +51,16 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Top Header with Notification Bell */}
+      <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex items-center justify-between px-4 h-14">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+            GymApp
+          </h1>
+          <NotificationBell />
+        </div>
+      </header>
+
       {/* Main content */}
       <main className="flex-1 overflow-y-auto pb-20">
         {children}

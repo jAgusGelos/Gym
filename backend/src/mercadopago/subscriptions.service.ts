@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +8,7 @@ import { MembershipPlan } from './entities/membership-plan.entity';
 import { OnlinePayment, PaymentStatus } from './entities/online-payment.entity';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -21,6 +22,8 @@ export class SubscriptionsService {
     @InjectRepository(OnlinePayment)
     private paymentRepository: Repository<OnlinePayment>,
     private configService: ConfigService,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
   // Crear suscripción
@@ -158,6 +161,24 @@ export class SubscriptionsService {
       approvedAt: new Date(),
       metadata: { subscriptionId, recurring: true },
     } as any);
+
+    // Enviar notificaciones
+    try {
+      await this.notificationsService.notifyPaymentSuccess(
+        subscription.userId,
+        amount,
+        subscription.plan.nombre,
+      );
+
+      await this.notificationsService.notifySubscriptionRenewed(
+        subscription.userId,
+        subscription.plan.nombre,
+        subscription.nextBillingDate,
+      );
+    } catch (error) {
+      console.error('Error sending notifications:', error);
+      // No fallar el proceso de pago por errores de notificación
+    }
 
     return { subscription, membership };
   }

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tantml:router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
   CreditCard,

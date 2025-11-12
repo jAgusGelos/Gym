@@ -18,6 +18,7 @@ import {
 import { cn } from '../../utils/cn';
 import { Button } from '../ui';
 import { useState } from 'react';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -163,6 +164,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             </button>
 
             <div className="flex items-center gap-4 ml-auto">
+              <NotificationBell />
               <Link to="/dashboard">
                 <Button variant="outline" size="sm">
                   Ver como usuario

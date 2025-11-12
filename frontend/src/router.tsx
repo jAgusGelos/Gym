@@ -13,6 +13,7 @@ import { AchievementsPage } from './routes/achievements';
 import { GoalsPage } from './routes/goals';
 import { PaymentSuccessPage } from './routes/payment-success';
 import { PaymentFailurePage } from './routes/payment-failure';
+import NotificationsPage from './routes/notifications';
 import { AdminDashboard } from './routes/admin/dashboard';
 import { MembersPage } from './routes/admin/members';
 import { AdminClassesPage } from './routes/admin/classes';
@@ -172,6 +173,18 @@ const goalsRoute = createRoute({
   ),
 });
 
+const notificationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/notifications',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <NotificationsPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
 const paymentSuccessRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/payment/success',
@@ -308,6 +321,7 @@ const routeTree = rootRoute.addChildren([
   progressRoute,
   achievementsRoute,
   goalsRoute,
+  notificationsRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   adminRoute.addChildren([

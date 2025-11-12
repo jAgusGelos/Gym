@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tantml:router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, BookOpen, Calendar, TrendingUp, User } from 'lucide-react';
 import { useClientDetails } from '../hooks/useTrainers';
 import { format } from 'date-fns';

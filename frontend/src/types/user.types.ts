@@ -20,8 +20,10 @@ export interface User {
   rol: UserRole;
   qrCode: string;
   estado: UserStatus;
+  activo: boolean;
   avatar?: string;
   fechaNacimiento?: string;
   fechaRegistro: string;
+  createdAt: string;
   updatedAt: string;
 }

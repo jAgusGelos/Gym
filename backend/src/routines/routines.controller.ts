@@ -9,7 +9,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { RoutinesService, RoutineFilters } from './routines.service';
+import { RoutinesService, type RoutineFilters } from './routines.service';
 import { CreateRoutineDto } from './dto/create-routine.dto';
 import { UpdateRoutineDto } from './dto/update-routine.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';

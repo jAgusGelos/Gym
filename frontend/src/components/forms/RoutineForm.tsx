@@ -2,7 +2,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Select } from '../ui';
-import { RoutineLevel, RoutineGoal } from '../types/routine.types';
+import { RoutineLevel, RoutineGoal } from '../../types/routine.types';
 import { useExercises } from '../../hooks/useExercises';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 

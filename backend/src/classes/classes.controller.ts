@@ -9,7 +9,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ClassesService, ClassFilters } from './classes.service';
+import { ClassesService, type ClassFilters } from './classes.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';

@@ -330,7 +330,13 @@ export const AnnouncementsPage = () => {
           onSubmit={editingAnnouncement ? handleEditAnnouncement : handleCreateAnnouncement}
           onCancel={closeModal}
           isLoading={createAnnouncement.isPending || updateAnnouncement.isPending}
-          initialData={editingAnnouncement || undefined}
+          initialData={editingAnnouncement ? {
+            ...editingAnnouncement,
+            fechaPublicacion: new Date(editingAnnouncement.fechaPublicacion).toISOString().split('T')[0],
+            fechaExpiracion: editingAnnouncement.fechaExpiracion
+              ? new Date(editingAnnouncement.fechaExpiracion).toISOString().split('T')[0]
+              : undefined,
+          } : undefined}
           isEdit={!!editingAnnouncement}
         />
       </Modal>

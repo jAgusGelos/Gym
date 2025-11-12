@@ -44,6 +44,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
 
   const { fields, append, remove } = useFieldArray({
     control,
+    // @ts-expect-error - useFieldArray type issues with strict mode
     name: 'beneficios',
   });
 

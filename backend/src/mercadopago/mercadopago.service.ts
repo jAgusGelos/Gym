@@ -102,9 +102,6 @@ export class MercadopagoService {
               currency_id: 'ARS',
             },
           ],
-          payer: {
-            id: userId,
-          },
           back_urls: {
             success: `${baseUrl}/payment/success`,
             failure: `${baseUrl}/payment/failure`,
@@ -120,7 +117,9 @@ export class MercadopagoService {
         },
       });
 
-      payment.preferenceId = preference.id;
+      if (preference.id) {
+        payment.preferenceId = preference.id;
+      }
       payment.metadata = preference;
       await this.paymentRepository.save(payment);
 

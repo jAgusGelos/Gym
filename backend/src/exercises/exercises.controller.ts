@@ -9,7 +9,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ExercisesService, ExerciseFilters } from './exercises.service';
+import { ExercisesService, type ExerciseFilters } from './exercises.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';

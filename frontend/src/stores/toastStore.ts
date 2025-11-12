@@ -12,6 +12,7 @@ export interface Toast {
 interface ToastState {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
+  showToast: (message: string, type?: ToastType) => void;
   removeToast: (id: string) => void;
   clearAll: () => void;
 }
@@ -27,6 +28,20 @@ export const useToastStore = create<ToastState>((set) => ({
     }));
 
     // Auto-remove after duration
+    setTimeout(() => {
+      set((state) => ({
+        toasts: state.toasts.filter((t) => t.id !== id),
+      }));
+    }, duration);
+  },
+  showToast: (message, type = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    const duration = 3000;
+
+    set((state) => ({
+      toasts: [...state.toasts, { id, type, message, duration }],
+    }));
+
     setTimeout(() => {
       set((state) => ({
         toasts: state.toasts.filter((t) => t.id !== id),

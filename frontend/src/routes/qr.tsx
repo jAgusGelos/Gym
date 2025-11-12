@@ -1,6 +1,6 @@
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG as QRCode } from 'qrcode.react';
 import { QrCode as QrCodeIcon, Info } from 'lucide-react';
 
 export const QRPage = () => {

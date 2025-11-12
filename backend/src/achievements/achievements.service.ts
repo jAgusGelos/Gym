@@ -6,7 +6,7 @@ import { UserAchievement } from './entities/user-achievement.entity';
 import { CreateAchievementDto } from './dto/create-achievement.dto';
 import { Attendance } from '../attendance/entities/attendance.entity';
 import { ProgressEntry } from '../progress-tracking/entities/progress-entry.entity';
-import { ClassReservation } from '../classes/entities/class-reservation.entity';
+import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 
 @Injectable()
 export class AchievementsService {
@@ -19,8 +19,8 @@ export class AchievementsService {
     private attendanceRepository: Repository<Attendance>,
     @InjectRepository(ProgressEntry)
     private progressRepository: Repository<ProgressEntry>,
-    @InjectRepository(ClassReservation)
-    private reservationRepository: Repository<ClassReservation>,
+    @InjectRepository(Booking)
+    private bookingRepository: Repository<Booking>,
   ) {}
 
   // Admin: Crear un logro
@@ -82,7 +82,8 @@ export class AchievementsService {
       puntosTotal,
       porcentajeCompletado,
       ultimosLogros: completados
-        .sort((a, b) => new Date(b.fechaCompletado).getTime() - new Date(a.fechaCompletado).getTime())
+        .filter(a => a.fechaCompletado !== null)
+        .sort((a, b) => new Date(b.fechaCompletado!).getTime() - new Date(a.fechaCompletado!).getTime())
         .slice(0, 5)
         .map(a => ({
           nombre: a.achievement.nombre,
@@ -94,9 +95,9 @@ export class AchievementsService {
   }
 
   // Verificar y actualizar progreso de un usuario para todos los criterios
-  async checkAndUpdateAchievements(userId: string) {
+  async checkAndUpdateAchievements(userId: string): Promise<Achievement[]> {
     const achievements = await this.findAll();
-    const unlocked = [];
+    const unlocked: Achievement[] = [];
 
     for (const achievement of achievements) {
       const progreso = await this.calculateProgress(userId, achievement.criterio);
@@ -107,7 +108,7 @@ export class AchievementsService {
         achievement.objetivo,
       );
 
-      if (userAchievement.completado && new Date(userAchievement.fechaCompletado).getTime() > Date.now() - 5000) {
+      if (userAchievement.completado && userAchievement.fechaCompletado && new Date(userAchievement.fechaCompletado).getTime() > Date.now() - 5000) {
         unlocked.push(achievement);
       }
     }
@@ -147,11 +148,11 @@ export class AchievementsService {
       case AchievementCriterio.RESERVAR_PRIMERA_CLASE:
       case AchievementCriterio.RESERVAR_10_CLASES:
       case AchievementCriterio.RESERVAR_50_CLASES:
-        return this.reservationRepository.count({ where: { userId } });
+        return this.bookingRepository.count({ where: { userId } });
 
       case AchievementCriterio.ASISTIR_10_CLASES:
       case AchievementCriterio.ASISTIR_50_CLASES:
-        return this.reservationRepository.count({ where: { userId, attended: true } });
+        return this.bookingRepository.count({ where: { userId, estado: BookingStatus.ASISTIDO } });
 
       default:
         return 0;
@@ -229,29 +230,32 @@ export class AchievementsService {
     progresoActual: number,
     objetivo: number,
   ): Promise<UserAchievement> {
-    let userAchievement = await this.userAchievementRepository.findOne({
+    const existing = await this.userAchievementRepository.findOne({
       where: { userId, achievementId },
     });
 
     const completado = progresoActual >= objetivo;
 
-    if (!userAchievement) {
-      userAchievement = this.userAchievementRepository.create({
+    if (!existing) {
+      const data: any = {
         userId,
         achievementId,
         progresoActual,
         completado,
-        fechaCompletado: completado ? new Date() : null,
-      });
-    } else {
-      userAchievement.progresoActual = progresoActual;
-      if (completado && !userAchievement.completado) {
-        userAchievement.completado = true;
-        userAchievement.fechaCompletado = new Date();
+      };
+      if (completado) {
+        data.fechaCompletado = new Date();
       }
+      const userAchievement = this.userAchievementRepository.create(data);
+      return this.userAchievementRepository.save(userAchievement);
+    } else {
+      existing.progresoActual = progresoActual;
+      if (completado && !existing.completado) {
+        existing.completado = true;
+        existing.fechaCompletado = new Date();
+      }
+      return this.userAchievementRepository.save(existing);
     }
-
-    return this.userAchievementRepository.save(userAchievement);
   }
 
   // Admin: Eliminar un logro

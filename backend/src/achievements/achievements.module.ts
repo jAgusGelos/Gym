@@ -6,7 +6,7 @@ import { Achievement } from './entities/achievement.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { Attendance } from '../attendance/entities/attendance.entity';
 import { ProgressEntry } from '../progress-tracking/entities/progress-entry.entity';
-import { ClassReservation } from '../classes/entities/class-reservation.entity';
+import { Booking } from '../bookings/entities/booking.entity';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { ClassReservation } from '../classes/entities/class-reservation.entity';
       UserAchievement,
       Attendance,
       ProgressEntry,
-      ClassReservation,
+      Booking,
     ]),
   ],
   controllers: [AchievementsController],

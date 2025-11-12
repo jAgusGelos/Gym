@@ -8,7 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PaymentMethod } from '../entities/payment.entity';
+import { PaymentMethod } from '../../memberships/entities/membership.entity';
 
 export class CreatePaymentDto {
   @IsUUID()

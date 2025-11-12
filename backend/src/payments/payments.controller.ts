@@ -7,7 +7,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { PaymentsService, PaymentFilters } from './payments.service';
+import { PaymentsService, type PaymentFilters } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';

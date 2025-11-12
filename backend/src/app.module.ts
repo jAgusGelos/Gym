@@ -23,6 +23,7 @@ import { WorkoutLogsModule } from './workout-logs/workout-logs.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TrainersModule } from './trainers/trainers.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     AchievementsModule,
     GoalsModule,
     WorkoutLogsModule,
+    TrainersModule,
   ],
   controllers: [AppController],
   providers: [

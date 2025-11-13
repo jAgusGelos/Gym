@@ -1,10 +1,11 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
+import { Membership, MembershipStatus } from '../memberships/entities/membership.entity';
 import { NotificationsService } from '../notifications/notifications.service';
-import { format } from 'date-fns';
+import { format, addDays, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 @Injectable()
@@ -14,6 +15,8 @@ export class RemindersService {
   constructor(
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
+    @InjectRepository(Membership)
+    private membershipRepository: Repository<Membership>,
     @Inject(forwardRef(() => NotificationsService))
     private notificationsService: NotificationsService,
   ) {}
@@ -203,6 +206,130 @@ export class RemindersService {
       this.logger.log('Job de marcado de no asistencias completado');
     } catch (error) {
       this.logger.error('Error en job de marcado de no asistencias:', error);
+    }
+  }
+
+  /**
+   * Cron job que se ejecuta diariamente para notificar membresías por vencer
+   * Se ejecuta a las 10:00 todos los días
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  async checkExpiringMemberships() {
+    this.logger.log('Ejecutando job de membresías por vencer...');
+
+    try {
+      const today = new Date();
+
+      // Buscar membresías activas
+      const memberships = await this.membershipRepository.find({
+        where: {
+          estado: MembershipStatus.ACTIVA,
+        },
+        relations: ['user'],
+      });
+
+      // Filtrar membresías que vencen en 7 días
+      const expiringMemberships = memberships.filter((membership) => {
+        const daysUntilExpiry = differenceInDays(
+          new Date(membership.fechaVencimiento),
+          today,
+        );
+        return daysUntilExpiry === 7;
+      });
+
+      this.logger.log(`Encontradas ${expiringMemberships.length} membresías por vencer en 7 días`);
+
+      for (const membership of expiringMemberships) {
+        try {
+          const fechaVencimiento = format(
+            new Date(membership.fechaVencimiento),
+            "dd 'de' MMMM",
+            { locale: es },
+          );
+
+          await this.notificationsService.create({
+            userId: membership.userId,
+            type: 'MEMBERSHIP_EXPIRING',
+            priority: 'HIGH',
+            title: 'Membresía por Vencer',
+            message: `Tu membresía vence en 7 días el ${fechaVencimiento}. Renueva para seguir disfrutando de nuestros servicios.`,
+            actionUrl: '/plans',
+            actionLabel: 'Renovar Ahora',
+          });
+
+          this.logger.log(
+            `Notificación de membresía por vencer enviada para usuario ${membership.userId}`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Error enviando notificación de membresía para usuario ${membership.userId}:`,
+            error,
+          );
+        }
+      }
+
+      this.logger.log('Job de membresías por vencer completado');
+    } catch (error) {
+      this.logger.error('Error en job de membresías por vencer:', error);
+    }
+  }
+
+  /**
+   * Cron job que se ejecuta diariamente para marcar membresías vencidas
+   * Se ejecuta a la 1:00 AM todos los días
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  async expireMemberships() {
+    this.logger.log('Ejecutando job de expiración de membresías...');
+
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Buscar membresías activas
+      const memberships = await this.membershipRepository.find({
+        where: {
+          estado: MembershipStatus.ACTIVA,
+        },
+        relations: ['user'],
+      });
+
+      // Filtrar membresías que ya vencieron
+      const expiredMemberships = memberships.filter((membership) => {
+        const expiryDate = new Date(membership.fechaVencimiento);
+        expiryDate.setHours(0, 0, 0, 0);
+        return expiryDate < today;
+      });
+
+      this.logger.log(`Encontradas ${expiredMemberships.length} membresías vencidas`);
+
+      for (const membership of expiredMemberships) {
+        try {
+          membership.estado = MembershipStatus.VENCIDA;
+          await this.membershipRepository.save(membership);
+
+          await this.notificationsService.create({
+            userId: membership.userId,
+            type: 'MEMBERSHIP_EXPIRED',
+            priority: 'HIGH',
+            title: 'Membresía Vencida',
+            message: 'Tu membresía ha vencido. Renueva para seguir disfrutando de nuestros servicios.',
+            actionUrl: '/plans',
+            actionLabel: 'Renovar Ahora',
+          });
+
+          this.logger.log(`Membresía ${membership.id} marcada como VENCIDA`);
+        } catch (error) {
+          this.logger.error(
+            `Error marcando membresía ${membership.id} como vencida:`,
+            error,
+          );
+        }
+      }
+
+      this.logger.log('Job de expiración de membresías completado');
+    } catch (error) {
+      this.logger.error('Error en job de expiración de membresías:', error);
     }
   }
 }

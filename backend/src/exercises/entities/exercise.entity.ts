@@ -4,74 +4,60 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
-export enum ExerciseCategory {
-  FUERZA = 'FUERZA',
-  CARDIO = 'CARDIO',
-  FLEXIBILIDAD = 'FLEXIBILIDAD',
-  MOVILIDAD = 'MOVILIDAD',
-  FUNCIONAL = 'FUNCIONAL',
+export enum MuscleGroup {
+  PECHO = 'pecho',
+  ESPALDA = 'espalda',
+  PIERNAS = 'piernas',
+  HOMBROS = 'hombros',
+  BRAZOS = 'brazos',
+  CORE = 'core',
+  CARDIO = 'cardio',
+  CUERPO_COMPLETO = 'cuerpo_completo',
 }
 
 export enum DifficultyLevel {
-  PRINCIPIANTE = 'PRINCIPIANTE',
-  INTERMEDIO = 'INTERMEDIO',
-  AVANZADO = 'AVANZADO',
-}
-
-export enum MuscleGroup {
-  PECHO = 'PECHO',
-  ESPALDA = 'ESPALDA',
-  HOMBROS = 'HOMBROS',
-  BRAZOS = 'BRAZOS',
-  PIERNAS = 'PIERNAS',
-  ABDOMEN = 'ABDOMEN',
-  GLUTEOS = 'GLUTEOS',
-  CUERPO_COMPLETO = 'CUERPO_COMPLETO',
+  PRINCIPIANTE = 'principiante',
+  INTERMEDIO = 'intermedio',
+  AVANZADO = 'avanzado',
 }
 
 @Entity('exercises')
+@Index(['grupoMuscular'])
+@Index(['nivelDificultad'])
 export class Exercise {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   nombre: string;
 
   @Column({ type: 'text' })
   descripcion: string;
 
-  @Column({ nullable: true })
-  videoUrl: string;
-
-  @Column({ nullable: true })
-  imagenUrl: string;
-
   @Column({
     type: 'enum',
-    enum: ExerciseCategory,
+    enum: MuscleGroup,
   })
-  categoria: ExerciseCategory;
+  grupoMuscular: MuscleGroup;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  equipamiento: string;
 
   @Column({
     type: 'enum',
     enum: DifficultyLevel,
+    default: DifficultyLevel.INTERMEDIO,
   })
   nivelDificultad: DifficultyLevel;
 
-  @Column({
-    type: 'enum',
-    enum: MuscleGroup,
-    array: true,
-  })
-  grupoMuscular: MuscleGroup[];
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  videoUrl: string;
 
-  @Column({ type: 'text', nullable: true })
-  instrucciones: string;
-
-  @Column({ default: true })
-  activo: boolean;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  imagenUrl: string;
 
   @CreateDateColumn()
   createdAt: Date;

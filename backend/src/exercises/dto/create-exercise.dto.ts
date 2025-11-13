@@ -1,25 +1,25 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsEnum,
-  IsOptional,
-  IsArray,
-  IsUrl,
-} from 'class-validator';
-import {
-  ExerciseCategory,
-  DifficultyLevel,
-  MuscleGroup,
-} from '../entities/exercise.entity';
+import { IsString, IsEnum, IsOptional, IsUrl, MaxLength } from 'class-validator';
+import { MuscleGroup, DifficultyLevel } from '../entities/exercise.entity';
 
 export class CreateExerciseDto {
   @IsString()
-  @IsNotEmpty()
+  @MaxLength(255)
   nombre: string;
 
   @IsString()
-  @IsNotEmpty()
   descripcion: string;
+
+  @IsEnum(MuscleGroup)
+  grupoMuscular: MuscleGroup;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  equipamiento?: string;
+
+  @IsEnum(DifficultyLevel)
+  @IsOptional()
+  nivelDificultad?: DifficultyLevel;
 
   @IsUrl()
   @IsOptional()
@@ -28,21 +28,4 @@ export class CreateExerciseDto {
   @IsUrl()
   @IsOptional()
   imagenUrl?: string;
-
-  @IsEnum(ExerciseCategory)
-  @IsNotEmpty()
-  categoria: ExerciseCategory;
-
-  @IsEnum(DifficultyLevel)
-  @IsNotEmpty()
-  nivelDificultad: DifficultyLevel;
-
-  @IsArray()
-  @IsEnum(MuscleGroup, { each: true })
-  @IsNotEmpty()
-  grupoMuscular: MuscleGroup[];
-
-  @IsString()
-  @IsOptional()
-  instrucciones?: string;
 }

@@ -1,76 +1,90 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../services/api';
-import { Exercise, CreateExerciseDto, UpdateExerciseDto } from '../types/exercise.types';
+import axios from 'axios';
+import type {
+  Exercise,
+  CreateExerciseDto,
+  MuscleGroup,
+  DifficultyLevel,
+} from '../types/workout.types';
 
-interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+const API_URL = 'http://localhost:3000/exercises';
 
-export const useExercises = (page = 1, limit = 20, filters?: any) => {
+export function useExercises(grupoMuscular?: MuscleGroup, nivelDificultad?: DifficultyLevel) {
   return useQuery({
-    queryKey: ['exercises', page, limit, filters],
+    queryKey: ['exercises', grupoMuscular, nivelDificultad],
     queryFn: async () => {
-      const response = await api.get<PaginatedResult<Exercise>>('/exercises', {
-        params: { page, limit, ...filters },
-      });
-      return response.data;
+      const params: Record<string, string> = {};
+      if (grupoMuscular) params.grupoMuscular = grupoMuscular;
+      if (nivelDificultad) params.nivelDificultad = nivelDificultad;
+
+      const { data } = await axios.get<Exercise[]>(API_URL, { params });
+      return data;
     },
   });
-};
+}
 
-export const useExercise = (id: string) => {
+export function useExercise(id: string) {
   return useQuery({
     queryKey: ['exercise', id],
     queryFn: async () => {
-      const response = await api.get<Exercise>(`/exercises/${id}`);
-      return response.data;
+      const { data } = await axios.get<Exercise>(`${API_URL}/${id}`);
+      return data;
     },
     enabled: !!id,
   });
-};
+}
 
-export const useCreateExercise = () => {
+export function useSearchExercises(searchTerm: string) {
+  return useQuery({
+    queryKey: ['exercises', 'search', searchTerm],
+    queryFn: async () => {
+      const { data } = await axios.get<Exercise[]>(`${API_URL}/search`, {
+        params: { q: searchTerm },
+      });
+      return data;
+    },
+    enabled: searchTerm.length >= 2,
+  });
+}
+
+export function useCreateExercise() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateExerciseDto) => {
-      const response = await api.post<Exercise>('/exercises', data);
-      return response.data;
+    mutationFn: async (exerciseData: CreateExerciseDto) => {
+      const { data } = await axios.post<Exercise>(API_URL, exerciseData);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
     },
   });
-};
+}
 
-export const useUpdateExercise = () => {
+export function useUpdateExercise() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateExerciseDto }) => {
-      const response = await api.patch<Exercise>(`/exercises/${id}`, data);
-      return response.data;
+    mutationFn: async ({ id, ...exerciseData }: Partial<CreateExerciseDto> & { id: string }) => {
+      const { data } = await axios.patch<Exercise>(`${API_URL}/${id}`, exerciseData);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
-      queryClient.invalidateQueries({ queryKey: ['exercise'] });
+      queryClient.invalidateQueries({ queryKey: ['exercise', data.id] });
     },
   });
-};
+}
 
-export const useDeleteExercise = () => {
+export function useDeleteExercise() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/exercises/${id}`);
+      await axios.delete(`${API_URL}/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
     },
   });
-};
+}

@@ -6,55 +6,59 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ExercisesService, type ExerciseFilters } from './exercises.service';
+import { ExercisesService } from './exercises.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { MuscleGroup, DifficultyLevel } from './entities/exercise.entity';
 
 @Controller('exercises')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 export class ExercisesController {
   constructor(private readonly exercisesService: ExercisesService) {}
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.ENTRENADOR)
-  async create(@Body() createExerciseDto: CreateExerciseDto) {
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TRAINER)
+  create(@Body() createExerciseDto: CreateExerciseDto) {
     return this.exercisesService.create(createExerciseDto);
   }
 
   @Get()
-  async findAll(
-    @Query() paginationDto: PaginationDto,
-    @Query() filters: ExerciseFilters,
+  findAll(
+    @Query('grupoMuscular') grupoMuscular?: MuscleGroup,
+    @Query('nivelDificultad') nivelDificultad?: DifficultyLevel,
   ) {
-    return this.exercisesService.findAll(paginationDto, filters);
+    return this.exercisesService.findAll(grupoMuscular, nivelDificultad);
+  }
+
+  @Get('search')
+  search(@Query('q') searchTerm: string) {
+    return this.exercisesService.searchByName(searchTerm);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string) {
     return this.exercisesService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles(UserRole.ADMIN, UserRole.ENTRENADOR)
-  async update(
-    @Param('id') id: string,
-    @Body() updateExerciseDto: UpdateExerciseDto,
-  ) {
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TRAINER)
+  update(@Param('id') id: string, @Body() updateExerciseDto: UpdateExerciseDto) {
     return this.exercisesService.update(id, updateExerciseDto);
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  async remove(@Param('id') id: string) {
-    await this.exercisesService.remove(id);
-    return { message: 'Ejercicio eliminado exitosamente' };
+  remove(@Param('id') id: string) {
+    return this.exercisesService.remove(id);
   }
 }

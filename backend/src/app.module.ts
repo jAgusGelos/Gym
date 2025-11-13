@@ -28,6 +28,7 @@ import { TrainersModule } from './trainers/trainers.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { WorkoutRoutinesModule } from './workout-routines/workout-routines.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { RemindersModule } from './reminders/reminders.module';
     NotificationsModule,
     BodyMeasurementsModule,
     RemindersModule,
+    WorkoutRoutinesModule,
   ],
   controllers: [AppController],
   providers: [

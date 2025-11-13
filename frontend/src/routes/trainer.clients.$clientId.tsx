@@ -1,241 +1,213 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, BookOpen, Calendar, TrendingUp, User } from 'lucide-react';
-import { useClientDetails } from '../hooks/useTrainers';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useClientProgress } from '../hooks/useTrainer';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export const Route = createFileRoute('/trainer/clients/$clientId')({
-  component: ClientDetailPage,
+  component: ClientProgressPage,
 });
 
-function ClientDetailPage() {
+function ClientProgressPage() {
   const { clientId } = Route.useParams();
-  const navigate = useNavigate();
-  const { data, isLoading } = useClientDetails(clientId);
+  const { data, isLoading } = useClientProgress(clientId);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="container mx-auto px-4 py-8">
+        <p>Cargando progreso...</p>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="text-center py-12">
-        <User className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Cliente no encontrado</h3>
-        <button
-          onClick={() => navigate({ to: '/trainer/clients' })}
-          className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Volver a Clientes
-        </button>
+      <div className="container mx-auto px-4 py-8">
+        <p>Cliente no encontrado</p>
       </div>
     );
   }
 
-  const { client, routines, recentClasses } = data;
+  const { client, routines, recentLogs, stats } = data;
+
+  const goalLabels = {
+    fuerza: 'Fuerza',
+    hipertrofia: 'Hipertrofia',
+    resistencia: 'Resistencia',
+    perdida_peso: 'Pérdida de Peso',
+    tonificacion: 'Tonificación',
+    funcional: 'Funcional',
+  };
+
+  const muscleGroupLabels = {
+    pecho: 'Pecho',
+    espalda: 'Espalda',
+    piernas: 'Piernas',
+    hombros: 'Hombros',
+    brazos: 'Brazos',
+    core: 'Core',
+    cardio: 'Cardio',
+    cuerpo_completo: 'Cuerpo Completo',
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => navigate({ to: '/trainer/clients' })}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-4 flex-1">
-          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-            <span className="text-indigo-600 font-semibold text-2xl">
-              {client.nombre[0]}
-              {client.apellido[0]}
-            </span>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {client.nombre} {client.apellido}
-            </h1>
-            <p className="text-sm text-gray-600">{client.email}</p>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Link to="/trainer/clients" className="text-blue-600 hover:underline mb-2 inline-block">
+          ← Volver a Clientes
+        </Link>
+        <h1 className="text-3xl font-bold mb-2">
+          {client.nombre} {client.apellido}
+        </h1>
+        <p className="text-gray-600">{client.email}</p>
+      </div>
+
+      {/* Estadísticas */}
+      <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white border rounded-lg p-6">
+          <p className="text-sm text-gray-600 mb-1">Entrenamientos (30 días)</p>
+          <p className="text-3xl font-bold text-blue-600">{stats.totalWorkoutsLast30Days}</p>
+        </div>
+        <div className="bg-white border rounded-lg p-6">
+          <p className="text-sm text-gray-600 mb-1">Días de Entrenamiento</p>
+          <p className="text-3xl font-bold text-green-600">
+            {stats.uniqueTrainingDaysLast30Days}
+          </p>
+        </div>
+        <div className="bg-white border rounded-lg p-6">
+          <p className="text-sm text-gray-600 mb-1">Rutinas Totales</p>
+          <p className="text-3xl font-bold text-purple-600">{stats.totalRoutines}</p>
+        </div>
+        <div className="bg-white border rounded-lg p-6">
+          <p className="text-sm text-gray-600 mb-1">Rutinas Activas</p>
+          <p className="text-3xl font-bold text-orange-600">{stats.activeRoutineCount}</p>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <BookOpen className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Rutinas Asignadas</p>
-              <p className="text-2xl font-bold text-gray-900">{routines.length}</p>
-            </div>
-          </div>
+      {/* Rutinas */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Rutinas Asignadas</h2>
+          <Link
+            to="/trainer/routines/new"
+            search={{ clientId }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            + Asignar Nueva Rutina
+          </Link>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Rutinas Activas</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {routines.filter((r) => r.activo).length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Clases Asistidas</p>
-              <p className="text-2xl font-bold text-gray-900">{recentClasses.length}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Rutinas */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              Rutinas Asignadas
-            </h2>
-          </div>
-
-          {routines.length === 0 ? (
-            <div className="p-12 text-center">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay rutinas</h3>
-              <p className="text-gray-600">Este cliente no tiene rutinas asignadas</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {routines.map((routine) => (
-                <Link
-                  key={routine.id}
-                  to="/routines/$routineId"
-                  params={{ routineId: routine.id }}
-                  className="block p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900">{routine.nombre}</h3>
-                        {routine.activo && (
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                            Activa
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{routine.descripcion}</p>
-                      <div className="flex items-center gap-3 text-xs text-gray-600">
-                        <span className="px-2 py-1 bg-gray-100 rounded">{routine.objetivo}</span>
-                        <span>{routine.diasSemana} días/semana</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Clases Recientes */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Clases Recientes
-            </h2>
-          </div>
-
-          {recentClasses.length === 0 ? (
-            <div className="p-12 text-center">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No hay clases registradas
-              </h3>
-              <p className="text-gray-600">
-                Este cliente no ha asistido a clases recientemente
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {recentClasses.map((booking: any) => (
-                <div key={booking.id} className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {booking.class?.nombre || 'Clase'}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {booking.class?.fechaHoraInicio &&
-                          format(
-                            new Date(booking.class.fechaHoraInicio),
-                            "d 'de' MMMM, yyyy",
-                            { locale: es },
-                          )}
-                      </p>
-                    </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                      Asistió
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Client Info */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Información del Cliente</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-600">Email</p>
-            <p className="font-medium text-gray-900">{client.email}</p>
-          </div>
-          {client.telefono && (
-            <div>
-              <p className="text-sm text-gray-600">Teléfono</p>
-              <p className="font-medium text-gray-900">{client.telefono}</p>
-            </div>
-          )}
-          <div>
-            <p className="text-sm text-gray-600">Estado</p>
-            <span
-              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                client.estado === 'ACTIVO'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-700'
+        <div className="grid md:grid-cols-2 gap-4">
+          {routines.map((routine) => (
+            <div
+              key={routine.id}
+              className={`border rounded-lg p-6 ${
+                routine.activa ? 'bg-green-50 border-green-500' : 'bg-white'
               }`}
             >
-              {client.estado}
-            </span>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Miembro desde</p>
-            <p className="font-medium text-gray-900">
-              {format(new Date(client.fechaRegistro || client.createdAt), 'MMMM yyyy', {
-                locale: es,
-              })}
-            </p>
-          </div>
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h3 className="text-lg font-bold">{routine.nombre}</h3>
+                  <p className="text-sm text-gray-600">{routine.descripcion}</p>
+                </div>
+                {routine.activa && (
+                  <span className="bg-green-500 text-white px-2 py-1 rounded text-xs">
+                    Activa
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-sm mb-3">
+                <div>
+                  <p className="text-gray-600">Objetivo</p>
+                  <p className="font-medium">{goalLabels[routine.objetivo]}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Duración</p>
+                  <p className="font-medium">{routine.duracionSemanas} sem</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Frecuencia</p>
+                  <p className="font-medium">{routine.diasPorSemana} días</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-500 mb-3">
+                {routine.exercises?.length || 0} ejercicios
+              </p>
+
+              <div className="flex gap-2">
+                <Link
+                  to="/trainer/routines/$routineId"
+                  params={{ routineId: routine.id }}
+                  className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-center text-sm hover:bg-gray-700"
+                >
+                  Ver Detalles
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {routines.length === 0 && (
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">No hay rutinas asignadas</p>
+          </div>
+        )}
+      </div>
+
+      {/* Entrenamientos Recientes */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Entrenamientos Recientes</h2>
+
+        {recentLogs.length === 0 ? (
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">Sin entrenamientos registrados</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentLogs.map((log) => (
+              <div key={log.id} className="bg-white border rounded-lg p-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h4 className="font-bold">{log.routineExercise.exercise.nombre}</h4>
+                    <p className="text-sm text-gray-600">
+                      {muscleGroupLabels[log.routineExercise.exercise.grupoMuscular]} •{' '}
+                      {format(new Date(log.fecha), "d 'de' MMMM", { locale: es })}
+                    </p>
+                  </div>
+                  {log.rpe && (
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                      RPE: {log.rpe}/10
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-4 gap-4 mt-3 text-sm">
+                  <div>
+                    <p className="text-gray-600">Series</p>
+                    <p className="font-semibold">{log.seriesCompletadas}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Reps</p>
+                    <p className="font-semibold">{log.repeticionesRealizadas}</p>
+                  </div>
+                  {log.pesoUtilizado && (
+                    <div>
+                      <p className="text-gray-600">Peso</p>
+                      <p className="font-semibold">{log.pesoUtilizado} kg</p>
+                    </div>
+                  )}
+                  {log.duracionMinutos && (
+                    <div>
+                      <p className="text-gray-600">Duración</p>
+                      <p className="font-semibold">{log.duracionMinutos} min</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

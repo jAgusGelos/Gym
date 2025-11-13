@@ -35,4 +35,24 @@ export class TrainersController {
   async getMyStats(@CurrentUser() user: User) {
     return this.trainersService.getMyStats(user.id);
   }
+
+  // === NUEVOS ENDPOINTS PARA WORKOUT ROUTINES ===
+
+  // Obtener clientes con workout routines
+  @Get('workout-clients')
+  async getWorkoutClients(@CurrentUser() user: User) {
+    return this.trainersService.getWorkoutClients(user.id);
+  }
+
+  // Obtener progreso de un cliente
+  @Get('workout-clients/:clientId/progress')
+  async getClientProgress(@CurrentUser() user: User, @Param('clientId') clientId: string) {
+    return this.trainersService.getClientProgress(user.id, clientId);
+  }
+
+  // Obtener todos los miembros para asignar rutinas
+  @Get('all-members')
+  async getAllMembers(@CurrentUser() user: User) {
+    return this.trainersService.getAllMembers(user.id);
+  }
 }

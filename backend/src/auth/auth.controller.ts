@@ -42,15 +42,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@CurrentUser() user: User) {
-    const { password, ...result } = user;
-    return result;
+  getProfile(@CurrentUser() user: User) {
+    return this.authService.sanitizeUser(user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout() {
+  logout() {
     // En una implementación más completa, aquí se podría
     // invalidar el refresh token en una lista negra
     return { message: 'Logout exitoso' };

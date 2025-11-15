@@ -1,11 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { MembershipPlan } from './entities/membership-plan.entity';
 import { OnlinePayment, PaymentStatus } from './entities/online-payment.entity';
-import { Membership, MembershipStatus, PaymentMethod } from '../memberships/entities/membership.entity';
+import {
+  Membership,
+  MembershipStatus,
+  PaymentMethod,
+} from '../memberships/entities/membership.entity';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 
@@ -24,10 +32,14 @@ export class MercadopagoService {
     private configService: ConfigService,
   ) {
     // Initialize MercadoPago SDK
-    const accessToken = this.configService.get<string>('MERCADOPAGO_ACCESS_TOKEN');
+    const accessToken = this.configService.get<string>(
+      'MERCADOPAGO_ACCESS_TOKEN',
+    );
 
     if (!accessToken) {
-      console.warn('MERCADOPAGO_ACCESS_TOKEN not configured. Payment features will be disabled.');
+      console.warn(
+        'MERCADOPAGO_ACCESS_TOKEN not configured. Payment features will be disabled.',
+      );
     } else {
       this.mercadoPagoClient = new MercadoPagoConfig({
         accessToken,
@@ -58,7 +70,10 @@ export class MercadopagoService {
     return plan;
   }
 
-  async updatePlan(id: string, updatePlanDto: UpdatePlanDto): Promise<MembershipPlan> {
+  async updatePlan(
+    id: string,
+    updatePlanDto: UpdatePlanDto,
+  ): Promise<MembershipPlan> {
     const plan = await this.getPlanById(id);
     Object.assign(plan, updatePlanDto);
     return this.planRepository.save(plan);
@@ -78,7 +93,8 @@ export class MercadopagoService {
     }
 
     const plan = await this.getPlanById(planId);
-    const baseUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
+    const baseUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
 
     // Create payment record
     const payment = this.paymentRepository.create({
@@ -157,10 +173,15 @@ export class MercadopagoService {
     // This would fetch the payment from MercadoPago API
     // For now, we'll leave this as a placeholder
     // You'll need to implement the Payment API client from MercadoPago SDK
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log('Processing payment:', paymentId);
   }
 
-  async approvePayment(preferenceId: string, paymentId: string, paymentData: any) {
+  async approvePayment(
+    preferenceId: string,
+    paymentId: string,
+    paymentData: any,
+  ) {
     const payment = await this.paymentRepository.findOne({
       where: { preferenceId },
       relations: ['plan', 'user'],
@@ -196,9 +217,10 @@ export class MercadopagoService {
     });
 
     const now = new Date();
-    const startDate = existingMembership && existingMembership.fechaVencimiento > now
-      ? existingMembership.fechaVencimiento
-      : now;
+    const startDate =
+      existingMembership && existingMembership.fechaVencimiento > now
+        ? existingMembership.fechaVencimiento
+        : now;
 
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + plan.duracionDias);

@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsUUID, IsEnum, IsOptional, IsNumber, IsDateString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsUUID,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+} from 'class-validator';
 import { SubscriptionFrequency } from '../entities/subscription.entity';
 
 export class CreateSubscriptionDto {

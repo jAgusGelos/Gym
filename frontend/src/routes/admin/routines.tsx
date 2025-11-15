@@ -1,15 +1,36 @@
-import { useState } from 'react';
-import { useAdminRoutines, useCreateRoutine, useUpdateRoutine, useDeleteRoutine } from '../../hooks/useAdminRoutines';
-import { Button, Card, CardContent, Input, Loading, Modal } from '../../components/ui';
-import { RoutineForm } from '../../components/forms/RoutineForm';
-import { useToast } from '../../stores/toastStore';
-import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, ClipboardList, Clock, Target } from 'lucide-react';
-import { Routine, RoutineLevel, RoutineGoal } from '../../types/routine.types';
+import { useState } from "react";
+import {
+  useAdminRoutines,
+  useCreateRoutine,
+  useUpdateRoutine,
+  useDeleteRoutine,
+} from "../../hooks/useAdminRoutines";
+import {
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Loading,
+  Modal,
+} from "../../components/ui";
+import { RoutineForm } from "../../components/forms/RoutineForm";
+import { useToast } from "../../stores/toastStore";
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  ClipboardList,
+  Clock,
+} from "lucide-react";
+import { Routine, RoutineLevel, RoutineGoal } from "../../types/routine.types";
 
 export const AdminRoutinesPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterLevel, setFilterLevel] = useState<RoutineLevel | 'all'>('all');
-  const [filterGoal, setFilterGoal] = useState<RoutineGoal | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterLevel, setFilterLevel] = useState<RoutineLevel | "all">("all");
+  const [filterGoal, setFilterGoal] = useState<RoutineGoal | "all">("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
 
@@ -24,37 +45,40 @@ export const AdminRoutinesPage = () => {
       routine.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       routine.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesLevel =
-      filterLevel === 'all' || routine.nivel === filterLevel;
+    const matchesLevel = filterLevel === "all" || routine.nivel === filterLevel;
 
-    const matchesGoal =
-      filterGoal === 'all' || routine.objetivo === filterGoal;
+    const matchesGoal = filterGoal === "all" || routine.objetivo === filterGoal;
 
     return matchesSearch && matchesLevel && matchesGoal;
   });
 
   const handleToggleStatus = (routineId: string, currentStatus: boolean) => {
-    updateRoutine.mutate({
-      id: routineId,
-      data: { activo: !currentStatus },
-    }, {
-      onSuccess: () => {
-        toast.success(currentStatus ? 'Rutina desactivada' : 'Rutina activada');
+    updateRoutine.mutate(
+      {
+        id: routineId,
+        data: { activo: !currentStatus },
       },
-      onError: () => {
-        toast.error('Error al cambiar el estado de la rutina');
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success(
+            currentStatus ? "Rutina desactivada" : "Rutina activada"
+          );
+        },
+        onError: () => {
+          toast.error("Error al cambiar el estado de la rutina");
+        },
+      }
+    );
   };
 
   const handleDeleteRoutine = (routineId: string, routineName: string) => {
     if (confirm(`¿Estás seguro de que querés eliminar "${routineName}"?`)) {
       deleteRoutine.mutate(routineId, {
         onSuccess: () => {
-          toast.success('Rutina eliminada correctamente');
+          toast.success("Rutina eliminada correctamente");
         },
         onError: () => {
-          toast.error('Error al eliminar la rutina');
+          toast.error("Error al eliminar la rutina");
         },
       });
     }
@@ -64,9 +88,9 @@ export const AdminRoutinesPage = () => {
     try {
       await createRoutine.mutateAsync(data);
       setIsModalOpen(false);
-      toast.success('Rutina creada correctamente');
+      toast.success("Rutina creada correctamente");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al crear la rutina');
+      toast.error(error.response?.data?.message || "Error al crear la rutina");
     }
   };
 
@@ -79,9 +103,11 @@ export const AdminRoutinesPage = () => {
       });
       setIsModalOpen(false);
       setEditingRoutine(null);
-      toast.success('Rutina actualizada correctamente');
+      toast.success("Rutina actualizada correctamente");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al actualizar la rutina');
+      toast.error(
+        error.response?.data?.message || "Error al actualizar la rutina"
+      );
     }
   };
 
@@ -102,23 +128,23 @@ export const AdminRoutinesPage = () => {
 
   const getLevelColor = (level: RoutineLevel) => {
     const colors = {
-      [RoutineLevel.PRINCIPIANTE]: 'bg-green-100 text-green-800',
-      [RoutineLevel.INTERMEDIO]: 'bg-yellow-100 text-yellow-800',
-      [RoutineLevel.AVANZADO]: 'bg-red-100 text-red-800',
+      [RoutineLevel.PRINCIPIANTE]: "bg-green-100 text-green-800",
+      [RoutineLevel.INTERMEDIO]: "bg-yellow-100 text-yellow-800",
+      [RoutineLevel.AVANZADO]: "bg-red-100 text-red-800",
     };
-    return colors[level] || 'bg-gray-100 text-gray-800';
+    return colors[level] || "bg-gray-100 text-gray-800";
   };
 
   const getGoalColor = (goal: RoutineGoal) => {
     const colors = {
-      [RoutineGoal.FUERZA]: 'bg-red-100 text-red-800',
-      [RoutineGoal.HIPERTROFIA]: 'bg-purple-100 text-purple-800',
-      [RoutineGoal.DEFINICION]: 'bg-blue-100 text-blue-800',
-      [RoutineGoal.RESISTENCIA]: 'bg-green-100 text-green-800',
-      [RoutineGoal.MOVILIDAD]: 'bg-yellow-100 text-yellow-800',
-      [RoutineGoal.PERDIDA_PESO]: 'bg-orange-100 text-orange-800',
+      [RoutineGoal.FUERZA]: "bg-red-100 text-red-800",
+      [RoutineGoal.HIPERTROFIA]: "bg-purple-100 text-purple-800",
+      [RoutineGoal.DEFINICION]: "bg-blue-100 text-blue-800",
+      [RoutineGoal.RESISTENCIA]: "bg-green-100 text-green-800",
+      [RoutineGoal.MOVILIDAD]: "bg-yellow-100 text-yellow-800",
+      [RoutineGoal.PERDIDA_PESO]: "bg-orange-100 text-orange-800",
     };
-    return colors[goal] || 'bg-gray-100 text-gray-800';
+    return colors[goal] || "bg-gray-100 text-gray-800";
   };
 
   if (isLoading) {
@@ -134,8 +160,12 @@ export const AdminRoutinesPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Rutinas</h1>
-          <p className="text-gray-600 mt-1">Administrá las rutinas de entrenamiento</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Gestión de Rutinas
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Administrá las rutinas de entrenamiento
+          </p>
         </div>
         <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4 mr-2" />
@@ -192,7 +222,9 @@ export const AdminRoutinesPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total de Rutinas</p>
-                <p className="text-2xl font-bold text-gray-900">{routinesData?.total || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {routinesData?.total || 0}
+                </p>
               </div>
               <ClipboardList className="w-8 h-8 text-blue-600" />
             </div>
@@ -205,7 +237,7 @@ export const AdminRoutinesPage = () => {
               <div>
                 <p className="text-sm text-gray-600">Públicas</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {routinesData?.data.filter(r => r.publico).length || 0}
+                  {routinesData?.data.filter((r) => r.publico).length || 0}
                 </p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
@@ -219,7 +251,7 @@ export const AdminRoutinesPage = () => {
               <div>
                 <p className="text-sm text-gray-600">Privadas</p>
                 <p className="text-2xl font-bold text-gray-600">
-                  {routinesData?.data.filter(r => !r.publico).length || 0}
+                  {routinesData?.data.filter((r) => !r.publico).length || 0}
                 </p>
               </div>
               <XCircle className="w-8 h-8 text-gray-600" />
@@ -237,7 +269,9 @@ export const AdminRoutinesPage = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{routine.nombre}</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        {routine.nombre}
+                      </h3>
                       {routine.publico && (
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                           Público
@@ -250,22 +284,36 @@ export const AdminRoutinesPage = () => {
                   </div>
                   <div className="flex items-center gap-2 ml-2">
                     <button
-                      onClick={() => handleToggleStatus(routine.id, routine.activo)}
+                      onClick={() =>
+                        handleToggleStatus(routine.id, routine.activo)
+                      }
                       className={`p-1 rounded ${
-                        routine.activo ? 'text-green-600' : 'text-gray-400'
+                        routine.activo ? "text-green-600" : "text-gray-400"
                       }`}
-                      title={routine.activo ? 'Activo' : 'Inactivo'}
+                      title={routine.activo ? "Activo" : "Inactivo"}
                     >
-                      {routine.activo ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                      {routine.activo ? (
+                        <CheckCircle className="w-5 h-5" />
+                      ) : (
+                        <XCircle className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(routine.nivel)}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(
+                      routine.nivel
+                    )}`}
+                  >
                     {routine.nivel}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getGoalColor(routine.objetivo)}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getGoalColor(
+                      routine.objetivo
+                    )}`}
+                  >
                     {routine.objetivo}
                   </span>
                 </div>
@@ -285,7 +333,8 @@ export const AdminRoutinesPage = () => {
 
                 {routine.creador && (
                   <p className="text-xs text-gray-500">
-                    Creado por: {routine.creador.nombre} {routine.creador.apellido}
+                    Creado por: {routine.creador.nombre}{" "}
+                    {routine.creador.apellido}
                   </p>
                 )}
 
@@ -302,7 +351,9 @@ export const AdminRoutinesPage = () => {
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => handleDeleteRoutine(routine.id, routine.nombre)}
+                    onClick={() =>
+                      handleDeleteRoutine(routine.id, routine.nombre)
+                    }
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -324,8 +375,8 @@ export const AdminRoutinesPage = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={editingRoutine ? 'Editar Rutina' : 'Nueva Rutina'}
-        size="lg"
+        title={editingRoutine ? "Editar Rutina" : "Nueva Rutina"}
+        size="xl"
       >
         <RoutineForm
           onSubmit={editingRoutine ? handleEditRoutine : handleCreateRoutine}

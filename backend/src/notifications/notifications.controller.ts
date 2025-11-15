@@ -1,4 +1,12 @@
-import { Controller, Get, Patch, Delete, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -12,8 +20,14 @@ export class NotificationsController {
 
   // Obtener notificaciones del usuario (paginadas)
   @Get()
-  async getMyNotifications(@CurrentUser() user: User, @Query() paginationDto: PaginationDto) {
-    return this.notificationsService.findUserNotifications(user.id, paginationDto);
+  async getMyNotifications(
+    @CurrentUser() user: User,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.notificationsService.findUserNotifications(
+      user.id,
+      paginationDto,
+    );
   }
 
   // Obtener notificaciones no leídas

@@ -5,9 +5,17 @@ import { WorkoutRoutinesController } from './workout-routines.controller';
 import { WorkoutRoutine } from './entities/workout-routine.entity';
 import { RoutineExercise } from './entities/routine-exercise.entity';
 import { WorkoutLog } from './entities/workout-log.entity';
+import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WorkoutRoutine, RoutineExercise, WorkoutLog])],
+  imports: [
+    TypeOrmModule.forFeature([
+      WorkoutRoutine,
+      RoutineExercise,
+      WorkoutLog,
+      User,
+    ]),
+  ],
   controllers: [WorkoutRoutinesController],
   providers: [WorkoutRoutinesService],
   exports: [WorkoutRoutinesService],

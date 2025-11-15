@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Class } from '../../classes/entities/class.entity';
+import { ClassSchedule } from '../../classes/entities/class-schedule.entity';
 
 export enum BookingStatus {
   RESERVADO = 'RESERVADO',
@@ -35,6 +36,17 @@ export class Booking {
 
   @Column()
   classId: string;
+
+  @ManyToOne(() => ClassSchedule)
+  @JoinColumn({ name: 'scheduleId' })
+  schedule: ClassSchedule;
+
+  @Column()
+  scheduleId: string;
+
+  // Fecha específica de la clase (ej: 2025-11-18 para el próximo lunes)
+  @Column({ type: 'date' })
+  classDate: Date;
 
   @Column({
     type: 'enum',

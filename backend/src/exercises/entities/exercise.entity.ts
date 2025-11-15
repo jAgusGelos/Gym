@@ -59,6 +59,9 @@ export class Exercise {
   @Column({ type: 'varchar', length: 500, nullable: true })
   imagenUrl: string;
 
+  @Column({ type: 'boolean', default: true })
+  trackeaPeso: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

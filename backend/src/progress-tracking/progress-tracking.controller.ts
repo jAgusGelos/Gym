@@ -19,7 +19,9 @@ import { User } from '../users/entities/user.entity';
 @Controller('progress')
 @UseGuards(JwtAuthGuard)
 export class ProgressTrackingController {
-  constructor(private readonly progressTrackingService: ProgressTrackingService) {}
+  constructor(
+    private readonly progressTrackingService: ProgressTrackingService,
+  ) {}
 
   @Post()
   async create(
@@ -45,7 +47,11 @@ export class ProgressTrackingController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ) {
-    return this.progressTrackingService.findByDateRange(user.id, startDate, endDate);
+    return this.progressTrackingService.findByDateRange(
+      user.id,
+      startDate,
+      endDate,
+    );
   }
 
   @Get(':id')
@@ -59,7 +65,11 @@ export class ProgressTrackingController {
     @CurrentUser() user: User,
     @Body() updateProgressEntryDto: UpdateProgressEntryDto,
   ) {
-    return this.progressTrackingService.update(id, user.id, updateProgressEntryDto);
+    return this.progressTrackingService.update(
+      id,
+      user.id,
+      updateProgressEntryDto,
+    );
   }
 
   @Delete(':id')

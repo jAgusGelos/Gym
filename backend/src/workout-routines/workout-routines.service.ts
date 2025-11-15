@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorkoutRoutine } from './entities/workout-routine.entity';
+import { WorkoutRoutine, RoutineType } from './entities/workout-routine.entity';
 import { RoutineExercise } from './entities/routine-exercise.entity';
 import { WorkoutLog } from './entities/workout-log.entity';
 import { CreateWorkoutRoutineDto } from './dto/create-workout-routine.dto';
 import { UpdateWorkoutRoutineDto } from './dto/update-workout-routine.dto';
 import { CreateWorkoutLogDto } from './dto/create-workout-log.dto';
-import { UserRole } from '../users/entities/user.entity';
+import { UserRole, User } from '../users/entities/user.entity';
 
 @Injectable()
 export class WorkoutRoutinesService {
@@ -18,6 +22,8 @@ export class WorkoutRoutinesService {
     private routineExerciseRepository: Repository<RoutineExercise>,
     @InjectRepository(WorkoutLog)
     private workoutLogRepository: Repository<WorkoutLog>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(
@@ -49,8 +55,15 @@ export class WorkoutRoutinesService {
     return await this.findOne(savedRoutine.id);
   }
 
-  async findAll(trainerId?: string, clientId?: string, activa?: boolean): Promise<WorkoutRoutine[]> {
-    const query = this.routineRepository.createQueryBuilder('routine')
+  async findAll(
+    trainerId?: string,
+    clientId?: string,
+    activa?: boolean,
+    tipo?: string,
+    nivel?: string,
+  ): Promise<WorkoutRoutine[]> {
+    const query = this.routineRepository
+      .createQueryBuilder('routine')
       .leftJoinAndSelect('routine.exercises', 'exercises')
       .leftJoinAndSelect('exercises.exercise', 'exercise')
       .leftJoinAndSelect('routine.trainer', 'trainer')
@@ -66,6 +79,14 @@ export class WorkoutRoutinesService {
 
     if (activa !== undefined) {
       query.andWhere('routine.activa = :activa', { activa });
+    }
+
+    if (tipo) {
+      query.andWhere('routine.tipo = :tipo', { tipo });
+    }
+
+    if (nivel) {
+      query.andWhere('routine.nivel = :nivel', { nivel });
     }
 
     query.orderBy('routine.createdAt', 'DESC');
@@ -158,11 +179,16 @@ export class WorkoutRoutinesService {
   }
 
   // Workout Log methods
-  async logWorkout(userId: string, createWorkoutLogDto: CreateWorkoutLogDto): Promise<WorkoutLog> {
+  async logWorkout(
+    userId: string,
+    createWorkoutLogDto: CreateWorkoutLogDto,
+  ): Promise<WorkoutLog> {
     const log = this.workoutLogRepository.create({
       ...createWorkoutLogDto,
       userId,
-      fecha: createWorkoutLogDto.fecha ? new Date(createWorkoutLogDto.fecha) : new Date(),
+      fecha: createWorkoutLogDto.fecha
+        ? new Date(createWorkoutLogDto.fecha)
+        : new Date(),
     });
 
     return await this.workoutLogRepository.save(log);
@@ -174,7 +200,8 @@ export class WorkoutRoutinesService {
     startDate?: string,
     endDate?: string,
   ): Promise<WorkoutLog[]> {
-    const query = this.workoutLogRepository.createQueryBuilder('log')
+    const query = this.workoutLogRepository
+      .createQueryBuilder('log')
       .leftJoinAndSelect('log.routineExercise', 'routineExercise')
       .leftJoinAndSelect('routineExercise.exercise', 'exercise')
       .leftJoinAndSelect('routineExercise.routine', 'routine')
@@ -197,8 +224,12 @@ export class WorkoutRoutinesService {
     return await query.getMany();
   }
 
-  async getExerciseProgress(userId: string, exerciseId: string): Promise<WorkoutLog[]> {
-    return await this.workoutLogRepository.createQueryBuilder('log')
+  async getExerciseProgress(
+    userId: string,
+    exerciseId: string,
+  ): Promise<WorkoutLog[]> {
+    return await this.workoutLogRepository
+      .createQueryBuilder('log')
       .leftJoinAndSelect('log.routineExercise', 'routineExercise')
       .leftJoinAndSelect('routineExercise.exercise', 'exercise')
       .where('log.userId = :userId', { userId })
@@ -206,5 +237,54 @@ export class WorkoutRoutinesService {
       .orderBy('log.fecha', 'DESC')
       .limit(50)
       .getMany();
+  }
+
+  // Personal Plan methods
+  async assignPersonalPlan(
+    userId: string,
+    routineId: string,
+  ): Promise<WorkoutRoutine> {
+    const routine = await this.findOne(routineId);
+
+    // Verificar que el plan sea del tipo PERSONAL o asignado al usuario
+    if (routine.tipo !== RoutineType.PERSONAL && routine.clientId !== userId) {
+      throw new ForbiddenException(
+        'Solo puedes asignar planes personales o planes asignados a ti',
+      );
+    }
+
+    // Actualizar el usuario con el plan activo
+    await this.userRepository.update(userId, { activePlanId: routineId });
+
+    return routine;
+  }
+
+  async getMyPlan(userId: string): Promise<WorkoutRoutine | null> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user || !user.activePlanId) {
+      return null;
+    }
+
+    return await this.findOne(user.activePlanId);
+  }
+
+  async createPersonalPlan(
+    trainerId: string,
+    clientId: string,
+    createWorkoutRoutineDto: CreateWorkoutRoutineDto,
+  ): Promise<WorkoutRoutine> {
+    const planData = {
+      ...createWorkoutRoutineDto,
+      clientId,
+      tipo: RoutineType.PERSONAL,
+    };
+
+    const routine = await this.create(trainerId, planData);
+
+    // Asignar automáticamente como plan activo del usuario
+    await this.userRepository.update(clientId, { activePlanId: routine.id });
+
+    return routine;
   }
 }

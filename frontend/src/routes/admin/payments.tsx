@@ -1,13 +1,23 @@
-import { useState } from 'react';
-import { usePayments, useCreatePayment } from '../../hooks/useAdmin';
-import { Button, Card, CardContent, Loading, Modal } from '../../components/ui';
-import { PaymentForm } from '../../components/forms/PaymentForm';
-import { useToast } from '../../stores/toastStore';
-import { DollarSign, Plus, Calendar, CreditCard, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { PaymentStatus, PaymentMethod } from '../../types/payment.types';
+import { useState } from "react";
+import { usePayments, useCreatePayment } from "../../hooks/useAdmin";
+import { Button, Card, CardContent, Loading, Modal } from "../../components/ui";
+import { PaymentForm } from "../../components/forms/PaymentForm";
+import { useToast } from "../../stores/toastStore";
+import {
+  DollarSign,
+  Plus,
+  Calendar,
+  CreditCard,
+  CheckCircle,
+  Clock,
+  XCircle,
+} from "lucide-react";
+import { PaymentStatus, PaymentMethod } from "../../types/payment.types";
 
 export const PaymentsPage = () => {
-  const [filterStatus, setFilterStatus] = useState<'all' | PaymentStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<"all" | PaymentStatus>(
+    "all"
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: paymentsData, isLoading } = usePayments(1, 50);
@@ -15,17 +25,19 @@ export const PaymentsPage = () => {
   const toast = useToast();
 
   const filteredPayments = paymentsData?.data.filter((payment) => {
-    if (filterStatus === 'all') return true;
+    if (filterStatus === "all") return true;
     return payment.estado === filterStatus;
   });
 
-  const totalIngresos = paymentsData?.data
-    .filter((p) => p.estado === PaymentStatus.COMPLETADO)
-    .reduce((sum, p) => sum + p.monto, 0) || 0;
+  const totalIngresos =
+    paymentsData?.data
+      .filter((p) => p.estado === PaymentStatus.COMPLETADO)
+      .reduce((sum, p) => sum + p.monto, 0) || 0;
 
-  const totalPendientes = paymentsData?.data
-    .filter((p) => p.estado === PaymentStatus.PENDIENTE)
-    .reduce((sum, p) => sum + p.monto, 0) || 0;
+  const totalPendientes =
+    paymentsData?.data
+      .filter((p) => p.estado === PaymentStatus.PENDIENTE)
+      .reduce((sum, p) => sum + p.monto, 0) || 0;
 
   const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
@@ -41,15 +53,16 @@ export const PaymentsPage = () => {
   const getStatusColor = (status: PaymentStatus) => {
     switch (status) {
       case PaymentStatus.COMPLETADO:
-        return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+        return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400";
       case PaymentStatus.PENDIENTE:
-        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
+        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400";
       case PaymentStatus.RECHAZADO:
-        return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+        return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
     }
   };
 
-  const getMethodIcon = (method: PaymentMethod) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getMethodIcon = (_method: PaymentMethod) => {
     return <CreditCard className="w-4 h-4" />;
   };
 
@@ -57,9 +70,11 @@ export const PaymentsPage = () => {
     try {
       await createPayment.mutateAsync(data);
       setIsModalOpen(false);
-      toast.success('Pago registrado correctamente');
+      toast.success("Pago registrado correctamente");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al registrar el pago');
+      toast.error(
+        error.response?.data?.message || "Error al registrar el pago"
+      );
     }
   };
 
@@ -98,7 +113,7 @@ export const PaymentsPage = () => {
                   Ingresos Totales
                 </p>
                 <p className="text-2xl font-bold text-green-600">
-                  ${totalIngresos.toLocaleString('es-AR')}
+                  ${totalIngresos.toLocaleString("es-AR")}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
@@ -116,7 +131,7 @@ export const PaymentsPage = () => {
                   Pendientes
                 </p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  ${totalPendientes.toLocaleString('es-AR')}
+                  ${totalPendientes.toLocaleString("es-AR")}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
@@ -150,28 +165,36 @@ export const PaymentsPage = () => {
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={filterStatus === 'all' ? 'primary' : 'outline'}
+              variant={filterStatus === "all" ? "primary" : "outline"}
               size="sm"
-              onClick={() => setFilterStatus('all')}
+              onClick={() => setFilterStatus("all")}
             >
               Todos
             </Button>
             <Button
-              variant={filterStatus === PaymentStatus.COMPLETADO ? 'primary' : 'outline'}
+              variant={
+                filterStatus === PaymentStatus.COMPLETADO
+                  ? "primary"
+                  : "outline"
+              }
               size="sm"
               onClick={() => setFilterStatus(PaymentStatus.COMPLETADO)}
             >
               Completados
             </Button>
             <Button
-              variant={filterStatus === PaymentStatus.PENDIENTE ? 'primary' : 'outline'}
+              variant={
+                filterStatus === PaymentStatus.PENDIENTE ? "primary" : "outline"
+              }
               size="sm"
               onClick={() => setFilterStatus(PaymentStatus.PENDIENTE)}
             >
               Pendientes
             </Button>
             <Button
-              variant={filterStatus === PaymentStatus.RECHAZADO ? 'primary' : 'outline'}
+              variant={
+                filterStatus === PaymentStatus.RECHAZADO ? "primary" : "outline"
+              }
               size="sm"
               onClick={() => setFilterStatus(PaymentStatus.RECHAZADO)}
             >
@@ -202,7 +225,11 @@ export const PaymentsPage = () => {
                         <p className="font-medium text-gray-900 dark:text-white">
                           {payment.user?.nombre} {payment.user?.apellido}
                         </p>
-                        <span className={`px-2 py-1 text-xs font-medium rounded flex items-center gap-1 ${getStatusColor(payment.estado)}`}>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded flex items-center gap-1 ${getStatusColor(
+                            payment.estado
+                          )}`}
+                        >
                           {getStatusIcon(payment.estado)}
                           {payment.estado}
                         </span>
@@ -213,7 +240,9 @@ export const PaymentsPage = () => {
                       <div className="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {new Date(payment.fechaPago).toLocaleDateString('es-AR')}
+                          {new Date(payment.fechaPago).toLocaleDateString(
+                            "es-AR"
+                          )}
                         </span>
                         <span className="flex items-center gap-1">
                           {getMethodIcon(payment.metodoPago)}
@@ -224,7 +253,7 @@ export const PaymentsPage = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      ${payment.monto.toLocaleString('es-AR')}
+                      ${payment.monto.toLocaleString("es-AR")}
                     </p>
                   </div>
                 </div>

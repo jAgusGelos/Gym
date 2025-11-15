@@ -1,7 +1,14 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -17,7 +24,10 @@ export class SubscriptionsController {
     @CurrentUser() user: User,
     @Body() createSubscriptionDto: CreateSubscriptionDto,
   ) {
-    return this.subscriptionsService.createSubscription(user.id, createSubscriptionDto);
+    return this.subscriptionsService.createSubscription(
+      user.id,
+      createSubscriptionDto,
+    );
   }
 
   // Obtener mis suscripciones
@@ -45,7 +55,11 @@ export class SubscriptionsController {
     @Param('id') id: string,
     @Body('cancelReason') cancelReason?: string,
   ) {
-    return this.subscriptionsService.cancelSubscription(id, user.id, cancelReason);
+    return this.subscriptionsService.cancelSubscription(
+      id,
+      user.id,
+      cancelReason,
+    );
   }
 
   // Pausar suscripción

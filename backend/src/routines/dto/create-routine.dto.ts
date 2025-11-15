@@ -7,6 +7,7 @@ import {
   IsArray,
   ValidateNested,
   IsBoolean,
+  IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { RoutineLevel, RoutineGoal } from '../entities/routine.entity';
@@ -61,6 +62,10 @@ export class CreateRoutineDto {
   @IsBoolean()
   @IsOptional()
   publico?: boolean;
+
+  @IsUUID()
+  @IsOptional()
+  userId?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

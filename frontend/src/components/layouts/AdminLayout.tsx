@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { Link, useLocation } from '@tanstack/react-router';
-import { useAuth } from '../../hooks/useAuth';
+import { ReactNode } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { useAuth } from "../../hooks/useAuth";
 import {
   LayoutDashboard,
   Users,
@@ -8,17 +8,16 @@ import {
   QrCode,
   CreditCard,
   Bell,
-  Settings,
   LogOut,
   Menu,
   X,
   Dumbbell,
-  ClipboardList
-} from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { Button } from '../ui';
-import { useState } from 'react';
-import { NotificationBell } from '../notifications/NotificationBell';
+  ClipboardList,
+} from "lucide-react";
+import { cn } from "../../utils/cn";
+import { Button } from "../ui";
+import { useState } from "react";
+import { NotificationBell } from "../notifications/NotificationBell";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -31,49 +30,49 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const navItems = [
     {
-      path: '/admin',
+      path: "/admin",
       icon: LayoutDashboard,
-      label: 'Dashboard',
+      label: "Dashboard",
     },
     {
-      path: '/admin/members',
+      path: "/adm/members",
       icon: Users,
-      label: 'Socios',
+      label: "Socios",
     },
     {
-      path: '/admin/classes',
+      path: "/adm/classes",
       icon: Calendar,
-      label: 'Clases',
+      label: "Clases",
     },
     {
-      path: '/admin/attendance',
+      path: "/adm/attendance",
       icon: QrCode,
-      label: 'Asistencia',
+      label: "Asistencia",
     },
     {
-      path: '/admin/payments',
+      path: "/adm/payments",
       icon: CreditCard,
-      label: 'Pagos',
+      label: "Pagos",
     },
     {
-      path: '/admin/plans',
+      path: "/adm/plans",
       icon: CreditCard,
-      label: 'Planes',
+      label: "Planes",
     },
     {
-      path: '/admin/exercises',
+      path: "/adm/exercises",
       icon: Dumbbell,
-      label: 'Ejercicios',
+      label: "Ejercicios",
     },
     {
-      path: '/admin/routines',
+      path: "/adm/routines",
       icon: ClipboardList,
-      label: 'Rutinas',
+      label: "Rutinas",
     },
     {
-      path: '/admin/announcements',
+      path: "/adm/announcements",
       icon: Bell,
-      label: 'Anuncios',
+      label: "Anuncios",
     },
   ];
 
@@ -82,13 +81,13 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Header del sidebar */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl font-bold text-primary-600">GymApp Admin</h1>
+          <h1 className="text-xl font-bold text-primary-600 dark:text-primary-400">GymApp Admin</h1>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -109,10 +108,10 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
                   isActive
-                    ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-500'
-                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                    ? "bg-primary-50 text-primary-600 dark:bg-gray-700 dark:text-white"
+                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 )}
               >
                 <Icon className="w-5 h-5" />
@@ -132,11 +131,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               {user?.rol.toLowerCase()}
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={logout}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={logout} className="w-full">
             <LogOut className="w-4 h-4 mr-2" />
             Cerrar Sesión
           </Button>
@@ -175,9 +170,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         </header>
 
         {/* Contenido */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );

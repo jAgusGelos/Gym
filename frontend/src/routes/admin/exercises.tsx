@@ -1,51 +1,37 @@
 import { useState } from 'react';
+import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { useExercises, useCreateExercise, useUpdateExercise, useDeleteExercise } from '../../hooks/useExercises';
-import { Button, Card, CardContent, Input, Loading, Modal } from '../../components/ui';
+import { Button, Card, CardContent, Input, Modal, DataTable } from '../../components/ui';
 import { ExerciseForm } from '../../components/forms/ExerciseForm';
 import { useToast } from '../../stores/toastStore';
-import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, Dumbbell } from 'lucide-react';
-import { Exercise, ExerciseCategory, DifficultyLevel } from '../../types/exercise.types';
+import { Plus, Edit, Trash2, Dumbbell } from 'lucide-react';
+import { Exercise, MuscleGroup, DifficultyLevel } from '../../types/workout.types';
 
 export const ExercisesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState<ExerciseCategory | 'all'>('all');
-  const [filterDifficulty, setFilterDifficulty] = useState<DifficultyLevel | 'all'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
-  const { data: exercisesData, isLoading } = useExercises(1, 100);
+  const { data: exercisesData, isLoading } = useExercises(
+    pagination.pageIndex + 1,
+    pagination.pageSize
+  );
   const createExercise = useCreateExercise();
   const updateExercise = useUpdateExercise();
   const deleteExercise = useDeleteExercise();
   const toast = useToast();
 
-  const filteredExercises = exercisesData?.data.filter((exercise) => {
-    const matchesSearch =
-      exercise.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exercise.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesCategory =
-      filterCategory === 'all' || exercise.categoria === filterCategory;
-
-    const matchesDifficulty =
-      filterDifficulty === 'all' || exercise.nivelDificultad === filterDifficulty;
-
-    return matchesSearch && matchesCategory && matchesDifficulty;
-  });
-
-  const handleToggleStatus = (exerciseId: string, currentStatus: boolean) => {
-    updateExercise.mutate({
-      id: exerciseId,
-      data: { activo: !currentStatus },
-    }, {
-      onSuccess: () => {
-        toast.success(currentStatus ? 'Ejercicio desactivado' : 'Ejercicio activado');
-      },
-      onError: () => {
-        toast.error('Error al cambiar el estado del ejercicio');
-      },
-    });
-  };
+  // Filtro de búsqueda del lado del cliente (para la página actual)
+  const filteredExercises = searchTerm
+    ? exercisesData?.data.filter((exercise) =>
+        exercise.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exercise.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : exercisesData?.data;
 
   const handleDeleteExercise = (exerciseId: string, exerciseName: string) => {
     if (confirm(`¿Estás seguro de que querés eliminar "${exerciseName}"?`)) {
@@ -75,7 +61,7 @@ export const ExercisesPage = () => {
     try {
       await updateExercise.mutateAsync({
         id: editingExercise.id,
-        data,
+        ...data,
       });
       setIsModalOpen(false);
       setEditingExercise(null);
@@ -100,41 +86,120 @@ export const ExercisesPage = () => {
     setEditingExercise(null);
   };
 
-  const getCategoryColor = (category: ExerciseCategory) => {
-    const colors = {
-      [ExerciseCategory.FUERZA]: 'bg-red-100 text-red-800',
-      [ExerciseCategory.CARDIO]: 'bg-blue-100 text-blue-800',
-      [ExerciseCategory.FLEXIBILIDAD]: 'bg-purple-100 text-purple-800',
-      [ExerciseCategory.MOVILIDAD]: 'bg-green-100 text-green-800',
-      [ExerciseCategory.FUNCIONAL]: 'bg-yellow-100 text-yellow-800',
+  const getMuscleGroupLabel = (group: MuscleGroup): string => {
+    const labels: Record<MuscleGroup, string> = {
+      [MuscleGroup.PECHO]: 'Pecho',
+      [MuscleGroup.ESPALDA]: 'Espalda',
+      [MuscleGroup.PIERNAS]: 'Piernas',
+      [MuscleGroup.HOMBROS]: 'Hombros',
+      [MuscleGroup.BRAZOS]: 'Brazos',
+      [MuscleGroup.CORE]: 'Core',
+      [MuscleGroup.CARDIO]: 'Cardio',
+      [MuscleGroup.CUERPO_COMPLETO]: 'Cuerpo Completo',
     };
-    return colors[category] || 'bg-gray-100 text-gray-800';
+    return labels[group] || group;
   };
 
-  const getDifficultyColor = (difficulty: DifficultyLevel) => {
-    const colors = {
-      [DifficultyLevel.PRINCIPIANTE]: 'bg-green-100 text-green-800',
-      [DifficultyLevel.INTERMEDIO]: 'bg-yellow-100 text-yellow-800',
-      [DifficultyLevel.AVANZADO]: 'bg-red-100 text-red-800',
+  const getDifficultyLabel = (difficulty: DifficultyLevel): string => {
+    const labels: Record<DifficultyLevel, string> = {
+      [DifficultyLevel.PRINCIPIANTE]: 'Principiante',
+      [DifficultyLevel.INTERMEDIO]: 'Intermedio',
+      [DifficultyLevel.AVANZADO]: 'Avanzado',
     };
-    return colors[difficulty] || 'bg-gray-100 text-gray-800';
+    return labels[difficulty] || difficulty;
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loading />
-      </div>
-    );
-  }
+  const getDifficultyColor = (difficulty: DifficultyLevel): string => {
+    switch (difficulty) {
+      case DifficultyLevel.PRINCIPIANTE:
+        return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+      case DifficultyLevel.INTERMEDIO:
+        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case DifficultyLevel.AVANZADO:
+        return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  // Definición de columnas para la tabla
+  const columns: ColumnDef<Exercise>[] = [
+    {
+      accessorKey: 'nombre',
+      header: 'Ejercicio',
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium text-gray-900 dark:text-white">
+            {row.original.nombre}
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+            {row.original.descripcion}
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'grupoMuscular',
+      header: 'Grupo Muscular',
+      cell: ({ row }) => (
+        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded">
+          {getMuscleGroupLabel(row.original.grupoMuscular)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'nivelDificultad',
+      header: 'Dificultad',
+      cell: ({ row }) => (
+        <span className={`px-2 py-1 text-xs font-medium rounded ${getDifficultyColor(row.original.nivelDificultad)}`}>
+          {getDifficultyLabel(row.original.nivelDificultad)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'equipamiento',
+      header: 'Equipamiento',
+      cell: ({ row }) => (
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {row.original.equipamiento || '-'}
+        </div>
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Acciones',
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => openEditModal(row.original)}
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDeleteExercise(row.original.id, row.original.nombre)}
+            disabled={deleteExercise.isPending}
+          >
+            <Trash2 className="w-4 h-4 text-red-600" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Ejercicios</h1>
-          <p className="text-gray-600 mt-1">Administrá la biblioteca de ejercicios</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Gestión de Ejercicios
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {exercisesData?.total || 0} ejercicios registrados
+          </p>
         </div>
         <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4 mr-2" />
@@ -142,183 +207,56 @@ export const ExercisesPage = () => {
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      {/* Filtros */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
               <Input
-                placeholder="Buscar ejercicios..."
+                placeholder="Buscar por nombre o descripción..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="w-full"
               />
             </div>
-
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Todas las categorías</option>
-              <option value={ExerciseCategory.FUERZA}>Fuerza</option>
-              <option value={ExerciseCategory.CARDIO}>Cardio</option>
-              <option value={ExerciseCategory.FLEXIBILIDAD}>Flexibilidad</option>
-              <option value={ExerciseCategory.MOVILIDAD}>Movilidad</option>
-              <option value={ExerciseCategory.FUNCIONAL}>Funcional</option>
-            </select>
-
-            <select
-              value={filterDifficulty}
-              onChange={(e) => setFilterDifficulty(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Todas las dificultades</option>
-              <option value={DifficultyLevel.PRINCIPIANTE}>Principiante</option>
-              <option value={DifficultyLevel.INTERMEDIO}>Intermedio</option>
-              <option value={DifficultyLevel.AVANZADO}>Avanzado</option>
-            </select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total de Ejercicios</p>
-                <p className="text-2xl font-bold text-gray-900">{exercisesData?.total || 0}</p>
-              </div>
-              <Dumbbell className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Tabla de ejercicios */}
+      <DataTable
+        columns={columns}
+        data={filteredExercises || []}
+        pageCount={exercisesData?.totalPages || 0}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        isLoading={isLoading}
+        manualPagination={true}
+      />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Activos</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {exercisesData?.data.filter(e => e.activo).length || 0}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Inactivos</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {exercisesData?.data.filter(e => !e.activo).length || 0}
-                </p>
-              </div>
-              <XCircle className="w-8 h-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Exercises Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredExercises?.map((exercise) => (
-          <Card key={exercise.id}>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{exercise.nombre}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                      {exercise.descripcion}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-2">
-                    <button
-                      onClick={() => handleToggleStatus(exercise.id, exercise.activo)}
-                      className={`p-1 rounded ${
-                        exercise.activo ? 'text-green-600' : 'text-gray-400'
-                      }`}
-                      title={exercise.activo ? 'Activo' : 'Inactivo'}
-                    >
-                      {exercise.activo ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(exercise.categoria)}`}>
-                    {exercise.categoria}
-                  </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(exercise.nivelDificultad)}`}>
-                    {exercise.nivelDificultad}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-1">
-                  {exercise.grupoMuscular.map((muscle) => (
-                    <span
-                      key={muscle}
-                      className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                    >
-                      {muscle}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditModal(exercise)}
-                    className="flex-1"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteExercise(exercise.id, exercise.nombre)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredExercises?.length === 0 && (
-        <div className="text-center py-12">
-          <Dumbbell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">No se encontraron ejercicios</p>
-        </div>
-      )}
-
-      {/* Modal */}
+      {/* Modal de crear/editar ejercicio */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
         title={editingExercise ? 'Editar Ejercicio' : 'Nuevo Ejercicio'}
+        size="lg"
       >
         <ExerciseForm
           onSubmit={editingExercise ? handleEditExercise : handleCreateExercise}
           onCancel={closeModal}
-          isLoading={createExercise.isPending || updateExercise.isPending}
-          initialData={editingExercise || undefined}
+          isLoading={editingExercise ? updateExercise.isPending : createExercise.isPending}
+          initialData={editingExercise ? {
+            nombre: editingExercise.nombre,
+            descripcion: editingExercise.descripcion,
+            grupoMuscular: editingExercise.grupoMuscular,
+            equipamiento: editingExercise.equipamiento || '',
+            nivelDificultad: editingExercise.nivelDificultad,
+            videoUrl: editingExercise.videoUrl || '',
+            imagenUrl: editingExercise.imagenUrl || '',
+          } : undefined}
           isEdit={!!editingExercise}
         />
       </Modal>
     </div>
   );
 };
-
-export default ExercisesPage;

@@ -1,12 +1,23 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
-import { Membership, MembershipStatus } from '../memberships/entities/membership.entity';
+import {
+  Membership,
+  MembershipStatus,
+} from '../memberships/entities/membership.entity';
 import { NotificationsService } from '../notifications/notifications.service';
-import { format, addDays, differenceInDays } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  NotificationPriority,
+  NotificationType,
+} from 'src/notifications/entities/notification.entity';
+import {
+  ensureLocalDate,
+  combineDateAndTime,
+} from '../common/utils/date.utils';
 
 @Injectable()
 export class RemindersService {
@@ -41,32 +52,38 @@ export class RemindersService {
           enListaEspera: false,
           reminder24hSent: false,
         },
-        relations: ['class', 'user'],
+        relations: ['class', 'user', 'schedule'],
       });
 
       // Filtrar por rango de fecha
-      const bookingsToRemind = bookings.filter((booking) => {
-        const classDate = new Date(booking.class.fechaHoraInicio);
-        return classDate >= start && classDate <= end;
+      const bookingsToRemind = (bookings || []).filter((booking) => {
+        const classDateTime = combineDateAndTime(
+          booking.classDate,
+          booking.schedule?.startTime || '00:00',
+        );
+        return classDateTime >= start && classDateTime <= end;
       });
 
-      this.logger.log(`Encontradas ${bookingsToRemind.length} reservas para recordatorio de 24h`);
+      this.logger.log(
+        `Encontradas ${bookingsToRemind.length} reservas para recordatorio de 24h`,
+      );
 
       // Enviar notificaciones
       for (const booking of bookingsToRemind) {
         try {
           const fechaClase = format(
-            new Date(booking.class.fechaHoraInicio),
-            "dd 'de' MMMM 'a las' HH:mm",
+            ensureLocalDate(booking.classDate),
+            "dd 'de' MMMM",
             { locale: es },
           );
+          const horaClase = booking.schedule?.startTime || '';
 
           await this.notificationsService.create({
             userId: booking.userId,
-            type: 'CLASS_REMINDER',
-            priority: 'HIGH',
+            type: NotificationType.CLASS_REMINDER,
+            priority: NotificationPriority.HIGH,
             title: 'Recordatorio de Clase',
-            message: `Recordá que mañana tenés ${booking.class.nombre} el ${fechaClase}. ¡Te esperamos!`,
+            message: `Recordá que mañana tenés ${booking.class.nombre} el ${fechaClase} a las ${horaClase}. ¡Te esperamos!`,
             actionUrl: '/classes',
             actionLabel: 'Ver Mis Reservas',
           });
@@ -112,32 +129,33 @@ export class RemindersService {
           enListaEspera: false,
           reminder2hSent: false,
         },
-        relations: ['class', 'user'],
+        relations: ['class', 'user', 'schedule'],
       });
 
       // Filtrar por rango de fecha
       const bookingsToRemind = bookings.filter((booking) => {
-        const classDate = new Date(booking.class.fechaHoraInicio);
-        return classDate >= start && classDate <= end;
+        const classDateTime = combineDateAndTime(
+          booking.classDate,
+          booking.schedule?.startTime || '00:00',
+        );
+        return classDateTime >= start && classDateTime <= end;
       });
 
-      this.logger.log(`Encontradas ${bookingsToRemind.length} reservas para recordatorio de 2h`);
+      this.logger.log(
+        `Encontradas ${bookingsToRemind.length} reservas para recordatorio de 2h`,
+      );
 
       // Enviar notificaciones
       for (const booking of bookingsToRemind) {
         try {
-          const fechaClase = format(
-            new Date(booking.class.fechaHoraInicio),
-            "HH:mm",
-            { locale: es },
-          );
+          const horaClase = booking.schedule?.startTime || '';
 
           await this.notificationsService.create({
             userId: booking.userId,
-            type: 'CLASS_REMINDER',
-            priority: 'URGENT',
+            type: NotificationType.CLASS_REMINDER,
+            priority: NotificationPriority.URGENT,
             title: '¡Clase en 2 Horas!',
-            message: `Tu clase de ${booking.class.nombre} comienza a las ${fechaClase}. ¡No olvides asistir!`,
+            message: `Tu clase de ${booking.class.nombre} comienza a las ${horaClase}. ¡No olvides asistir!`,
             actionUrl: '/qr',
             actionLabel: 'Ver mi QR',
           });
@@ -180,16 +198,21 @@ export class RemindersService {
           estado: BookingStatus.RESERVADO,
           enListaEspera: false,
         },
-        relations: ['class'],
+        relations: ['class', 'schedule'],
       });
 
       // Filtrar clases que ya pasaron
       const expiredBookings = bookings.filter((booking) => {
-        const classEndDate = new Date(booking.class.fechaHoraFin);
+        const classEndDate = combineDateAndTime(
+          booking.classDate,
+          booking.schedule?.endTime || '00:00',
+        );
         return classEndDate < now;
       });
 
-      this.logger.log(`Encontradas ${expiredBookings.length} reservas para marcar como no asistidas`);
+      this.logger.log(
+        `Encontradas ${expiredBookings.length} reservas para marcar como no asistidas`,
+      );
 
       // Marcar como no asistidas
       for (const booking of expiredBookings) {
@@ -199,7 +222,10 @@ export class RemindersService {
 
           this.logger.log(`Booking ${booking.id} marcado como NO_ASISTIO`);
         } catch (error) {
-          this.logger.error(`Error marcando booking ${booking.id} como no asistido:`, error);
+          this.logger.error(
+            `Error marcando booking ${booking.id} como no asistido:`,
+            error,
+          );
         }
       }
 
@@ -231,26 +257,28 @@ export class RemindersService {
       // Filtrar membresías que vencen en 7 días
       const expiringMemberships = memberships.filter((membership) => {
         const daysUntilExpiry = differenceInDays(
-          new Date(membership.fechaVencimiento),
+          ensureLocalDate(membership.fechaVencimiento),
           today,
         );
         return daysUntilExpiry === 7;
       });
 
-      this.logger.log(`Encontradas ${expiringMemberships.length} membresías por vencer en 7 días`);
+      this.logger.log(
+        `Encontradas ${expiringMemberships.length} membresías por vencer en 7 días`,
+      );
 
       for (const membership of expiringMemberships) {
         try {
           const fechaVencimiento = format(
-            new Date(membership.fechaVencimiento),
+            ensureLocalDate(membership.fechaVencimiento),
             "dd 'de' MMMM",
             { locale: es },
           );
 
           await this.notificationsService.create({
             userId: membership.userId,
-            type: 'MEMBERSHIP_EXPIRING',
-            priority: 'HIGH',
+            type: NotificationType.MEMBERSHIP_EXPIRING,
+            priority: NotificationPriority.HIGH,
             title: 'Membresía por Vencer',
             message: `Tu membresía vence en 7 días el ${fechaVencimiento}. Renueva para seguir disfrutando de nuestros servicios.`,
             actionUrl: '/plans',
@@ -296,12 +324,13 @@ export class RemindersService {
 
       // Filtrar membresías que ya vencieron
       const expiredMemberships = memberships.filter((membership) => {
-        const expiryDate = new Date(membership.fechaVencimiento);
-        expiryDate.setHours(0, 0, 0, 0);
+        const expiryDate = ensureLocalDate(membership.fechaVencimiento);
         return expiryDate < today;
       });
 
-      this.logger.log(`Encontradas ${expiredMemberships.length} membresías vencidas`);
+      this.logger.log(
+        `Encontradas ${expiredMemberships.length} membresías vencidas`,
+      );
 
       for (const membership of expiredMemberships) {
         try {
@@ -310,10 +339,11 @@ export class RemindersService {
 
           await this.notificationsService.create({
             userId: membership.userId,
-            type: 'MEMBERSHIP_EXPIRED',
-            priority: 'HIGH',
+            type: NotificationType.MEMBERSHIP_EXPIRED,
+            priority: NotificationPriority.HIGH,
             title: 'Membresía Vencida',
-            message: 'Tu membresía ha vencido. Renueva para seguir disfrutando de nuestros servicios.',
+            message:
+              'Tu membresía ha vencido. Renueva para seguir disfrutando de nuestros servicios.',
             actionUrl: '/plans',
             actionLabel: 'Renovar Ahora',
           });

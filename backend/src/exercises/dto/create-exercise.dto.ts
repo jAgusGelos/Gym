@@ -1,4 +1,10 @@
-import { IsString, IsEnum, IsOptional, IsUrl, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsBoolean,
+  MaxLength,
+} from 'class-validator';
 import { MuscleGroup, DifficultyLevel } from '../entities/exercise.entity';
 
 export class CreateExerciseDto {
@@ -21,11 +27,15 @@ export class CreateExerciseDto {
   @IsOptional()
   nivelDificultad?: DifficultyLevel;
 
-  @IsUrl()
+  @IsString()
   @IsOptional()
   videoUrl?: string;
 
-  @IsUrl()
+  @IsString()
   @IsOptional()
   imagenUrl?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  trackeaPeso?: boolean;
 }

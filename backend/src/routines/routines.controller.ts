@@ -9,9 +9,10 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { RoutinesService, type RoutineFilters } from './routines.service';
+import { RoutinesService } from './routines.service';
 import { CreateRoutineDto } from './dto/create-routine.dto';
 import { UpdateRoutineDto } from './dto/update-routine.dto';
+import { RoutineFiltersDto } from './dto/routine-filters.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -34,11 +35,8 @@ export class RoutinesController {
   }
 
   @Get()
-  async findAll(
-    @Query() paginationDto: PaginationDto,
-    @Query() filters: RoutineFilters,
-  ) {
-    return this.routinesService.findAll(paginationDto, filters);
+  async findAll(@Query() filters: RoutineFiltersDto) {
+    return this.routinesService.findAll(filters, filters);
   }
 
   @Get('favorites')

@@ -20,7 +20,10 @@ export class TrainersController {
 
   // Obtener detalle de un cliente
   @Get('clients/:clientId')
-  async getClientDetails(@CurrentUser() user: User, @Param('clientId') clientId: string) {
+  async getClientDetails(
+    @CurrentUser() user: User,
+    @Param('clientId') clientId: string,
+  ) {
     return this.trainersService.getClientDetails(user.id, clientId);
   }
 
@@ -46,7 +49,10 @@ export class TrainersController {
 
   // Obtener progreso de un cliente
   @Get('workout-clients/:clientId/progress')
-  async getClientProgress(@CurrentUser() user: User, @Param('clientId') clientId: string) {
+  async getClientProgress(
+    @CurrentUser() user: User,
+    @Param('clientId') clientId: string,
+  ) {
     return this.trainersService.getClientProgress(user.id, clientId);
   }
 

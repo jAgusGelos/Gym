@@ -43,7 +43,7 @@ export const useMyBookings = () => {
   return useQuery({
     queryKey: ['my-bookings'],
     queryFn: async () => {
-      const response = await api.get<Booking[]>('/bookings/my-bookings');
+      const response = await api.get<PaginatedResult<Booking>>('/bookings/my-bookings');
       return response.data;
     },
   });

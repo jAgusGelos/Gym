@@ -1,4 +1,13 @@
-import { IsEnum, IsNotEmpty, IsString, IsOptional, IsNumber, IsDateString, Min, Max } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsDateString,
+  Min,
+  Max,
+} from 'class-validator';
 import { GoalType } from '../entities/user-goal.entity';
 
 export class CreateGoalDto {

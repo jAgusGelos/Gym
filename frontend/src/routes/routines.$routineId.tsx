@@ -63,8 +63,8 @@ function RoutineDetailPage() {
 
     try {
       await logWorkout.mutateAsync(logData);
-      alert('¡Entrenamiento registrado con éxito!');
-    } catch (error) {
+      alert('ï¿½Entrenamiento registrado con ï¿½xito!');
+    } catch {
       alert('Error al registrar el entrenamiento');
     }
   };
@@ -73,8 +73,8 @@ function RoutineDetailPage() {
     fuerza: 'Fuerza',
     hipertrofia: 'Hipertrofia',
     resistencia: 'Resistencia',
-    perdida_peso: 'Pérdida de Peso',
-    tonificacion: 'Tonificación',
+    perdida_peso: 'Pï¿½rdida de Peso',
+    tonificacion: 'Tonificaciï¿½n',
     funcional: 'Funcional',
   };
 
@@ -93,7 +93,7 @@ function RoutineDetailPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Link to="/routines" className="text-blue-600 hover:underline mb-2 inline-block">
-           Volver a Rutinas
+          ï¿½ Volver a Rutinas
         </Link>
         <h1 className="text-3xl font-bold mb-2">{routine.nombre}</h1>
         <p className="text-gray-600">{routine.descripcion}</p>
@@ -105,12 +105,12 @@ function RoutineDetailPage() {
           <p className="font-semibold">{goalLabels[routine.objetivo]}</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <p className="text-sm text-gray-600">Duración</p>
+          <p className="text-sm text-gray-600">Duraciï¿½n</p>
           <p className="font-semibold">{routine.duracionSemanas} semanas</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <p className="text-sm text-gray-600">Frecuencia</p>
-          <p className="font-semibold">{routine.diasPorSemana} días/semana</p>
+          <p className="font-semibold">{routine.diasPorSemana} dï¿½as/semana</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <p className="text-sm text-gray-600">Estado</p>

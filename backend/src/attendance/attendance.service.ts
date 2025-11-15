@@ -7,8 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Attendance, CheckInType } from './entities/attendance.entity';
-import { User } from '../users/entities/user.entity';
-import { Membership, MembershipStatus } from '../memberships/entities/membership.entity';
+import { User, UserStatus } from '../users/entities/user.entity';
+import {
+  Membership,
+  MembershipStatus,
+} from '../memberships/entities/membership.entity';
 import { CheckInDto, ManualCheckInDto, CheckOutDto } from './dto/check-in.dto';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
 
@@ -36,7 +39,7 @@ export class AttendanceService {
     }
 
     // Verificar que el usuario esté activo
-    if (user.estado !== 'ACTIVO') {
+    if (user.estado !== UserStatus.ACTIVO) {
       throw new UnauthorizedException('Usuario inactivo o suspendido');
     }
 
@@ -57,7 +60,7 @@ export class AttendanceService {
     const savedAttendance = await this.attendanceRepository.save(attendance);
 
     // Cargar la relación user para devolverla
-    return await this.attendanceRepository.findOne({
+    return await this.attendanceRepository.findOneOrFail({
       where: { id: savedAttendance.id },
       relations: ['user'],
     });
@@ -76,7 +79,7 @@ export class AttendanceService {
     }
 
     // Verificar que el usuario esté activo
-    if (user.estado !== 'ACTIVO') {
+    if (user.estado !== UserStatus.ACTIVO) {
       throw new UnauthorizedException('Usuario inactivo o suspendido');
     }
 
@@ -96,7 +99,7 @@ export class AttendanceService {
 
     const savedAttendance = await this.attendanceRepository.save(attendance);
 
-    return await this.attendanceRepository.findOne({
+    return await this.attendanceRepository.findOneOrFail({
       where: { id: savedAttendance.id },
       relations: ['user'],
     });
@@ -140,10 +143,13 @@ export class AttendanceService {
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
 
-      queryBuilder.andWhere('attendance.fecha >= :start AND attendance.fecha < :end', {
-        start: date,
-        end: nextDay,
-      });
+      queryBuilder.andWhere(
+        'attendance.fecha >= :start AND attendance.fecha < :end',
+        {
+          start: date,
+          end: nextDay,
+        },
+      );
     }
 
     if (filters?.userId) {
@@ -216,7 +222,9 @@ export class AttendanceService {
     });
 
     const totalAsistencias = attendances.length;
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+    );
     const promedioAsistenciasDiarias = Math.round(totalAsistencias / days);
 
     // Agrupar por fecha

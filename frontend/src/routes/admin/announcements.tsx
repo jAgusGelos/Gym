@@ -140,8 +140,8 @@ export const AnnouncementsPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Anuncios</h1>
-          <p className="text-gray-600 mt-1">Administrá las novedades y anuncios del gimnasio</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gestión de Anuncios</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Administrá las novedades y anuncios del gimnasio</p>
         </div>
         <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4 mr-2" />

@@ -1,13 +1,15 @@
 import {
   IsString,
-  IsUUID,
-  IsDateString,
   IsNumber,
   IsPositive,
   IsOptional,
   IsUrl,
   IsBoolean,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import { UpdateClassScheduleDto } from './class-schedule.dto';
 
 export class UpdateClassDto {
   @IsString()
@@ -18,28 +20,23 @@ export class UpdateClassDto {
   @IsOptional()
   descripcion?: string;
 
-  @IsUUID()
-  @IsOptional()
-  instructorId?: string;
-
-  @IsDateString()
-  @IsOptional()
-  fechaHoraInicio?: string;
-
-  @IsDateString()
-  @IsOptional()
-  fechaHoraFin?: string;
-
   @IsNumber()
   @IsPositive()
   @IsOptional()
   cupoMaximo?: number;
 
-  @IsUrl()
+  @Transform(({ value }) => value === '' || value === null ? null : value)
   @IsOptional()
-  imagenUrl?: string;
+  @IsString()
+  imagenUrl?: string | null;
 
   @IsBoolean()
   @IsOptional()
   activo?: boolean;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateClassScheduleDto)
+  schedules?: UpdateClassScheduleDto[];
 }

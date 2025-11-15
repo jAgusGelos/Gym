@@ -12,7 +12,11 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { WorkoutGoal } from '../entities/workout-routine.entity';
+import {
+  WorkoutGoal,
+  RoutineType,
+  DifficultyLevel,
+} from '../entities/workout-routine.entity';
 import { CreateRoutineExerciseDto } from './create-routine-exercise.dto';
 
 export class CreateWorkoutRoutineDto {
@@ -26,6 +30,14 @@ export class CreateWorkoutRoutineDto {
   @IsUUID()
   @IsOptional()
   clientId?: string;
+
+  @IsEnum(RoutineType)
+  @IsOptional()
+  tipo?: RoutineType;
+
+  @IsEnum(DifficultyLevel)
+  @IsOptional()
+  nivel?: DifficultyLevel;
 
   @IsInt()
   @Min(1)

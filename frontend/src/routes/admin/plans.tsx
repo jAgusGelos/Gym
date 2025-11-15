@@ -125,8 +125,8 @@ export const AdminPlansPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Planes</h1>
-          <p className="text-gray-600 mt-1">Administrá los planes de membresía</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gestión de Planes</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Administrá los planes de membresía</p>
         </div>
         <Button onClick={openCreateModal}>
           <Plus className="w-4 h-4 mr-2" />
@@ -140,10 +140,10 @@ export const AdminPlansPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Planes</p>
-                <p className="text-2xl font-bold text-gray-900">{plans?.length || 0}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Planes</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{plans?.length || 0}</p>
               </div>
-              <CreditCard className="w-8 h-8 text-blue-600" />
+              <CreditCard className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
           </CardContent>
         </Card>
@@ -152,12 +152,12 @@ export const AdminPlansPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Planes Activos</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Planes Activos</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {plans?.filter(p => p.activo).length || 0}
                 </p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
           </CardContent>
         </Card>
@@ -166,10 +166,10 @@ export const AdminPlansPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Ventas Totales</p>
-                <p className="text-2xl font-bold text-purple-600">{approvedPayments}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Ventas Totales</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{approvedPayments}</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-purple-600" />
+              <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
           </CardContent>
         </Card>
@@ -178,12 +178,12 @@ export const AdminPlansPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Ingresos</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Ingresos</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   ${totalRevenue.toLocaleString('es-AR')}
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
           </CardContent>
         </Card>

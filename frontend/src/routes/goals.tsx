@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { Plus, Target, Trophy, Filter } from 'lucide-react';
-import { useGoals, useCreateGoal, useUpdateGoal, useDeleteGoal, useRecalculateGoals } from '../hooks/useGoals';
-import { GoalCard } from '../components/goals/GoalCard';
-import { GoalForm } from '../components/goals/GoalForm';
-import { UserGoal, GoalStatus } from '../types/goal.types';
-import { useToastStore } from '../stores/toast.store';
+import { useState } from "react";
+import { Plus, Target, Trophy, Filter } from "lucide-react";
+import {
+  useGoals,
+  useCreateGoal,
+  useUpdateGoal,
+  useDeleteGoal,
+  useRecalculateGoals,
+} from "../hooks/useGoals";
+import { GoalCard } from "../components/goals/GoalCard";
+import { GoalForm } from "../components/goals/GoalForm";
+import { UserGoal, GoalStatus } from "../types/goal.types";
+import { useToastStore } from "../stores/toast.store";
 
 export const GoalsPage = () => {
   const { data: goals = [], isLoading } = useGoals();
@@ -16,15 +22,15 @@ export const GoalsPage = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<UserGoal | null>(null);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
 
   const handleCreate = async (data: any) => {
     try {
       await createGoal.mutateAsync(data);
-      showToast('Objetivo creado exitosamente', 'success');
+      showToast("Objetivo creado exitosamente", "success");
       setShowForm(false);
-    } catch (error) {
-      showToast('Error al crear objetivo', 'error');
+    } catch {
+      showToast("Error al crear objetivo", "error");
     }
   };
 
@@ -33,31 +39,31 @@ export const GoalsPage = () => {
 
     try {
       await updateGoal.mutateAsync({ id: editingGoal.id, data });
-      showToast('Objetivo actualizado exitosamente', 'success');
+      showToast("Objetivo actualizado exitosamente", "success");
       setEditingGoal(null);
       setShowForm(false);
-    } catch (error) {
-      showToast('Error al actualizar objetivo', 'error');
+    } catch {
+      showToast("Error al actualizar objetivo", "error");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este objetivo?')) return;
+    if (!confirm("¿Estás seguro de eliminar este objetivo?")) return;
 
     try {
       await deleteGoal.mutateAsync(id);
-      showToast('Objetivo eliminado exitosamente', 'success');
-    } catch (error) {
-      showToast('Error al eliminar objetivo', 'error');
+      showToast("Objetivo eliminado exitosamente", "success");
+    } catch {
+      showToast("Error al eliminar objetivo", "error");
     }
   };
 
   const handleUpdateStatus = async (id: string, status: GoalStatus) => {
     try {
       await updateGoal.mutateAsync({ id, data: { estado: status } });
-      showToast('Estado actualizado exitosamente', 'success');
-    } catch (error) {
-      showToast('Error al actualizar estado', 'error');
+      showToast("Estado actualizado exitosamente", "success");
+    } catch {
+      showToast("Error al actualizar estado", "error");
     }
   };
 
@@ -74,20 +80,22 @@ export const GoalsPage = () => {
   const handleRecalculate = async () => {
     try {
       await recalculate.mutateAsync();
-      showToast('Progreso recalculado exitosamente', 'success');
-    } catch (error) {
-      showToast('Error al recalcular progreso', 'error');
+      showToast("Progreso recalculado exitosamente", "success");
+    } catch {
+      showToast("Error al recalcular progreso", "error");
     }
   };
 
   const filteredGoals = goals.filter((goal) => {
-    if (filter === 'active') return goal.estado === GoalStatus.ACTIVO;
-    if (filter === 'completed') return goal.estado === GoalStatus.COMPLETADO;
+    if (filter === "active") return goal.estado === GoalStatus.ACTIVO;
+    if (filter === "completed") return goal.estado === GoalStatus.COMPLETADO;
     return true;
   });
 
   const activeGoals = goals.filter((g) => g.estado === GoalStatus.ACTIVO);
-  const completedGoals = goals.filter((g) => g.estado === GoalStatus.COMPLETADO);
+  const completedGoals = goals.filter(
+    (g) => g.estado === GoalStatus.COMPLETADO
+  );
 
   if (isLoading) {
     return (
@@ -110,7 +118,9 @@ export const GoalsPage = () => {
               <Target className="w-8 h-8" />
               Mis Objetivos
             </h1>
-            <p className="text-primary-100 mt-1">Configura y alcanza tus metas</p>
+            <p className="text-primary-100 mt-1">
+              Configura y alcanza tus metas
+            </p>
           </div>
           <div className="flex gap-2">
             <button
@@ -118,7 +128,9 @@ export const GoalsPage = () => {
               disabled={recalculate.isPending}
               className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
             >
-              {recalculate.isPending ? 'Recalculando...' : 'Actualizar Progreso'}
+              {recalculate.isPending
+                ? "Recalculando..."
+                : "Actualizar Progreso"}
             </button>
             <button
               onClick={() => {
@@ -158,31 +170,31 @@ export const GoalsPage = () => {
         <div className="flex items-center gap-2">
           <Filter className="w-5 h-5 text-gray-500" />
           <button
-            onClick={() => setFilter('all')}
+            onClick={() => setFilter("all")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'all'
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              filter === "all"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             Todos ({goals.length})
           </button>
           <button
-            onClick={() => setFilter('active')}
+            onClick={() => setFilter("active")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'active'
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              filter === "active"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             Activos ({activeGoals.length})
           </button>
           <button
-            onClick={() => setFilter('completed')}
+            onClick={() => setFilter("completed")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'completed'
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              filter === "completed"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             Completados ({completedGoals.length})
@@ -195,7 +207,7 @@ export const GoalsPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              {editingGoal ? 'Editar Objetivo' : 'Nuevo Objetivo'}
+              {editingGoal ? "Editar Objetivo" : "Nuevo Objetivo"}
             </h2>
             <GoalForm
               goal={editingGoal || undefined}
@@ -213,11 +225,11 @@ export const GoalsPage = () => {
           <div className="text-center py-12">
             <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {filter === 'all'
-                ? 'No tienes objetivos aún'
-                : filter === 'active'
-                ? 'No tienes objetivos activos'
-                : 'No has completado objetivos aún'}
+              {filter === "all"
+                ? "No tienes objetivos aún"
+                : filter === "active"
+                ? "No tienes objetivos activos"
+                : "No has completado objetivos aún"}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6">
               Crea tu primer objetivo y comienza a alcanzar tus metas

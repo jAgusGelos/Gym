@@ -1,23 +1,31 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
-import { Calendar, TrendingUp, CheckCircle, XCircle, AlertCircle, Award, ArrowLeft } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+  Calendar,
+  TrendingUp,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Award,
+  ArrowLeft,
+} from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   useBookingHistory,
   useAttendanceStats,
   useMonthlyAttendance,
-} from '../hooks/useClasses';
+} from "../hooks/useClasses";
 
-export const Route = createFileRoute('/classes/history')({
-  component: ClassHistoryPage,
-});
-
-function ClassHistoryPage() {
+export function ClassHistoryPage() {
   const [page, setPage] = useState(1);
-  const { data: history, isLoading: loadingHistory } = useBookingHistory(page, 10);
+  const { data: history, isLoading: loadingHistory } = useBookingHistory(
+    page,
+    10
+  );
   const { data: stats, isLoading: loadingStats } = useAttendanceStats();
-  const { data: monthlyData, isLoading: loadingMonthly } = useMonthlyAttendance(6);
+  const { data: monthlyData, isLoading: loadingMonthly } =
+    useMonthlyAttendance(6);
 
   if (loadingHistory || loadingStats || loadingMonthly) {
     return (
@@ -42,8 +50,12 @@ function ClassHistoryPage() {
             <Calendar className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Historial de Clases</h1>
-            <p className="text-sm text-gray-600">Tu registro de asistencia y estadísticas</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Historial de Clases
+            </h1>
+            <p className="text-sm text-gray-600">
+              Tu registro de asistencia y estadísticas
+            </p>
           </div>
         </div>
       </div>
@@ -58,7 +70,9 @@ function ClassHistoryPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Asistidas</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.attendedClasses}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.attendedClasses}
+                </p>
               </div>
             </div>
           </div>
@@ -70,7 +84,9 @@ function ClassHistoryPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Tasa de Asistencia</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.attendanceRate}%</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.attendanceRate}%
+                </p>
               </div>
             </div>
           </div>
@@ -82,7 +98,9 @@ function ClassHistoryPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Racha Actual</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.currentStreak} días</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.currentStreak} días
+                </p>
               </div>
             </div>
           </div>
@@ -94,7 +112,9 @@ function ClassHistoryPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Canceladas</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.canceledClasses}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.canceledClasses}
+                </p>
               </div>
             </div>
           </div>
@@ -107,8 +127,12 @@ function ClassHistoryPage() {
           <div className="flex items-center gap-4">
             <Award className="w-12 h-12 text-purple-200" />
             <div>
-              <p className="text-purple-100 text-sm mb-1">Instructor Favorito</p>
-              <p className="text-2xl font-bold">{stats.favoriteInstructor.nombre}</p>
+              <p className="text-purple-100 text-sm mb-1">
+                Instructor Favorito
+              </p>
+              <p className="text-2xl font-bold">
+                {stats.favoriteInstructor.nombre}
+              </p>
               <p className="text-purple-100 text-sm">
                 {stats.favoriteInstructor.classCount} clases asistidas
               </p>
@@ -130,13 +154,17 @@ function ClassHistoryPage() {
       {/* History List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Historial Detallado</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Historial Detallado
+          </h2>
         </div>
 
         {!history || history.data.length === 0 ? (
           <div className="p-12 text-center">
             <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay historial</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No hay historial
+            </h3>
             <p className="text-gray-600">
               Aún no has asistido a ninguna clase. ¡Reserva tu primera clase!
             </p>
@@ -151,19 +179,22 @@ function ClassHistoryPage() {
           <>
             <div className="divide-y divide-gray-200">
               {history.data.map((booking: any) => (
-                <div key={booking.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div
+                  key={booking.id}
+                  className="p-6 hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         {getStatusIcon(booking.estado)}
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {booking.class?.nombre || 'Clase'}
+                            {booking.class?.nombre || "Clase"}
                           </h3>
                           <p className="text-sm text-gray-600">
                             {booking.class?.instructor
                               ? `con ${booking.class.instructor.nombre} ${booking.class.instructor.apellido}`
-                              : 'Sin instructor'}
+                              : "Sin instructor"}
                           </p>
                         </div>
                       </div>
@@ -175,7 +206,7 @@ function ClassHistoryPage() {
                             format(
                               new Date(booking.class.fechaHoraInicio),
                               "d 'de' MMMM, yyyy 'a las' HH:mm",
-                              { locale: es },
+                              { locale: es }
                             )}
                         </div>
                       </div>
@@ -184,7 +215,7 @@ function ClassHistoryPage() {
                     <div>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(
-                          booking.estado,
+                          booking.estado
                         )}`}
                       >
                         {getStatusText(booking.estado)}
@@ -209,7 +240,9 @@ function ClassHistoryPage() {
                   Página {page} de {history.totalPages}
                 </span>
                 <button
-                  onClick={() => setPage((p) => Math.min(history.totalPages, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(history.totalPages, p + 1))
+                  }
                   disabled={page === history.totalPages}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -226,19 +259,19 @@ function ClassHistoryPage() {
 
 function getStatusIcon(estado: string) {
   switch (estado) {
-    case 'ASISTIDO':
+    case "ASISTIDO":
       return (
         <div className="p-2 bg-green-100 rounded-lg">
           <CheckCircle className="w-5 h-5 text-green-600" />
         </div>
       );
-    case 'CANCELADO':
+    case "CANCELADO":
       return (
         <div className="p-2 bg-red-100 rounded-lg">
           <XCircle className="w-5 h-5 text-red-600" />
         </div>
       );
-    case 'NO_ASISTIDO':
+    case "NO_ASISTIDO":
       return (
         <div className="p-2 bg-yellow-100 rounded-lg">
           <AlertCircle className="w-5 h-5 text-yellow-600" />
@@ -255,27 +288,27 @@ function getStatusIcon(estado: string) {
 
 function getStatusBadgeColor(estado: string) {
   switch (estado) {
-    case 'ASISTIDO':
-      return 'bg-green-100 text-green-700';
-    case 'CANCELADO':
-      return 'bg-red-100 text-red-700';
-    case 'NO_ASISTIDO':
-      return 'bg-yellow-100 text-yellow-700';
+    case "ASISTIDO":
+      return "bg-green-100 text-green-700";
+    case "CANCELADO":
+      return "bg-red-100 text-red-700";
+    case "NO_ASISTIDO":
+      return "bg-yellow-100 text-yellow-700";
     default:
-      return 'bg-gray-100 text-gray-700';
+      return "bg-gray-100 text-gray-700";
   }
 }
 
 function getStatusText(estado: string) {
   switch (estado) {
-    case 'ASISTIDO':
-      return 'Asistida';
-    case 'CANCELADO':
-      return 'Cancelada';
-    case 'NO_ASISTIDO':
-      return 'No Asistida';
+    case "ASISTIDO":
+      return "Asistida";
+    case "CANCELADO":
+      return "Cancelada";
+    case "NO_ASISTIDO":
+      return "No Asistida";
     default:
-      return 'Desconocido';
+      return "Desconocido";
   }
 }
 
@@ -297,8 +330,21 @@ function MonthlyChart({ data }: { data: any[] }) {
           const value = Math.round(maxValue * percent);
           return (
             <g key={percent}>
-              <line x1="0" y1={y} x2={chartWidth} y2={y} stroke="#e5e7eb" strokeWidth="1" />
-              <text x="-5" y={y + 5} fontSize="12" fill="#6b7280" textAnchor="end">
+              <line
+                x1="0"
+                y1={y}
+                x2={chartWidth}
+                y2={y}
+                stroke="#e5e7eb"
+                strokeWidth="1"
+              />
+              <text
+                x="-5"
+                y={y + 5}
+                fontSize="12"
+                fill="#6b7280"
+                textAnchor="end"
+              >
                 {value}
               </text>
             </g>
@@ -349,7 +395,21 @@ function MonthlyChart({ data }: { data: any[] }) {
 }
 
 function getMonthName(monthKey: string) {
-  const [year, month] = monthKey.split('-');
-  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [year, month] = monthKey.split("-");
+  const months = [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
   return months[parseInt(month) - 1];
 }

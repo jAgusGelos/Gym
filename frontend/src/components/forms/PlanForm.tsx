@@ -1,19 +1,21 @@
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button, Input, Select } from '../ui';
-import { MembershipType } from '../../types/membership.types';
-import { Plus, X } from 'lucide-react';
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button, Input, Select } from "../ui";
+import { MembershipType } from "../../types/membership.types";
+import { Plus, X } from "lucide-react";
 
 const planSchema = z.object({
-  nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  descripcion: z.string().min(10, 'La descripción debe tener al menos 10 caracteres'),
+  nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+  descripcion: z
+    .string()
+    .min(10, "La descripción debe tener al menos 10 caracteres"),
   tipo: z.nativeEnum(MembershipType),
-  precio: z.number().min(1, 'El precio debe ser mayor a 0'),
-  duracionDias: z.number().min(1, 'La duración debe ser mayor a 0'),
-  beneficios: z.array(z.string()).min(1, 'Agrega al menos un beneficio'),
+  precio: z.number().min(1, "El precio debe ser mayor a 0"),
+  duracionDias: z.number().min(1, "La duración debe ser mayor a 0"),
+  beneficios: z.array(z.string()).min(1, "Agrega al menos un beneficio"),
   destacado: z.boolean(),
-  orden: z.number().min(0, 'El orden debe ser mayor o igual a 0'),
+  orden: z.number().min(0, "El orden debe ser mayor o igual a 0"),
 });
 
 type PlanFormData = z.infer<typeof planSchema>;
@@ -26,7 +28,13 @@ interface PlanFormProps {
   isEdit?: boolean;
 }
 
-export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }: PlanFormProps) => {
+export const PlanForm = ({
+  onSubmit,
+  onCancel,
+  isLoading,
+  initialData,
+  isEdit,
+}: PlanFormProps) => {
   const {
     register,
     handleSubmit,
@@ -36,7 +44,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
     resolver: zodResolver(planSchema),
     defaultValues: {
       ...initialData,
-      beneficios: initialData?.beneficios || [''],
+      beneficios: initialData?.beneficios || [""],
       destacado: initialData?.destacado ?? false,
       orden: initialData?.orden ?? 0,
     },
@@ -45,30 +53,15 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
   const { fields, append, remove } = useFieldArray({
     control,
     // @ts-expect-error - useFieldArray type issues with strict mode
-    name: 'beneficios',
+    name: "beneficios",
   });
 
   const tipoOptions = [
-    { value: MembershipType.MENSUAL, label: 'Mensual (30 días)' },
-    { value: MembershipType.TRIMESTRAL, label: 'Trimestral (90 días)' },
-    { value: MembershipType.SEMESTRAL, label: 'Semestral (180 días)' },
-    { value: MembershipType.ANUAL, label: 'Anual (365 días)' },
+    { value: MembershipType.MENSUAL, label: "Mensual (30 días)" },
+    { value: MembershipType.TRIMESTRAL, label: "Trimestral (90 días)" },
+    { value: MembershipType.SEMESTRAL, label: "Semestral (180 días)" },
+    { value: MembershipType.ANUAL, label: "Anual (365 días)" },
   ];
-
-  const getDuracionPorTipo = (tipo: MembershipType) => {
-    switch (tipo) {
-      case MembershipType.MENSUAL:
-        return 30;
-      case MembershipType.TRIMESTRAL:
-        return 90;
-      case MembershipType.SEMESTRAL:
-        return 180;
-      case MembershipType.ANUAL:
-        return 365;
-      default:
-        return 30;
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -76,7 +69,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
         label="Nombre del Plan *"
         placeholder="Plan Mensual"
         error={errors.nombre?.message}
-        {...register('nombre')}
+        {...register("nombre")}
       />
 
       <div>
@@ -84,13 +77,15 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
           Descripción *
         </label>
         <textarea
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
           rows={3}
           placeholder="Descripción del plan..."
-          {...register('descripcion')}
+          {...register("descripcion")}
         />
         {errors.descripcion && (
-          <p className="text-sm text-red-600 mt-1">{errors.descripcion.message}</p>
+          <p className="text-sm text-red-600 mt-1">
+            {errors.descripcion.message}
+          </p>
         )}
       </div>
 
@@ -99,7 +94,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
           label="Tipo de Membresía *"
           options={tipoOptions}
           error={errors.tipo?.message}
-          {...register('tipo')}
+          {...register("tipo")}
         />
 
         <Input
@@ -107,7 +102,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
           type="number"
           placeholder="15000"
           error={errors.precio?.message}
-          {...register('precio', { valueAsNumber: true })}
+          {...register("precio", { valueAsNumber: true })}
         />
       </div>
 
@@ -117,7 +112,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
         placeholder="30"
         helperText="Ej: 30 para mensual, 90 para trimestral, 365 para anual"
         error={errors.duracionDias?.message}
-        {...register('duracionDias', { valueAsNumber: true })}
+        {...register("duracionDias", { valueAsNumber: true })}
       />
 
       <div>
@@ -149,14 +144,16 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => append('')}
+          onClick={() => append("")}
           className="mt-2"
         >
           <Plus className="w-4 h-4 mr-1" />
           Agregar Beneficio
         </Button>
         {errors.beneficios && (
-          <p className="text-sm text-red-600 mt-1">{errors.beneficios.message}</p>
+          <p className="text-sm text-red-600 mt-1">
+            {errors.beneficios.message}
+          </p>
         )}
       </div>
 
@@ -166,9 +163,12 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
             type="checkbox"
             id="destacado"
             className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-            {...register('destacado')}
+            {...register("destacado")}
           />
-          <label htmlFor="destacado" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="destacado"
+            className="text-sm font-medium text-gray-700"
+          >
             Plan Destacado
           </label>
         </div>
@@ -179,7 +179,7 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
           placeholder="0"
           helperText="Menor número = aparece primero"
           error={errors.orden?.message}
-          {...register('orden', { valueAsNumber: true })}
+          {...register("orden", { valueAsNumber: true })}
         />
       </div>
 
@@ -192,12 +192,8 @@ export const PlanForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }:
         >
           Cancelar
         </Button>
-        <Button
-          type="submit"
-          className="flex-1"
-          isLoading={isLoading}
-        >
-          {isEdit ? 'Guardar Cambios' : 'Crear Plan'}
+        <Button type="submit" className="flex-1" isLoading={isLoading}>
+          {isEdit ? "Guardar Cambios" : "Crear Plan"}
         </Button>
       </div>
     </form>

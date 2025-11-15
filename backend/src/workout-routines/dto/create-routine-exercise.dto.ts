@@ -1,4 +1,12 @@
-import { IsUUID, IsString, IsInt, IsNumber, IsOptional, Min, Max, MaxLength } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Min,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateRoutineExerciseDto {
   @IsUUID()

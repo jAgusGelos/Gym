@@ -116,11 +116,7 @@ export class RoutinesService {
   async findOne(id: string): Promise<Routine> {
     const routine = await this.routineRepository.findOne({
       where: { id },
-      relations: [
-        'creador',
-        'ejercicios',
-        'ejercicios.exercise',
-      ],
+      relations: ['creador', 'ejercicios', 'ejercicios.exercise'],
       order: {
         ejercicios: {
           orden: 'ASC',

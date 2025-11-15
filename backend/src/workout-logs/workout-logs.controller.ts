@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { WorkoutLogsService } from './workout-logs.service';
 import { CreateWorkoutLogDto } from './dto/create-workout-log.dto';
 import { UpdateWorkoutLogDto } from './dto/update-workout-log.dto';
@@ -28,19 +39,29 @@ export class WorkoutLogsController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ) {
-    return this.workoutLogsService.findByDateRange(req.user.userId, startDate, endDate);
+    return this.workoutLogsService.findByDateRange(
+      req.user.userId,
+      startDate,
+      endDate,
+    );
   }
 
   // Obtener historial de un ejercicio
   @Get('exercise/:exerciseId/history')
   getExerciseHistory(@Request() req, @Param('exerciseId') exerciseId: string) {
-    return this.workoutLogsService.getExerciseHistory(req.user.userId, exerciseId);
+    return this.workoutLogsService.getExerciseHistory(
+      req.user.userId,
+      exerciseId,
+    );
   }
 
   // Obtener estadísticas de un ejercicio
   @Get('exercise/:exerciseId/stats')
   getExerciseStats(@Request() req, @Param('exerciseId') exerciseId: string) {
-    return this.workoutLogsService.getExerciseStats(req.user.userId, exerciseId);
+    return this.workoutLogsService.getExerciseStats(
+      req.user.userId,
+      exerciseId,
+    );
   }
 
   // Obtener gráfico de evolución de un ejercicio
@@ -77,8 +98,16 @@ export class WorkoutLogsController {
 
   // Actualizar un workout log
   @Patch(':id')
-  update(@Request() req, @Param('id') id: string, @Body() updateWorkoutLogDto: UpdateWorkoutLogDto) {
-    return this.workoutLogsService.update(id, req.user.userId, updateWorkoutLogDto);
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateWorkoutLogDto: UpdateWorkoutLogDto,
+  ) {
+    return this.workoutLogsService.update(
+      id,
+      req.user.userId,
+      updateWorkoutLogDto,
+    );
   }
 
   // Eliminar un workout log

@@ -1,4 +1,14 @@
-import { IsNotEmpty, IsUUID, IsDateString, IsOptional, IsString, IsInt, Min, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsUUID,
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateExerciseSetDto } from './create-exercise-set.dto';
 

@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
-import { Notification, NotificationType, NotificationPriority } from './entities/notification.entity';
+import {
+  Notification,
+  NotificationType,
+  NotificationPriority,
+} from './entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
 
@@ -13,8 +17,12 @@ export class NotificationsService {
   ) {}
 
   // Crear notificación
-  async create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
-    const notification = this.notificationRepository.create(createNotificationDto);
+  async create(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification> {
+    const notification = this.notificationRepository.create(
+      createNotificationDto,
+    );
     return this.notificationRepository.save(notification);
   }
 
@@ -157,7 +165,10 @@ export class NotificationsService {
 
   // ==================== HELPERS PARA CREAR NOTIFICACIONES ESPECÍFICAS ====================
 
-  async notifyClassReminder(userId: string, classData: any): Promise<Notification> {
+  async notifyClassReminder(
+    userId: string,
+    classData: any,
+  ): Promise<Notification> {
     return this.create({
       userId,
       type: NotificationType.CLASS_REMINDER,
@@ -170,7 +181,10 @@ export class NotificationsService {
     });
   }
 
-  async notifyMembershipExpiring(userId: string, daysRemaining: number): Promise<Notification> {
+  async notifyMembershipExpiring(
+    userId: string,
+    daysRemaining: number,
+  ): Promise<Notification> {
     return this.create({
       userId,
       type: NotificationType.MEMBERSHIP_EXPIRING,
@@ -229,7 +243,10 @@ export class NotificationsService {
     });
   }
 
-  async notifyNewRoutine(userId: string, routineName: string): Promise<Notification> {
+  async notifyNewRoutine(
+    userId: string,
+    routineName: string,
+  ): Promise<Notification> {
     return this.create({
       userId,
       type: NotificationType.NEW_ROUTINE,
@@ -241,7 +258,10 @@ export class NotificationsService {
     });
   }
 
-  async notifyWaitlistPromoted(userId: string, className: string): Promise<Notification> {
+  async notifyWaitlistPromoted(
+    userId: string,
+    className: string,
+  ): Promise<Notification> {
     return this.create({
       userId,
       type: NotificationType.WAITLIST_PROMOTED,

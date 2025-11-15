@@ -1,15 +1,19 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, X, Save, Dumbbell } from 'lucide-react';
-import { useCreateWorkoutLog } from '../hooks/useWorkoutLogs';
-import { useExercises } from '../hooks/useExercises';
-import { useToastStore } from '../stores/toastStore';
-import type { CreateWorkoutLogDto, CreateExerciseSetDto } from '../types/workout-log.types';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useForm, useFieldArray } from "react-hook-form";
+import { Plus, X, Save, Dumbbell } from "lucide-react";
+import { useCreateWorkoutLog } from "../hooks/useWorkoutLogs";
+import { useExercises } from "../hooks/useExercises";
+import { useToastStore } from "../stores/toastStore";
+import type {
+  CreateWorkoutLogDto,
+  CreateExerciseSetDto,
+} from "../types/workout-log.types";
 
-export const Route = createFileRoute('/workouts/new')({
+export const Route = createFileRoute("/workouts/new")({
   component: NewWorkoutPage,
 });
+
+export { NewWorkoutPage };
 
 interface WorkoutFormData {
   fecha: string;
@@ -29,7 +33,7 @@ interface WorkoutFormData {
 function NewWorkoutPage() {
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
-  const { data: exercises, isLoading: loadingExercises } = useExercises();
+  const { data: exercises } = useExercises();
   const createWorkoutLog = useCreateWorkoutLog();
 
   const {
@@ -37,20 +41,23 @@ function NewWorkoutPage() {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<WorkoutFormData>({
     defaultValues: {
-      fecha: new Date().toISOString().split('T')[0],
-      titulo: '',
+      fecha: new Date().toISOString().split("T")[0],
+      titulo: "",
       duracionMinutos: undefined,
       exercises: [],
     },
   });
 
-  const { fields: exerciseFields, append: addExercise, remove: removeExercise } = useFieldArray({
+  const {
+    fields: exerciseFields,
+    append: addExercise,
+    remove: removeExercise,
+  } = useFieldArray({
     control,
     // @ts-expect-error - useFieldArray type issues
-    name: 'exercises',
+    name: "exercises",
   });
 
   const onSubmit = async (data: WorkoutFormData) => {
@@ -73,22 +80,27 @@ function NewWorkoutPage() {
     const workoutData: CreateWorkoutLogDto = {
       fecha: data.fecha,
       titulo: data.titulo || undefined,
-      duracionMinutos: data.duracionMinutos ? Number(data.duracionMinutos) : undefined,
+      duracionMinutos: data.duracionMinutos
+        ? Number(data.duracionMinutos)
+        : undefined,
       sets,
     };
 
     try {
       await createWorkoutLog.mutateAsync(workoutData);
-      showToast('Entrenamiento registrado exitosamente', 'success');
-      navigate({ to: '/workouts' });
+      showToast("Entrenamiento registrado exitosamente", "success");
+      navigate({ to: "/workouts" });
     } catch (error: any) {
-      showToast(error.response?.data?.message || 'Error al registrar entrenamiento', 'error');
+      showToast(
+        error.response?.data?.message || "Error al registrar entrenamiento",
+        "error"
+      );
     }
   };
 
   const handleAddExercise = () => {
     addExercise({
-      exerciseId: '',
+      exerciseId: "",
       sets: [{ setNumber: 1, peso: 0, repeticiones: 0, rir: undefined }],
     });
   };
@@ -102,8 +114,12 @@ function NewWorkoutPage() {
             <Dumbbell className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Registrar Entrenamiento</h1>
-            <p className="text-sm text-gray-600">Registra tu sesión de entrenamiento</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Registrar Entrenamiento
+            </h1>
+            <p className="text-sm text-gray-600">
+              Registra tu sesión de entrenamiento
+            </p>
           </div>
         </div>
       </div>
@@ -112,7 +128,9 @@ function NewWorkoutPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Datos generales */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Información General</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Información General
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -120,11 +138,13 @@ function NewWorkoutPage() {
               </label>
               <input
                 type="date"
-                {...register('fecha', { required: 'La fecha es requerida' })}
+                {...register("fecha", { required: "La fecha es requerida" })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
               {errors.fecha && (
-                <p className="mt-1 text-sm text-red-600">{errors.fecha.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.fecha.message}
+                </p>
               )}
             </div>
 
@@ -134,7 +154,7 @@ function NewWorkoutPage() {
               </label>
               <input
                 type="text"
-                {...register('titulo')}
+                {...register("titulo")}
                 placeholder="ej: Día de pierna"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
@@ -146,7 +166,7 @@ function NewWorkoutPage() {
               </label>
               <input
                 type="number"
-                {...register('duracionMinutos')}
+                {...register("duracionMinutos")}
                 placeholder="60"
                 min="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -173,7 +193,9 @@ function NewWorkoutPage() {
             <div className="text-center py-8 text-gray-500">
               <Dumbbell className="w-12 h-12 mx-auto mb-3 text-gray-400" />
               <p>No hay ejercicios agregados</p>
-              <p className="text-sm">Haz clic en "Agregar Ejercicio" para comenzar</p>
+              <p className="text-sm">
+                Haz clic en "Agregar Ejercicio" para comenzar
+              </p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -196,7 +218,7 @@ function NewWorkoutPage() {
         <div className="flex gap-3 justify-end">
           <button
             type="button"
-            onClick={() => navigate({ to: '/workouts' })}
+            onClick={() => navigate({ to: "/workouts" })}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Cancelar
@@ -207,7 +229,9 @@ function NewWorkoutPage() {
             className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Save className="w-4 h-4" />
-            {createWorkoutLog.isPending ? 'Guardando...' : 'Guardar Entrenamiento'}
+            {createWorkoutLog.isPending
+              ? "Guardando..."
+              : "Guardar Entrenamiento"}
           </button>
         </div>
       </form>
@@ -232,9 +256,12 @@ function ExerciseSetForm({
   removeExercise,
   errors,
 }: ExerciseSetFormProps) {
-  const { fields: setFields, append: addSet, remove: removeSet } = useFieldArray({
+  const {
+    fields: setFields,
+    append: addSet,
+    remove: removeSet,
+  } = useFieldArray({
     control,
-    // @ts-expect-error - useFieldArray type issues
     name: `exercises.${exerciseIndex}.sets`,
   });
 
@@ -256,7 +283,7 @@ function ExerciseSetForm({
           </label>
           <select
             {...register(`exercises.${exerciseIndex}.exerciseId`, {
-              required: 'Selecciona un ejercicio',
+              required: "Selecciona un ejercicio",
             })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           >
@@ -298,17 +325,22 @@ function ExerciseSetForm({
         <div className="space-y-2">
           {setFields.map((field, setIndex) => (
             <div key={field.id} className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-600 w-6">{setIndex + 1}.</span>
+              <span className="text-sm font-medium text-gray-600 w-6">
+                {setIndex + 1}.
+              </span>
 
               <div className="flex-1">
                 <input
                   type="number"
                   step="0.5"
                   placeholder="Peso (kg)"
-                  {...register(`exercises.${exerciseIndex}.sets.${setIndex}.peso`, {
-                    required: true,
-                    min: 0,
-                  })}
+                  {...register(
+                    `exercises.${exerciseIndex}.sets.${setIndex}.peso`,
+                    {
+                      required: true,
+                      min: 0,
+                    }
+                  )}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -319,10 +351,13 @@ function ExerciseSetForm({
                 <input
                   type="number"
                   placeholder="Reps"
-                  {...register(`exercises.${exerciseIndex}.sets.${setIndex}.repeticiones`, {
-                    required: true,
-                    min: 1,
-                  })}
+                  {...register(
+                    `exercises.${exerciseIndex}.sets.${setIndex}.repeticiones`,
+                    {
+                      required: true,
+                      min: 1,
+                    }
+                  )}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -331,10 +366,13 @@ function ExerciseSetForm({
                 <input
                   type="number"
                   placeholder="RIR"
-                  {...register(`exercises.${exerciseIndex}.sets.${setIndex}.rir`, {
-                    min: 0,
-                    max: 10,
-                  })}
+                  {...register(
+                    `exercises.${exerciseIndex}.sets.${setIndex}.rir`,
+                    {
+                      min: 0,
+                      max: 10,
+                    }
+                  )}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>

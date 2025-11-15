@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { api } from '../services/api';
 import type {
   Exercise,
   CreateExerciseDto,
@@ -7,17 +7,28 @@ import type {
   DifficultyLevel,
 } from '../types/workout.types';
 
-const API_URL = 'http://localhost:3000/exercises';
+interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
-export function useExercises(grupoMuscular?: MuscleGroup, nivelDificultad?: DifficultyLevel) {
+export function useExercises(
+  page: number = 1,
+  limit: number = 20,
+  grupoMuscular?: MuscleGroup,
+  nivelDificultad?: DifficultyLevel
+) {
   return useQuery({
-    queryKey: ['exercises', grupoMuscular, nivelDificultad],
+    queryKey: ['exercises', page, limit, grupoMuscular, nivelDificultad],
     queryFn: async () => {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page, limit };
       if (grupoMuscular) params.grupoMuscular = grupoMuscular;
       if (nivelDificultad) params.nivelDificultad = nivelDificultad;
 
-      const { data } = await axios.get<Exercise[]>(API_URL, { params });
+      const { data } = await api.get<PaginatedResult<Exercise>>('/exercises', { params });
       return data;
     },
   });
@@ -27,7 +38,7 @@ export function useExercise(id: string) {
   return useQuery({
     queryKey: ['exercise', id],
     queryFn: async () => {
-      const { data } = await axios.get<Exercise>(`${API_URL}/${id}`);
+      const { data } = await api.get<Exercise>(`/exercises/${id}`);
       return data;
     },
     enabled: !!id,
@@ -38,7 +49,7 @@ export function useSearchExercises(searchTerm: string) {
   return useQuery({
     queryKey: ['exercises', 'search', searchTerm],
     queryFn: async () => {
-      const { data } = await axios.get<Exercise[]>(`${API_URL}/search`, {
+      const { data } = await api.get<Exercise[]>('/exercises/search', {
         params: { q: searchTerm },
       });
       return data;
@@ -52,7 +63,7 @@ export function useCreateExercise() {
 
   return useMutation({
     mutationFn: async (exerciseData: CreateExerciseDto) => {
-      const { data } = await axios.post<Exercise>(API_URL, exerciseData);
+      const { data } = await api.post<Exercise>('/exercises', exerciseData);
       return data;
     },
     onSuccess: () => {
@@ -66,7 +77,7 @@ export function useUpdateExercise() {
 
   return useMutation({
     mutationFn: async ({ id, ...exerciseData }: Partial<CreateExerciseDto> & { id: string }) => {
-      const { data } = await axios.patch<Exercise>(`${API_URL}/${id}`, exerciseData);
+      const { data } = await api.patch<Exercise>(`/exercises/${id}`, exerciseData);
       return data;
     },
     onSuccess: (data) => {
@@ -81,7 +92,7 @@ export function useDeleteExercise() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`${API_URL}/${id}`);
+      await api.delete(`/exercises/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercises'] });

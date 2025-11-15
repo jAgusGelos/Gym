@@ -7,15 +7,26 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, LessThan, MoreThan } from 'typeorm';
 import { Booking, BookingStatus } from './entities/booking.entity';
 import { Class } from '../classes/entities/class.entity';
+import { ClassSchedule } from '../classes/entities/class-schedule.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  NotificationPriority,
+  NotificationType,
+} from 'src/notifications/entities/notification.entity';
+import {
+  parseLocalDate,
+  combineDateAndTime,
+  isPast,
+  getHoursDifference,
+} from '../common/utils/date.utils';
 
 @Injectable()
 export class BookingsService {
@@ -24,6 +35,8 @@ export class BookingsService {
     private bookingRepository: Repository<Booking>,
     @InjectRepository(Class)
     private classRepository: Repository<Class>,
+    @InjectRepository(ClassSchedule)
+    private scheduleRepository: Repository<ClassSchedule>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @Inject(forwardRef(() => NotificationsService))
@@ -34,32 +47,47 @@ export class BookingsService {
     createBookingDto: CreateBookingDto,
     userId: string,
   ): Promise<Booking> {
-    const { classId } = createBookingDto;
+    const { scheduleId, classDate } = createBookingDto;
 
-    // Verificar que la clase existe
-    const classEntity = await this.classRepository.findOne({
-      where: { id: classId },
+    // Verificar que el horario existe
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: scheduleId },
+      relations: ['class'],
     });
 
-    if (!classEntity) {
-      throw new NotFoundException('Clase no encontrada');
+    if (!schedule) {
+      throw new NotFoundException('Horario de clase no encontrado');
     }
 
-    // Verificar que la clase está activa
-    if (!classEntity.activo) {
-      throw new BadRequestException('La clase no está activa');
+    // Verificar que la clase y el horario están activos
+    if (!schedule.class.activo || !schedule.activo) {
+      throw new BadRequestException('La clase o el horario no están activos');
     }
 
-    // Verificar que la clase no ha pasado
-    if (new Date(classEntity.fechaHoraInicio) < new Date()) {
+    // Parsear la fecha en zona horaria local
+    const parsedDate = parseLocalDate(classDate);
+
+    // Verificar que el día de la semana coincida
+    if (parsedDate.getDay() !== schedule.dayOfWeek) {
+      throw new BadRequestException(
+        'La fecha no corresponde al día de la semana del horario',
+      );
+    }
+
+    // Verificar que la fecha/hora no ha pasado
+    if (isPast(parsedDate, schedule.startTime)) {
       throw new BadRequestException('No se puede reservar una clase pasada');
     }
 
-    // Verificar que el usuario no tiene ya una reserva para esta clase
+    // Obtener fecha y hora completa de la clase
+    const classDateTime = combineDateAndTime(parsedDate, schedule.startTime);
+
+    // Verificar que el usuario no tiene ya una reserva para esta clase en esta fecha
     const existingBooking = await this.bookingRepository.findOne({
       where: {
         userId,
-        classId,
+        scheduleId,
+        classDate: parsedDate,
         estado: BookingStatus.RESERVADO,
       },
     });
@@ -68,8 +96,19 @@ export class BookingsService {
       throw new ConflictException('Ya tiene una reserva para esta clase');
     }
 
-    // Verificar disponibilidad de cupo
-    const hasSpots = classEntity.cupoActual < classEntity.cupoMaximo;
+    // Contar reservas actuales para este horario y fecha
+    const currentBookings = await this.bookingRepository.count({
+      where: {
+        scheduleId,
+        classDate: parsedDate,
+        estado: BookingStatus.RESERVADO,
+        enListaEspera: false,
+      },
+    });
+
+    // Determinar cupo máximo (usar el del schedule si está definido, sino el de la clase)
+    const cupoMaximo = schedule.cupoMaximo || schedule.class.cupoMaximo;
+    const hasSpots = currentBookings < cupoMaximo;
 
     let booking: Booking;
 
@@ -77,19 +116,20 @@ export class BookingsService {
       // Hay cupo disponible
       booking = this.bookingRepository.create({
         userId,
-        classId,
+        classId: schedule.classId,
+        scheduleId,
+        classDate: parsedDate,
         estado: BookingStatus.RESERVADO,
         enListaEspera: false,
       });
-
-      // Incrementar cupo actual
-      classEntity.cupoActual += 1;
-      await this.classRepository.save(classEntity);
     } else {
       // No hay cupo, agregar a lista de espera
       const maxPosition = await this.bookingRepository
         .createQueryBuilder('booking')
-        .where('booking.classId = :classId', { classId })
+        .where('booking.scheduleId = :scheduleId', { scheduleId })
+        .andWhere('booking.classDate = :classDate', {
+          classDate: parsedDate,
+        })
         .andWhere('booking.enListaEspera = :enLista', { enLista: true })
         .select('MAX(booking.posicionListaEspera)', 'max')
         .getRawOne();
@@ -98,7 +138,9 @@ export class BookingsService {
 
       booking = this.bookingRepository.create({
         userId,
-        classId,
+        classId: schedule.classId,
+        scheduleId,
+        classDate: parsedDate,
         estado: BookingStatus.RESERVADO,
         enListaEspera: true,
         posicionListaEspera: nextPosition,
@@ -109,18 +151,22 @@ export class BookingsService {
 
     // Enviar notificaciones
     try {
-      const fechaClase = format(new Date(classEntity.fechaHoraInicio), "dd 'de' MMMM 'a las' HH:mm", {
-        locale: es,
-      });
+      const fechaClase = format(
+        classDateTime,
+        "dd 'de' MMMM 'a las' HH:mm",
+        {
+          locale: es,
+        },
+      );
 
       if (savedBooking.enListaEspera) {
         // Notificación de lista de espera
         await this.notificationsService.create({
           userId,
-          type: 'WAITLIST_PROMOTED',
-          priority: 'MEDIUM',
+          type: NotificationType.WAITLIST_PROMOTED,
+          priority: NotificationPriority.MEDIUM,
           title: 'En Lista de Espera',
-          message: `Estás en la posición ${savedBooking.posicionListaEspera} de la lista de espera para ${classEntity.nombre} el ${fechaClase}.`,
+          message: `Estás en la posición ${savedBooking.posicionListaEspera} de la lista de espera para ${schedule.class.nombre} el ${fechaClase}.`,
           actionUrl: '/classes',
           actionLabel: 'Ver Clases',
         });
@@ -128,10 +174,10 @@ export class BookingsService {
         // Notificación de confirmación de reserva
         await this.notificationsService.create({
           userId,
-          type: 'BOOKING_CONFIRMED',
-          priority: 'HIGH',
+          type: NotificationType.BOOKING_CONFIRMED,
+          priority: NotificationPriority.HIGH,
           title: 'Reserva Confirmada',
-          message: `Tu reserva para ${classEntity.nombre} el ${fechaClase} fue confirmada exitosamente.`,
+          message: `Tu reserva para ${schedule.class.nombre} el ${fechaClase} fue confirmada exitosamente.`,
           actionUrl: '/classes',
           actionLabel: 'Ver Mis Reservas',
         });
@@ -140,16 +186,16 @@ export class BookingsService {
       console.error('Error enviando notificación de booking:', error);
     }
 
-    return await this.bookingRepository.findOne({
+    return await this.bookingRepository.findOneOrFail({
       where: { id: savedBooking.id },
-      relations: ['class', 'class.instructor', 'user'],
+      relations: ['class', 'schedule', 'schedule.instructor', 'user'],
     });
   }
 
   async cancel(id: string, userId: string): Promise<void> {
     const booking = await this.bookingRepository.findOne({
       where: { id },
-      relations: ['class'],
+      relations: ['class', 'schedule'],
     });
 
     if (!booking) {
@@ -166,10 +212,14 @@ export class BookingsService {
       throw new BadRequestException('La reserva ya está cancelada');
     }
 
+    // Calcular fecha y hora de la clase
+    const classDateTime = combineDateAndTime(
+      booking.classDate,
+      booking.schedule.startTime,
+    );
+
     // Verificar que falten al menos 2 horas para la clase
-    const hoursUntilClass =
-      (new Date(booking.class.fechaHoraInicio).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60);
+    const hoursUntilClass = getHoursDifference(classDateTime, new Date());
 
     if (hoursUntilClass < 2) {
       throw new BadRequestException(
@@ -177,43 +227,42 @@ export class BookingsService {
       );
     }
 
-    // Si estaba en la lista principal, decrementar cupo y promover de lista de espera
+    // Si estaba en la lista principal, promover de lista de espera
     if (!booking.enListaEspera) {
-      booking.class.cupoActual -= 1;
-      await this.classRepository.save(booking.class);
-
-      // Buscar el primero en lista de espera
+      // Buscar el primero en lista de espera para este horario y fecha
       const nextInWaitlist = await this.bookingRepository.findOne({
         where: {
-          classId: booking.classId,
+          scheduleId: booking.scheduleId,
+          classDate: booking.classDate,
           enListaEspera: true,
           estado: BookingStatus.RESERVADO,
         },
         order: {
           posicionListaEspera: 'ASC',
         },
+        relations: ['schedule', 'class'],
       });
 
       if (nextInWaitlist) {
         // Promover de lista de espera
         nextInWaitlist.enListaEspera = false;
-        nextInWaitlist.posicionListaEspera = null;
+        nextInWaitlist.posicionListaEspera = 0;
         await this.bookingRepository.save(nextInWaitlist);
-
-        // Incrementar cupo nuevamente
-        booking.class.cupoActual += 1;
-        await this.classRepository.save(booking.class);
 
         // Enviar notificación al usuario promovido
         try {
-          const fechaClase = format(new Date(booking.class.fechaHoraInicio), "dd 'de' MMMM 'a las' HH:mm", {
-            locale: es,
-          });
+          const fechaClase = format(
+            classDateTime,
+            "dd 'de' MMMM 'a las' HH:mm",
+            {
+              locale: es,
+            },
+          );
 
           await this.notificationsService.create({
             userId: nextInWaitlist.userId,
-            type: 'WAITLIST_PROMOTED',
-            priority: 'URGENT',
+            type: NotificationType.WAITLIST_PROMOTED,
+            priority: NotificationPriority.URGENT,
             title: '¡Promovido de Lista de Espera!',
             message: `¡Buenas noticias! Se liberó un cupo para ${booking.class.nombre} el ${fechaClase}. Tu reserva está confirmada.`,
             actionUrl: '/classes',
@@ -241,15 +290,19 @@ export class BookingsService {
     const queryBuilder = this.bookingRepository
       .createQueryBuilder('booking')
       .leftJoinAndSelect('booking.class', 'class')
-      .leftJoinAndSelect('class.instructor', 'instructor')
+      .leftJoinAndSelect('booking.schedule', 'schedule')
+      .leftJoinAndSelect('schedule.instructor', 'instructor')
       .where('booking.userId = :userId', { userId })
       .andWhere('booking.estado = :estado', { estado: BookingStatus.RESERVADO })
       .skip(skip)
       .take(limit)
-      .orderBy('class.fechaHoraInicio', 'ASC');
+      .orderBy('booking.classDate', 'ASC')
+      .addOrderBy('schedule.startTime', 'ASC');
 
     if (!includeExpired) {
-      queryBuilder.andWhere('class.fechaHoraInicio >= :now', { now: new Date() });
+      queryBuilder.andWhere('booking.classDate >= :now', {
+        now: new Date(),
+      });
     }
 
     const [data, total] = await queryBuilder.getManyAndCount();
@@ -263,12 +316,21 @@ export class BookingsService {
     };
   }
 
-  async findClassBookings(classId: string): Promise<Booking[]> {
+  async findScheduleBookings(
+    scheduleId: string,
+    classDate?: Date,
+  ): Promise<Booking[]> {
+    const where: any = {
+      scheduleId,
+      estado: BookingStatus.RESERVADO,
+    };
+
+    if (classDate) {
+      where.classDate = classDate;
+    }
+
     return await this.bookingRepository.find({
-      where: {
-        classId,
-        estado: BookingStatus.RESERVADO,
-      },
+      where,
       relations: ['user'],
       order: {
         enListaEspera: 'ASC',
@@ -278,7 +340,11 @@ export class BookingsService {
     });
   }
 
-  async checkInWithQR(qrCode: string, classId: string): Promise<Booking> {
+  async checkInWithQR(
+    qrCode: string,
+    scheduleId: string,
+    classDate: Date,
+  ): Promise<Booking> {
     // Buscar usuario por QR
     const user = await this.userRepository.findOne({
       where: { qrCode },
@@ -288,14 +354,15 @@ export class BookingsService {
       throw new NotFoundException('Código QR inválido');
     }
 
-    // Buscar reserva del usuario para esta clase
+    // Buscar reserva del usuario para este horario y fecha
     const booking = await this.bookingRepository.findOne({
       where: {
         userId: user.id,
-        classId,
+        scheduleId,
+        classDate,
         estado: BookingStatus.RESERVADO,
       },
-      relations: ['class'],
+      relations: ['class', 'schedule'],
     });
 
     if (!booking) {
@@ -326,14 +393,20 @@ export class BookingsService {
     const queryBuilder = this.bookingRepository
       .createQueryBuilder('booking')
       .leftJoinAndSelect('booking.class', 'class')
-      .leftJoinAndSelect('class.instructor', 'instructor')
+      .leftJoinAndSelect('booking.schedule', 'schedule')
+      .leftJoinAndSelect('schedule.instructor', 'instructor')
       .where('booking.userId = :userId', { userId })
       .andWhere('booking.estado IN (:...estados)', {
-        estados: [BookingStatus.ASISTIDO, BookingStatus.CANCELADO, BookingStatus.NO_ASISTIDO],
+        estados: [
+          BookingStatus.ASISTIDO,
+          BookingStatus.CANCELADO,
+          BookingStatus.NO_ASISTIO,
+        ],
       })
       .skip(skip)
       .take(limit)
-      .orderBy('class.fechaHoraInicio', 'DESC');
+      .orderBy('booking.classDate', 'DESC')
+      .addOrderBy('schedule.startTime', 'DESC');
 
     const [data, total] = await queryBuilder.getManyAndCount();
 
@@ -376,13 +449,14 @@ export class BookingsService {
     const noShowClasses = await this.bookingRepository.count({
       where: {
         userId,
-        estado: BookingStatus.NO_ASISTIDO,
+        estado: BookingStatus.NO_ASISTIO,
       },
     });
 
     // Calcular tasa de asistencia
     const totalCompleted = attendedClasses + noShowClasses;
-    const attendanceRate = totalCompleted > 0 ? (attendedClasses / totalCompleted) * 100 : 0;
+    const attendanceRate =
+      totalCompleted > 0 ? (attendedClasses / totalCompleted) * 100 : 0;
 
     // Obtener últimas clases asistidas para calcular racha
     const recentBookings = await this.bookingRepository.find({
@@ -390,9 +464,9 @@ export class BookingsService {
         userId,
         estado: BookingStatus.ASISTIDO,
       },
-      relations: ['class'],
+      relations: ['schedule'],
       order: {
-        createdAt: 'DESC',
+        classDate: 'DESC',
       },
       take: 50,
     });
@@ -404,7 +478,7 @@ export class BookingsService {
 
     const attendanceDates = new Set(
       recentBookings.map((booking) => {
-        const date = new Date(booking.class.fechaHoraInicio);
+        const date = new Date(booking.classDate);
         date.setHours(0, 0, 0, 0);
         return date.getTime();
       }),
@@ -424,17 +498,17 @@ export class BookingsService {
       }
     }
 
-    // Obtener clase favorita (instructor más frecuente)
+    // Obtener instructor favorito (más frecuente)
     const instructorFrequency = await this.bookingRepository
       .createQueryBuilder('booking')
-      .select('class.instructorId', 'instructorId')
+      .select('schedule.instructorId', 'instructorId')
       .addSelect('instructor.nombre', 'instructorName')
       .addSelect('COUNT(*)', 'count')
-      .innerJoin('booking.class', 'class')
-      .innerJoin('class.instructor', 'instructor')
+      .innerJoin('booking.schedule', 'schedule')
+      .innerJoin('schedule.instructor', 'instructor')
       .where('booking.userId = :userId', { userId })
       .andWhere('booking.estado = :estado', { estado: BookingStatus.ASISTIDO })
-      .groupBy('class.instructorId')
+      .groupBy('schedule.instructorId')
       .addGroupBy('instructor.nombre')
       .orderBy('count', 'DESC')
       .getRawOne();
@@ -463,11 +537,10 @@ export class BookingsService {
 
     const bookings = await this.bookingRepository
       .createQueryBuilder('booking')
-      .innerJoin('booking.class', 'class')
       .where('booking.userId = :userId', { userId })
       .andWhere('booking.estado = :estado', { estado: BookingStatus.ASISTIDO })
-      .andWhere('class.fechaHoraInicio >= :startDate', { startDate })
-      .select('class.fechaHoraInicio', 'fecha')
+      .andWhere('booking.classDate >= :startDate', { startDate })
+      .select('booking.classDate', 'fecha')
       .getRawMany();
 
     // Agrupar por mes

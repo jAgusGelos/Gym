@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +9,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
+import { UserStatus } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
@@ -77,7 +77,7 @@ export class AuthService {
     }
 
     // Verificar estado
-    if (user.estado !== 'ACTIVO') {
+    if (user.estado !== UserStatus.ACTIVO) {
       throw new UnauthorizedException('Usuario inactivo o suspendido');
     }
 
@@ -100,14 +100,14 @@ export class AuthService {
         where: { id: payload.sub },
       });
 
-      if (!user || user.estado !== 'ACTIVO') {
+      if (!user || user.estado !== UserStatus.ACTIVO) {
         throw new UnauthorizedException('Token inválido');
       }
 
       const accessToken = await this.generateAccessToken(user);
 
       return { accessToken };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Token inválido o expirado');
     }
   }
@@ -158,8 +158,8 @@ export class AuthService {
     });
   }
 
-  private sanitizeUser(user: User): Partial<User> {
-    const { password, ...result } = user;
+  sanitizeUser(user: User): Partial<User> {
+    const { password: _password, ...result } = user;
     return result;
   }
 }

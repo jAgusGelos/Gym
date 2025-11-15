@@ -100,11 +100,14 @@ export class MercadopagoController {
   @Post('approve-payment')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  async approvePayment(@Body() data: {
-    preferenceId: string;
-    paymentId: string;
-    paymentData?: any;
-  }) {
+  async approvePayment(
+    @Body()
+    data: {
+      preferenceId: string;
+      paymentId: string;
+      paymentData?: any;
+    },
+  ) {
     return this.mercadopagoService.approvePayment(
       data.preferenceId,
       data.paymentId,

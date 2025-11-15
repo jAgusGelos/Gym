@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../services/api';
-import { User } from '../types/user.types';
-import { Membership, CreateMembershipDto } from '../types/membership.types';
-import { Payment, CreatePaymentDto } from '../types/payment.types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../services/api";
+import { User } from "../types/user.types";
+import { Membership, CreateMembershipDto } from "../types/membership.types";
+import { Payment, CreatePaymentDto } from "../types/payment.types";
 
 interface PaginatedResult<T> {
   data: T[];
@@ -12,6 +12,22 @@ interface PaginatedResult<T> {
   totalPages: number;
 }
 
+// Interfaz para la respuesta del backend (en inglés)
+interface BackendStats {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  suspendedUsers: number;
+  usersByRole: {
+    admin: number;
+    trainer: number;
+    receptionist: number;
+    member: number;
+  };
+  newUsersLastMonth: number;
+}
+
+// Interfaz para el frontend (en español)
 interface AdminStats {
   totalSocios: number;
   sociosActivos: number;
@@ -25,20 +41,35 @@ interface AdminStats {
 // Estadísticas
 export const useAdminStats = () => {
   return useQuery({
-    queryKey: ['admin-stats'],
+    queryKey: ["admin-stats"],
     queryFn: async () => {
-      const response = await api.get<AdminStats>('/users/stats');
-      return response.data;
+      const response = await api.get<BackendStats>("/users/stats");
+      const data = response.data;
+
+      // Mapear las propiedades del backend (inglés) a frontend (español)
+      return {
+        totalSocios: data.totalUsers || 0,
+        sociosActivos: data.activeUsers || 0,
+        totalClases: 0, // TODO: implementar en backend
+        clasesHoy: 0, // TODO: implementar en backend
+        asistenciasHoy: 0, // TODO: implementar en backend
+        ingresosMes: 0, // TODO: implementar en backend
+        membresiasVencen: 0, // TODO: implementar en backend
+      } as AdminStats;
     },
   });
 };
 
 // Usuarios/Socios
-export const useUsers = (page = 1, limit = 20, filters?: { activo?: boolean; rol?: string }) => {
+export const useUsers = (
+  page = 1,
+  limit = 20,
+  filters?: { activo?: boolean; rol?: string }
+) => {
   return useQuery({
-    queryKey: ['users', page, limit, filters],
+    queryKey: ["users", page, limit, filters],
     queryFn: async () => {
-      const response = await api.get<PaginatedResult<User>>('/users', {
+      const response = await api.get<PaginatedResult<User>>("/users", {
         params: { page, limit, ...filters },
       });
       return response.data;
@@ -48,7 +79,7 @@ export const useUsers = (page = 1, limit = 20, filters?: { activo?: boolean; rol
 
 export const useUser = (id: string) => {
   return useQuery({
-    queryKey: ['user', id],
+    queryKey: ["user", id],
     queryFn: async () => {
       const response = await api.get<User>(`/users/${id}`);
       return response.data;
@@ -62,12 +93,12 @@ export const useCreateUser = () => {
 
   return useMutation({
     mutationFn: async (data: Partial<User> & { password: string }) => {
-      const response = await api.post<User>('/auth/register', data);
+      const response = await api.post<User>("/auth/register", data);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
     },
   });
 };
@@ -81,9 +112,9 @@ export const useUpdateUser = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
     },
   });
 };
@@ -96,7 +127,7 @@ export const useDeleteUser = () => {
       await api.delete(`/users/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
@@ -104,11 +135,14 @@ export const useDeleteUser = () => {
 // Membresías
 export const useMemberships = (page = 1, limit = 20) => {
   return useQuery({
-    queryKey: ['memberships', page, limit],
+    queryKey: ["memberships", page, limit],
     queryFn: async () => {
-      const response = await api.get<PaginatedResult<Membership>>('/memberships', {
-        params: { page, limit },
-      });
+      const response = await api.get<PaginatedResult<Membership>>(
+        "/memberships",
+        {
+          params: { page, limit },
+        }
+      );
       return response.data;
     },
   });
@@ -119,12 +153,12 @@ export const useCreateMembership = () => {
 
   return useMutation({
     mutationFn: async (data: CreateMembershipDto) => {
-      const response = await api.post<Membership>('/memberships', data);
+      const response = await api.post<Membership>("/memberships", data);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memberships'] });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["memberships"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
@@ -132,9 +166,9 @@ export const useCreateMembership = () => {
 // Pagos
 export const usePayments = (page = 1, limit = 20) => {
   return useQuery({
-    queryKey: ['payments', page, limit],
+    queryKey: ["payments", page, limit],
     queryFn: async () => {
-      const response = await api.get<PaginatedResult<Payment>>('/payments', {
+      const response = await api.get<PaginatedResult<Payment>>("/payments", {
         params: { page, limit },
       });
       return response.data;
@@ -147,12 +181,12 @@ export const useCreatePayment = () => {
 
   return useMutation({
     mutationFn: async (data: CreatePaymentDto) => {
-      const response = await api.post<Payment>('/payments', data);
+      const response = await api.post<Payment>("/payments", data);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
     },
   });
 };

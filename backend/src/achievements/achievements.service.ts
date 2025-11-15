@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Achievement, AchievementCriterio } from './entities/achievement.entity';
+import {
+  Achievement,
+  AchievementCriterio,
+} from './entities/achievement.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { CreateAchievementDto } from './dto/create-achievement.dto';
 import { Attendance } from '../attendance/entities/attendance.entity';
@@ -24,7 +27,9 @@ export class AchievementsService {
   ) {}
 
   // Admin: Crear un logro
-  async create(createAchievementDto: CreateAchievementDto): Promise<Achievement> {
+  async create(
+    createAchievementDto: CreateAchievementDto,
+  ): Promise<Achievement> {
     const achievement = this.achievementRepository.create(createAchievementDto);
     return this.achievementRepository.save(achievement);
   }
@@ -39,7 +44,9 @@ export class AchievementsService {
 
   // Obtener un logro por ID
   async findOne(id: string): Promise<Achievement> {
-    const achievement = await this.achievementRepository.findOne({ where: { id } });
+    const achievement = await this.achievementRepository.findOne({
+      where: { id },
+    });
     if (!achievement) {
       throw new NotFoundException('Logro no encontrado');
     }
@@ -55,9 +62,9 @@ export class AchievementsService {
     });
 
     // Mapear todos los achievements con el progreso del usuario
-    return allAchievements.map(achievement => {
+    return allAchievements.map((achievement) => {
       const userAchievement = userAchievements.find(
-        ua => ua.achievementId === achievement.id
+        (ua) => ua.achievementId === achievement.id,
       );
 
       return {
@@ -72,9 +79,14 @@ export class AchievementsService {
   // Obtener estadísticas del usuario
   async getUserStats(userId: string) {
     const achievements = await this.getUserAchievements(userId);
-    const completados = achievements.filter(a => a.completado);
-    const puntosTotal = completados.reduce((sum, a) => sum + a.achievement.puntos, 0);
-    const porcentajeCompletado = Math.round((completados.length / achievements.length) * 100);
+    const completados = achievements.filter((a) => a.completado);
+    const puntosTotal = completados.reduce(
+      (sum, a) => sum + a.achievement.puntos,
+      0,
+    );
+    const porcentajeCompletado = Math.round(
+      (completados.length / achievements.length) * 100,
+    );
 
     return {
       totalLogros: achievements.length,
@@ -82,10 +94,14 @@ export class AchievementsService {
       puntosTotal,
       porcentajeCompletado,
       ultimosLogros: completados
-        .filter(a => a.fechaCompletado !== null)
-        .sort((a, b) => new Date(b.fechaCompletado!).getTime() - new Date(a.fechaCompletado!).getTime())
+        .filter((a) => a.fechaCompletado !== null)
+        .sort(
+          (a, b) =>
+            new Date(b.fechaCompletado!).getTime() -
+            new Date(a.fechaCompletado!).getTime(),
+        )
         .slice(0, 5)
-        .map(a => ({
+        .map((a) => ({
           nombre: a.achievement.nombre,
           icono: a.achievement.icono,
           puntos: a.achievement.puntos,
@@ -100,7 +116,10 @@ export class AchievementsService {
     const unlocked: Achievement[] = [];
 
     for (const achievement of achievements) {
-      const progreso = await this.calculateProgress(userId, achievement.criterio);
+      const progreso = await this.calculateProgress(
+        userId,
+        achievement.criterio,
+      );
       const userAchievement = await this.updateOrCreateUserAchievement(
         userId,
         achievement.id,
@@ -108,7 +127,11 @@ export class AchievementsService {
         achievement.objetivo,
       );
 
-      if (userAchievement.completado && userAchievement.fechaCompletado && new Date(userAchievement.fechaCompletado).getTime() > Date.now() - 5000) {
+      if (
+        userAchievement.completado &&
+        userAchievement.fechaCompletado &&
+        new Date(userAchievement.fechaCompletado).getTime() > Date.now() - 5000
+      ) {
         unlocked.push(achievement);
       }
     }
@@ -117,7 +140,10 @@ export class AchievementsService {
   }
 
   // Calcular progreso actual según el criterio
-  private async calculateProgress(userId: string, criterio: AchievementCriterio): Promise<number> {
+  private async calculateProgress(
+    userId: string,
+    criterio: AchievementCriterio,
+  ): Promise<number> {
     switch (criterio) {
       // Asistencia
       case AchievementCriterio.ASISTIR_7_DIAS:
@@ -152,7 +178,9 @@ export class AchievementsService {
 
       case AchievementCriterio.ASISTIR_10_CLASES:
       case AchievementCriterio.ASISTIR_50_CLASES:
-        return this.bookingRepository.count({ where: { userId, estado: BookingStatus.ASISTIDO } });
+        return this.bookingRepository.count({
+          where: { userId, estado: BookingStatus.ASISTIDO },
+        });
 
       default:
         return 0;
@@ -170,12 +198,14 @@ export class AchievementsService {
     if (attendances.length === 0) return 0;
 
     let streak = 1;
-    const dates = attendances.map(a => new Date(a.fecha).toDateString());
+    const dates = attendances.map((a) => new Date(a.fecha).toDateString());
 
     for (let i = 0; i < dates.length - 1; i++) {
       const current = new Date(dates[i]);
       const next = new Date(dates[i + 1]);
-      const diffDays = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24));
+      const diffDays = Math.floor(
+        (current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24),
+      );
 
       if (diffDays === 1) {
         streak++;
@@ -237,24 +267,21 @@ export class AchievementsService {
     const completado = progresoActual >= objetivo;
 
     if (!existing) {
-      const data: any = {
+      const userAchievement = this.userAchievementRepository.create({
         userId,
         achievementId,
         progresoActual,
         completado,
-      };
-      if (completado) {
-        data.fechaCompletado = new Date();
-      }
-      const userAchievement = this.userAchievementRepository.create(data);
-      return this.userAchievementRepository.save(userAchievement);
+        fechaCompletado: completado ? new Date() : undefined,
+      });
+      return await this.userAchievementRepository.save(userAchievement);
     } else {
       existing.progresoActual = progresoActual;
       if (completado && !existing.completado) {
         existing.completado = true;
         existing.fechaCompletado = new Date();
       }
-      return this.userAchievementRepository.save(existing);
+      return await this.userAchievementRepository.save(existing);
     }
   }
 

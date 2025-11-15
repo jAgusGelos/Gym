@@ -4,7 +4,6 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
   BeforeInsert,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -66,6 +65,9 @@ export class User {
   @Column({ type: 'date', nullable: true })
   fechaNacimiento: Date;
 
+  @Column({ type: 'uuid', nullable: true })
+  activePlanId: string;
+
   @CreateDateColumn()
   fechaRegistro: Date;
 
@@ -73,7 +75,7 @@ export class User {
   updatedAt: Date;
 
   @BeforeInsert()
-  async generateQrCode() {
+  generateQrCode() {
     if (!this.qrCode) {
       this.qrCode = uuidv4();
     }

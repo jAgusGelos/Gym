@@ -21,10 +21,23 @@ export enum WorkoutGoal {
   FUNCIONAL = 'funcional',
 }
 
+export enum RoutineType {
+  PERSONAL = 'personal',
+  TEMPLATE = 'template',
+}
+
+export enum DifficultyLevel {
+  PRINCIPIANTE = 'principiante',
+  INTERMEDIO = 'intermedio',
+  AVANZADO = 'avanzado',
+}
+
 @Entity('workout_routines')
 @Index(['trainerId'])
 @Index(['clientId'])
 @Index(['activa'])
+@Index(['tipo'])
+@Index(['nivel'])
 export class WorkoutRoutine {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -49,6 +62,20 @@ export class WorkoutRoutine {
   @JoinColumn({ name: 'clientId' })
   client: User;
 
+  @Column({
+    type: 'enum',
+    enum: RoutineType,
+    default: RoutineType.TEMPLATE,
+  })
+  tipo: RoutineType;
+
+  @Column({
+    type: 'enum',
+    enum: DifficultyLevel,
+    default: DifficultyLevel.INTERMEDIO,
+  })
+  nivel: DifficultyLevel;
+
   @Column({ type: 'int', default: 4 })
   duracionSemanas: number;
 
@@ -65,9 +92,13 @@ export class WorkoutRoutine {
   @Column({ type: 'boolean', default: false })
   activa: boolean;
 
-  @OneToMany(() => RoutineExercise, (routineExercise) => routineExercise.routine, {
-    cascade: true,
-  })
+  @OneToMany(
+    () => RoutineExercise,
+    (routineExercise) => routineExercise.routine,
+    {
+      cascade: true,
+    },
+  )
   exercises: RoutineExercise[];
 
   @CreateDateColumn()

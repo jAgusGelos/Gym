@@ -1,4 +1,13 @@
-import { IsNotEmpty, IsUUID, IsInt, IsNumber, Min, Max, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsUUID,
+  IsInt,
+  IsNumber,
+  Min,
+  Max,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateExerciseSetDto {
   @IsNotEmpty()

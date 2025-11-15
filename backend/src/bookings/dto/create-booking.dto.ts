@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsUUID, IsDateString } from 'class-validator';
 
 export class CreateBookingDto {
   @IsUUID()
   @IsNotEmpty()
-  classId: string;
+  scheduleId: string;
+
+  @IsDateString()
+  @IsNotEmpty()
+  classDate: string; // Fecha específica de la clase (YYYY-MM-DD)
 }

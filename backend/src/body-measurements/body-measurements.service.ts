@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, LessThanOrEqual } from 'typeorm';
 import { CreateBodyMeasurementDto } from './dto/create-body-measurement.dto';
@@ -63,7 +67,12 @@ export class BodyMeasurementsService {
     userId: string,
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ data: BodyMeasurement[]; total: number; page: number; totalPages: number }> {
+  ): Promise<{
+    data: BodyMeasurement[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
     const skip = (page - 1) * limit;
 
     const [data, total] = await this.bodyMeasurementRepository.findAndCount({
@@ -173,8 +182,12 @@ export class BodyMeasurementsService {
       currentBMI: Number(latest.bmi),
       initialBMI: Number(oldest.bmi),
       bmiChange: Number(latest.bmi) - Number(oldest.bmi),
-      currentBodyFat: latest.bodyFatPercentage ? Number(latest.bodyFatPercentage) : null,
-      initialBodyFat: oldest.bodyFatPercentage ? Number(oldest.bodyFatPercentage) : null,
+      currentBodyFat: latest.bodyFatPercentage
+        ? Number(latest.bodyFatPercentage)
+        : null,
+      initialBodyFat: oldest.bodyFatPercentage
+        ? Number(oldest.bodyFatPercentage)
+        : null,
       bodyFatChange:
         latest.bodyFatPercentage && oldest.bodyFatPercentage
           ? Number(latest.bodyFatPercentage) - Number(oldest.bodyFatPercentage)
@@ -212,18 +225,45 @@ export class BodyMeasurementsService {
           ? Number(m2.muscleMassPercentage) - Number(m1.muscleMassPercentage)
           : null,
       neck: m1.neck && m2.neck ? Number(m2.neck) - Number(m1.neck) : null,
-      shoulders: m1.shoulders && m2.shoulders ? Number(m2.shoulders) - Number(m1.shoulders) : null,
+      shoulders:
+        m1.shoulders && m2.shoulders
+          ? Number(m2.shoulders) - Number(m1.shoulders)
+          : null,
       chest: m1.chest && m2.chest ? Number(m2.chest) - Number(m1.chest) : null,
       waist: m1.waist && m2.waist ? Number(m2.waist) - Number(m1.waist) : null,
       hips: m1.hips && m2.hips ? Number(m2.hips) - Number(m1.hips) : null,
-      leftBicep: m1.leftBicep && m2.leftBicep ? Number(m2.leftBicep) - Number(m1.leftBicep) : null,
-      rightBicep: m1.rightBicep && m2.rightBicep ? Number(m2.rightBicep) - Number(m1.rightBicep) : null,
-      leftForearm: m1.leftForearm && m2.leftForearm ? Number(m2.leftForearm) - Number(m1.leftForearm) : null,
-      rightForearm: m1.rightForearm && m2.rightForearm ? Number(m2.rightForearm) - Number(m1.rightForearm) : null,
-      leftThigh: m1.leftThigh && m2.leftThigh ? Number(m2.leftThigh) - Number(m1.leftThigh) : null,
-      rightThigh: m1.rightThigh && m2.rightThigh ? Number(m2.rightThigh) - Number(m1.rightThigh) : null,
-      leftCalf: m1.leftCalf && m2.leftCalf ? Number(m2.leftCalf) - Number(m1.leftCalf) : null,
-      rightCalf: m1.rightCalf && m2.rightCalf ? Number(m2.rightCalf) - Number(m1.rightCalf) : null,
+      leftBicep:
+        m1.leftBicep && m2.leftBicep
+          ? Number(m2.leftBicep) - Number(m1.leftBicep)
+          : null,
+      rightBicep:
+        m1.rightBicep && m2.rightBicep
+          ? Number(m2.rightBicep) - Number(m1.rightBicep)
+          : null,
+      leftForearm:
+        m1.leftForearm && m2.leftForearm
+          ? Number(m2.leftForearm) - Number(m1.leftForearm)
+          : null,
+      rightForearm:
+        m1.rightForearm && m2.rightForearm
+          ? Number(m2.rightForearm) - Number(m1.rightForearm)
+          : null,
+      leftThigh:
+        m1.leftThigh && m2.leftThigh
+          ? Number(m2.leftThigh) - Number(m1.leftThigh)
+          : null,
+      rightThigh:
+        m1.rightThigh && m2.rightThigh
+          ? Number(m2.rightThigh) - Number(m1.rightThigh)
+          : null,
+      leftCalf:
+        m1.leftCalf && m2.leftCalf
+          ? Number(m2.leftCalf) - Number(m1.leftCalf)
+          : null,
+      rightCalf:
+        m1.rightCalf && m2.rightCalf
+          ? Number(m2.rightCalf) - Number(m1.rightCalf)
+          : null,
     };
 
     return {
@@ -247,7 +287,10 @@ export class BodyMeasurementsService {
     if (updateBodyMeasurementDto.weight || updateBodyMeasurementDto.height) {
       const weight = updateBodyMeasurementDto.weight || measurement.weight;
       const height = updateBodyMeasurementDto.height || measurement.height;
-      updateBodyMeasurementDto.bmi = this.calculateBMI(Number(weight), Number(height));
+      updateBodyMeasurementDto.bmi = this.calculateBMI(
+        Number(weight),
+        Number(height),
+      );
     }
 
     Object.assign(measurement, updateBodyMeasurementDto);
@@ -265,7 +308,10 @@ export class BodyMeasurementsService {
   /**
    * Obtiene el progreso de peso en los últimos N meses
    */
-  async getWeightProgress(userId: string, months: number = 6): Promise<BodyMeasurement[]> {
+  async getWeightProgress(
+    userId: string,
+    months: number = 6,
+  ): Promise<BodyMeasurement[]> {
     const date = new Date();
     date.setMonth(date.getMonth() - months);
 

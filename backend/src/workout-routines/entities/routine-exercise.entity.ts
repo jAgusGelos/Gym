@@ -9,7 +9,7 @@ import {
 import { WorkoutRoutine } from './workout-routine.entity';
 import { Exercise } from '../../exercises/entities/exercise.entity';
 
-@Entity('routine_exercises')
+@Entity('workout_routine_exercises')
 @Index(['routineId', 'dia', 'orden'])
 export class RoutineExercise {
   @PrimaryGeneratedColumn('uuid')

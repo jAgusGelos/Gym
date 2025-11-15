@@ -13,7 +13,12 @@ import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([MembershipPlan, OnlinePayment, Subscription, Membership]),
+    TypeOrmModule.forFeature([
+      MembershipPlan,
+      OnlinePayment,
+      Subscription,
+      Membership,
+    ]),
     ConfigModule,
     forwardRef(() => NotificationsModule),
   ],

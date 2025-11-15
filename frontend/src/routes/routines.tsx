@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { useRoutines, useFavoriteRoutines, useToggleFavorite } from '../hooks/useRoutines';
+import { useRoutines, useFavoriteRoutines, useToggleFavorite, useMyPlan } from '../hooks/useRoutines';
 import { Button, Card, CardContent, Loading } from '../components/ui';
-import { Dumbbell, Heart, Clock, TrendingUp, AlertCircle } from 'lucide-react';
+import { Dumbbell, Heart, Clock,  AlertCircle, Star } from 'lucide-react';
 import { Routine, RoutineLevel, RoutineGoal } from '../types/routine.types';
+import { useNavigate } from '@tanstack/react-router';
 
 export const RoutinesPage = () => {
-  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'my-plan' | 'all' | 'favorites'>('my-plan');
   const [filters, setFilters] = useState<{ nivel?: RoutineLevel; objetivo?: RoutineGoal }>({});
 
   const { data: routinesData, isLoading } = useRoutines(1, 20, { ...filters, publico: true });
   const { data: favoritesData, isLoading: isLoadingFavorites } = useFavoriteRoutines();
+  const { data: myPlanData, isLoading: isLoadingMyPlan } = useMyPlan();
   const toggleFavorite = useToggleFavorite();
 
   const handleToggleFavorite = (routineId: string) => {
@@ -126,6 +129,19 @@ export const RoutinesPage = () => {
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex">
           <button
+            onClick={() => setActiveTab('my-plan')}
+            className={`flex-1 py-4 text-center font-medium transition-colors ${
+              activeTab === 'my-plan'
+                ? 'text-primary-600 border-b-2 border-primary-600'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Star className="w-4 h-4" />
+              <span>Mi Plan</span>
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('all')}
             className={`flex-1 py-4 text-center font-medium transition-colors ${
               activeTab === 'all'
@@ -149,6 +165,41 @@ export const RoutinesPage = () => {
       </div>
 
       <div className="p-4">
+        {/* My Plan Tab */}
+        {activeTab === 'my-plan' && (
+          <>
+            {isLoadingMyPlan ? (
+              <Loading className="py-12" />
+            ) : myPlanData ? (
+              <div className="space-y-4">
+                <RoutineCard routine={myPlanData} />
+                <Button
+                  onClick={() => navigate({ to: '/workouts/new' })}
+                  className="w-full"
+                >
+                  Entrenar ahora
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                  No tenés un plan activo
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                  Seleccioná una rutina de las disponibles o consultá con tu entrenador
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveTab('all')}
+                >
+                  Ver rutinas disponibles
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+
         {/* Filters */}
         {activeTab === 'all' && (
           <div className="mb-4 space-y-3">

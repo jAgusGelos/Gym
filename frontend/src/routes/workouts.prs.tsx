@@ -8,7 +8,7 @@ export const Route = createFileRoute('/workouts/prs')({
   component: PersonalRecordsPage,
 });
 
-function PersonalRecordsPage() {
+export function PersonalRecordsPage() {
   const { data: prs, isLoading } = usePersonalRecords();
 
   if (isLoading) {

@@ -1,9 +1,11 @@
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Input, Select } from '../ui';
+import { useRef } from 'react';
+import { Button, Input, Select, Combobox } from '../ui';
 import { RoutineLevel, RoutineGoal } from '../../types/routine.types';
 import { useExercises } from '../../hooks/useExercises';
+import { useUsers } from '../../hooks/useAdmin';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 
 const routineExerciseSchema = z.object({
@@ -22,6 +24,7 @@ const routineSchema = z.object({
   objetivo: z.nativeEnum(RoutineGoal),
   duracionEstimada: z.number().min(1, 'La duración debe ser mayor a 0').optional(),
   publico: z.boolean(),
+  userId: z.string().optional(),
   ejercicios: z.array(routineExerciseSchema).min(1, 'Agrega al menos un ejercicio'),
 });
 
@@ -36,7 +39,9 @@ interface RoutineFormProps {
 }
 
 export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit }: RoutineFormProps) => {
-  const { data: exercisesData } = useExercises(1, 100);
+  const { data: exercisesData } = useExercises();
+  const { data: usersData } = useUsers(1, 100);
+  const exerciseInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const {
     register,
@@ -51,6 +56,8 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
       ejercicios: initialData?.ejercicios || [],
     },
   });
+
+  const isPublic = useWatch({ control, name: 'publico' });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -72,20 +79,34 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
     { value: RoutineGoal.PERDIDA_PESO, label: 'Pérdida de Peso' },
   ];
 
-  const exerciseOptions = exercisesData?.data.map((ex) => ({
+  const exerciseOptions = exercisesData?.data?.map((ex) => ({
     value: ex.id,
     label: ex.nombre,
   })) || [];
 
+  const userOptions = [
+    { value: '', label: 'Seleccionar usuario (opcional)' },
+    ...(usersData?.data?.map((user) => ({
+      value: user.id,
+      label: `${user.nombre} ${user.apellido}`,
+    })) || [])
+  ];
+
   const addExercise = () => {
+    const newIndex = fields.length;
     append({
       exerciseId: '',
-      orden: fields.length + 1,
+      orden: newIndex + 1,
       series: 3,
       repeticiones: '10',
       descanso: 60,
       notas: '',
     });
+
+    // Focus on the newly added exercise input
+    setTimeout(() => {
+      exerciseInputRefs.current[newIndex]?.focus();
+    }, 100);
   };
 
   return (
@@ -98,17 +119,17 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
       />
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Descripción *
         </label>
         <textarea
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
           rows={3}
           placeholder="Descripción de la rutina..."
           {...register('descripcion')}
         />
         {errors.descripcion && (
-          <p className="text-sm text-red-600 mt-1">{errors.descripcion.message}</p>
+          <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.descripcion.message}</p>
         )}
       </div>
 
@@ -144,42 +165,40 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
             className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
             {...register('publico')}
           />
-          <label htmlFor="publico" className="text-sm font-medium text-gray-700">
+          <label htmlFor="publico" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Rutina pública
           </label>
         </div>
       </div>
 
+      {!isPublic && (
+        <Select
+          label="Asignar a Usuario"
+          options={userOptions}
+          error={errors.userId?.message}
+          {...register('userId')}
+        />
+      )}
+
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium text-gray-700">
-            Ejercicios *
-          </label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addExercise}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Agregar Ejercicio
-          </Button>
-        </div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Ejercicios *
+        </label>
 
         {errors.ejercicios && (
-          <p className="text-sm text-red-600">{errors.ejercicios.message}</p>
+          <p className="text-sm text-red-600 dark:text-red-400">{errors.ejercicios.message}</p>
         )}
 
         <div className="space-y-3">
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="border border-gray-200 rounded-lg p-4 space-y-3 bg-gray-50"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 bg-gray-50 dark:bg-gray-900"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <GripVertical className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <GripVertical className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Ejercicio {index + 1}
                   </span>
                 </div>
@@ -192,11 +211,20 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
                 </button>
               </div>
 
-              <Select
-                label="Ejercicio *"
-                options={exerciseOptions}
-                error={errors.ejercicios?.[index]?.exerciseId?.message}
-                {...register(`ejercicios.${index}.exerciseId`)}
+              <Controller
+                name={`ejercicios.${index}.exerciseId`}
+                control={control}
+                render={({ field }) => (
+                  <Combobox
+                    ref={(el) => (exerciseInputRefs.current[index] = el)}
+                    label="Ejercicio *"
+                    options={exerciseOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.ejercicios?.[index]?.exerciseId?.message}
+                    placeholder="Buscar ejercicio..."
+                  />
+                )}
               />
 
               <div className="grid grid-cols-3 gap-3">
@@ -237,8 +265,18 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
             </div>
           ))}
 
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addExercise}
+            className="w-full"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Ejercicio
+          </Button>
+
           {fields.length === 0 && (
-            <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
               <p className="text-sm">No hay ejercicios agregados</p>
               <p className="text-xs mt-1">Haz clic en "Agregar Ejercicio" para empezar</p>
             </div>
@@ -246,7 +284,7 @@ export const RoutineForm = ({ onSubmit, onCancel, isLoading, initialData, isEdit
         </div>
       </div>
 
-      <div className="flex gap-3 pt-4 sticky bottom-0 bg-white border-t border-gray-200 -mx-6 px-6 py-4">
+      <div className="flex gap-3 pt-4 sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 -mx-6 px-6 py-4">
         <Button
           type="button"
           variant="outline"

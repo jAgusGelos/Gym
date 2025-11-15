@@ -433,7 +433,7 @@ export default function NewMeasurementPage() {
             value={formData.notes || ''}
             onChange={(e) => handleInputChange('notes', e.target.value || undefined)}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white resize-none"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none"
             placeholder="Observaciones adicionales..."
           />
         </div>

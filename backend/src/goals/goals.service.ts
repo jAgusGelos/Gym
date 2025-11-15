@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserGoal, GoalType, GoalStatus } from './entities/user-goal.entity';
@@ -16,7 +20,10 @@ export class GoalsService {
   ) {}
 
   // Crear un nuevo objetivo
-  async create(userId: string, createGoalDto: CreateGoalDto): Promise<UserGoal> {
+  async create(
+    userId: string,
+    createGoalDto: CreateGoalDto,
+  ): Promise<UserGoal> {
     // Si no se especifican valores iniciales, obtenerlos del último progreso
     if (!createGoalDto.pesoInicial && !createGoalDto.grasaCorporalInicial) {
       const latestProgress = await this.progressRepository.findOne({
@@ -25,7 +32,9 @@ export class GoalsService {
       });
 
       if (latestProgress) {
-        createGoalDto.pesoInicial = latestProgress.peso ? Number(latestProgress.peso) : undefined;
+        createGoalDto.pesoInicial = latestProgress.peso
+          ? Number(latestProgress.peso)
+          : undefined;
         createGoalDto.grasaCorporalInicial = latestProgress.grasaCorporal
           ? Number(latestProgress.grasaCorporal)
           : undefined;
@@ -86,13 +95,20 @@ export class GoalsService {
   }
 
   // Actualizar un objetivo
-  async update(id: string, userId: string, updateGoalDto: UpdateGoalDto): Promise<UserGoal> {
+  async update(
+    id: string,
+    userId: string,
+    updateGoalDto: UpdateGoalDto,
+  ): Promise<UserGoal> {
     const goal = await this.findOne(id, userId);
 
     Object.assign(goal, updateGoalDto);
 
     // Si se marca como completado, guardar fecha
-    if (updateGoalDto.estado === GoalStatus.COMPLETADO && !goal.fechaCompletado) {
+    if (
+      updateGoalDto.estado === GoalStatus.COMPLETADO &&
+      !goal.fechaCompletado
+    ) {
       goal.fechaCompletado = new Date();
     }
 
@@ -123,7 +139,10 @@ export class GoalsService {
         if (goal.pesoInicial && goal.pesoObjetivo && latestProgress.peso) {
           const totalChange = goal.pesoInicial - goal.pesoObjetivo;
           const currentChange = goal.pesoInicial - Number(latestProgress.peso);
-          porcentaje = Math.min(Math.round((currentChange / totalChange) * 100), 100);
+          porcentaje = Math.min(
+            Math.round((currentChange / totalChange) * 100),
+            100,
+          );
         }
         break;
 
@@ -132,15 +151,27 @@ export class GoalsService {
         if (goal.pesoInicial && goal.pesoObjetivo && latestProgress.peso) {
           const totalChange = goal.pesoObjetivo - goal.pesoInicial;
           const currentChange = Number(latestProgress.peso) - goal.pesoInicial;
-          porcentaje = Math.min(Math.round((currentChange / totalChange) * 100), 100);
+          porcentaje = Math.min(
+            Math.round((currentChange / totalChange) * 100),
+            100,
+          );
         }
         break;
 
       case GoalType.REDUCIR_GRASA:
-        if (goal.grasaCorporalInicial && goal.grasaCorporalObjetivo && latestProgress.grasaCorporal) {
-          const totalChange = goal.grasaCorporalInicial - goal.grasaCorporalObjetivo;
-          const currentChange = goal.grasaCorporalInicial - Number(latestProgress.grasaCorporal);
-          porcentaje = Math.min(Math.round((currentChange / totalChange) * 100), 100);
+        if (
+          goal.grasaCorporalInicial &&
+          goal.grasaCorporalObjetivo &&
+          latestProgress.grasaCorporal
+        ) {
+          const totalChange =
+            goal.grasaCorporalInicial - goal.grasaCorporalObjetivo;
+          const currentChange =
+            goal.grasaCorporalInicial - Number(latestProgress.grasaCorporal);
+          porcentaje = Math.min(
+            Math.round((currentChange / totalChange) * 100),
+            100,
+          );
         }
         break;
 
@@ -148,7 +179,8 @@ export class GoalsService {
         if (goal.pesoInicial && latestProgress.peso) {
           const diff = Math.abs(goal.pesoInicial - Number(latestProgress.peso));
           // Considerar exitoso si se mantiene +/- 2kg
-          porcentaje = diff <= 2 ? 100 : Math.max(0, 100 - Math.round(diff * 10));
+          porcentaje =
+            diff <= 2 ? 100 : Math.max(0, 100 - Math.round(diff * 10));
         }
         break;
 
@@ -156,14 +188,18 @@ export class GoalsService {
         // Para otros tipos, calcular basado en tiempo transcurrido
         if (goal.fechaObjetivo) {
           const totalDays = Math.floor(
-            (new Date(goal.fechaObjetivo).getTime() - new Date(goal.fechaInicio).getTime()) /
-            (1000 * 60 * 60 * 24)
+            (new Date(goal.fechaObjetivo).getTime() -
+              new Date(goal.fechaInicio).getTime()) /
+              (1000 * 60 * 60 * 24),
           );
           const elapsedDays = Math.floor(
             (new Date().getTime() - new Date(goal.fechaInicio).getTime()) /
-            (1000 * 60 * 60 * 24)
+              (1000 * 60 * 60 * 24),
           );
-          porcentaje = Math.min(Math.round((elapsedDays / totalDays) * 100), 100);
+          porcentaje = Math.min(
+            Math.round((elapsedDays / totalDays) * 100),
+            100,
+          );
         }
         break;
     }

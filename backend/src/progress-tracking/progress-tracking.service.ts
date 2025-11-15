@@ -12,7 +12,10 @@ export class ProgressTrackingService {
     private progressRepository: Repository<ProgressEntry>,
   ) {}
 
-  async create(userId: string, createDto: CreateProgressEntryDto): Promise<ProgressEntry> {
+  async create(
+    userId: string,
+    createDto: CreateProgressEntryDto,
+  ): Promise<ProgressEntry> {
     const entry = this.progressRepository.create({
       ...createDto,
       userId,
@@ -27,7 +30,11 @@ export class ProgressTrackingService {
     });
   }
 
-  async findByDateRange(userId: string, startDate: string, endDate: string): Promise<ProgressEntry[]> {
+  async findByDateRange(
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<ProgressEntry[]> {
     return this.progressRepository.find({
       where: {
         userId,
@@ -49,7 +56,11 @@ export class ProgressTrackingService {
     return entry;
   }
 
-  async update(id: string, userId: string, updateDto: UpdateProgressEntryDto): Promise<ProgressEntry> {
+  async update(
+    id: string,
+    userId: string,
+    updateDto: UpdateProgressEntryDto,
+  ): Promise<ProgressEntry> {
     const entry = await this.findOne(id, userId);
     Object.assign(entry, updateDto);
     return this.progressRepository.save(entry);
@@ -76,13 +87,15 @@ export class ProgressTrackingService {
     const latest = entries[0];
     const oldest = entries[entries.length - 1];
 
-    const weightChange = latest.peso && oldest.peso
-      ? Number(latest.peso) - Number(oldest.peso)
-      : null;
+    const weightChange =
+      latest.peso && oldest.peso
+        ? Number(latest.peso) - Number(oldest.peso)
+        : null;
 
-    const bodyFatChange = latest.grasaCorporal && oldest.grasaCorporal
-      ? Number(latest.grasaCorporal) - Number(oldest.grasaCorporal)
-      : null;
+    const bodyFatChange =
+      latest.grasaCorporal && oldest.grasaCorporal
+        ? Number(latest.grasaCorporal) - Number(oldest.grasaCorporal)
+        : null;
 
     return {
       totalEntries: entries.length,

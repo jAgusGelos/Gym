@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { User, UserRole } from '../users/entities/user.entity';
 import { Class } from '../classes/entities/class.entity';
+import { ClassSchedule } from '../classes/entities/class-schedule.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { Routine } from '../routines/entities/routine.entity';
 import { WorkoutRoutine } from '../workout-routines/entities/workout-routine.entity';
@@ -15,6 +20,8 @@ export class TrainersService {
     private userRepository: Repository<User>,
     @InjectRepository(Class)
     private classRepository: Repository<Class>,
+    @InjectRepository(ClassSchedule)
+    private classScheduleRepository: Repository<ClassSchedule>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
     @InjectRepository(Routine)
@@ -48,7 +55,7 @@ export class TrainersService {
     const routines = await this.routineRepository
       .createQueryBuilder('routine')
       .select('DISTINCT routine.userId', 'userId')
-      .where('routine.creadoPor = :trainerId', { trainerId })
+      .where('routine.creadorId = :trainerId', { trainerId })
       .getRawMany();
 
     const userIds = routines.map((r) => r.userId);
@@ -70,7 +77,7 @@ export class TrainersService {
         const routineCount = await this.routineRepository.count({
           where: {
             userId: client.id,
-            creadoPor: trainerId,
+            creadorId: trainerId,
           },
         });
 
@@ -125,7 +132,9 @@ export class TrainersService {
     });
 
     if (hasRoutines === 0) {
-      throw new ForbiddenException('No tienes rutinas asignadas a este cliente');
+      throw new ForbiddenException(
+        'No tienes rutinas asignadas a este cliente',
+      );
     }
 
     // Obtener rutinas del cliente creadas por este entrenador
@@ -147,7 +156,7 @@ export class TrainersService {
       },
       relations: ['class'],
       order: {
-        createdAt: 'DESC',
+        fechaReserva: 'DESC',
       },
       take: 10,
     });
@@ -163,34 +172,38 @@ export class TrainersService {
   async getMyClasses(trainerId: string) {
     await this.verifyTrainer(trainerId);
 
-    const classes = await this.classRepository.find({
+    // Buscar todos los schedules donde el trainer es instructor
+    const schedules = await this.classScheduleRepository.find({
       where: {
         instructorId: trainerId,
+        activo: true,
       },
-      order: {
-        fechaHoraInicio: 'DESC',
-      },
+      relations: ['class'],
       take: 50,
     });
 
-    // Agregar información de asistencia para cada clase
-    const classesWithAttendance = await Promise.all(
-      classes.map(async (classItem) => {
-        const bookings = await this.bookingRepository.count({
+    // Agrupar por clase
+    const classMap = new Map();
+    for (const schedule of schedules) {
+      if (!classMap.has(schedule.classId)) {
+        const attendanceCount = await this.bookingRepository.count({
           where: {
-            classId: classItem.id,
+            classId: schedule.classId,
             estado: BookingStatus.ASISTIDO,
           },
         });
 
-        return {
-          ...classItem,
-          attendanceCount: bookings,
-        };
-      }),
-    );
+        classMap.set(schedule.classId, {
+          ...schedule.class,
+          schedules: [schedule],
+          attendanceCount,
+        });
+      } else {
+        classMap.get(schedule.classId).schedules.push(schedule);
+      }
+    }
 
-    return classesWithAttendance;
+    return Array.from(classMap.values());
   }
 
   // Obtener estadísticas del entrenador
@@ -201,7 +214,7 @@ export class TrainersService {
     const routines = await this.routineRepository
       .createQueryBuilder('routine')
       .select('DISTINCT routine.userId')
-      .where('routine.creadoPor = :trainerId', { trainerId })
+      .where('routine.creadorId = :trainerId', { trainerId })
       .getRawMany();
 
     const totalClients = routines.length;
@@ -209,47 +222,47 @@ export class TrainersService {
     // Total de rutinas creadas
     const totalRoutines = await this.routineRepository.count({
       where: {
-        creadoPor: trainerId,
+        creadorId: trainerId,
       },
     });
 
     // Total de rutinas activas
     const activeRoutines = await this.routineRepository.count({
       where: {
-        creadoPor: trainerId,
+        creadorId: trainerId,
         activo: true,
       },
     });
 
-    // Total de clases impartidas
-    const totalClasses = await this.classRepository.count({
+    // Total de horarios de clases (schedules) del entrenador
+    const totalClasses = await this.classScheduleRepository.count({
       where: {
         instructorId: trainerId,
+        activo: true,
       },
     });
 
-    // Clases con asistencia
-    const classIds = await this.classRepository.find({
+    // Obtener schedules del entrenador para calcular asistencia
+    const schedules = await this.classScheduleRepository.find({
       where: {
         instructorId: trainerId,
       },
-      select: ['id'],
+      select: ['id', 'classId'],
     });
 
     let totalAttendance = 0;
-    if (classIds.length > 0) {
-      const ids = classIds.map((c) => c.id);
+    if (schedules.length > 0) {
+      const scheduleIds = schedules.map((s) => s.id);
       totalAttendance = await this.bookingRepository.count({
         where: {
-          classId: In(ids),
+          scheduleId: In(scheduleIds),
           estado: BookingStatus.ASISTIDO,
         },
       });
     }
 
-    // Próximas clases
-    const now = new Date();
-    const upcomingClasses = await this.classRepository.count({
+    // Próximas clases (schedules activos)
+    const upcomingClasses = await this.classScheduleRepository.count({
       where: {
         instructorId: trainerId,
         activo: true,
@@ -381,7 +394,9 @@ export class TrainersService {
     });
 
     if (hasRoutines === 0) {
-      throw new ForbiddenException('No tienes rutinas asignadas a este cliente');
+      throw new ForbiddenException(
+        'No tienes rutinas asignadas a este cliente',
+      );
     }
 
     // Obtener rutinas del cliente
@@ -457,7 +472,7 @@ export class TrainersService {
 
     const members = await this.userRepository.find({
       where: {
-        rol: UserRole.CLIENTE,
+        rol: UserRole.SOCIO,
       },
       select: ['id', 'nombre', 'apellido', 'email'],
       order: {

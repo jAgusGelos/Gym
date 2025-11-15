@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual, Or, IsNull } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Announcement, AnnouncementType } from './entities/announcement.entity';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
@@ -23,7 +23,7 @@ export class AnnouncementsService {
       fechaPublicacion: new Date(createAnnouncementDto.fechaPublicacion),
       fechaExpiracion: createAnnouncementDto.fechaExpiracion
         ? new Date(createAnnouncementDto.fechaExpiracion)
-        : null,
+        : undefined,
     });
 
     return await this.announcementRepository.save(announcement);

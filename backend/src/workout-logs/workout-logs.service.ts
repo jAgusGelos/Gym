@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { WorkoutLog } from './entities/workout-log.entity';
 import { ExerciseSet } from './entities/exercise-set.entity';
 import { CreateWorkoutLogDto } from './dto/create-workout-log.dto';
 import { UpdateWorkoutLogDto } from './dto/update-workout-log.dto';
+import { AchievementsService } from '../achievements/achievements.service';
 
 @Injectable()
 export class WorkoutLogsService {
@@ -13,10 +18,14 @@ export class WorkoutLogsService {
     private workoutLogRepository: Repository<WorkoutLog>,
     @InjectRepository(ExerciseSet)
     private exerciseSetRepository: Repository<ExerciseSet>,
+    private achievementsService: AchievementsService,
   ) {}
 
   // Crear un nuevo workout log con sets
-  async create(userId: string, createWorkoutLogDto: CreateWorkoutLogDto): Promise<WorkoutLog> {
+  async create(
+    userId: string,
+    createWorkoutLogDto: CreateWorkoutLogDto,
+  ): Promise<WorkoutLog> {
     const { sets, ...logData } = createWorkoutLogDto;
 
     // Crear el workout log
@@ -36,7 +45,12 @@ export class WorkoutLogsService {
         });
 
         // Verificar si es PR
-        const isPR = await this.checkIfPR(userId, setDto.exerciseId, setDto.peso, setDto.repeticiones);
+        const isPR = await this.checkIfPR(
+          userId,
+          setDto.exerciseId,
+          setDto.peso,
+          setDto.repeticiones,
+        );
         set.esPR = isPR;
 
         return this.exerciseSetRepository.save(set);
@@ -44,6 +58,15 @@ export class WorkoutLogsService {
     );
 
     savedLog.sets = exerciseSets;
+
+    // Actualizar logros del usuario
+    try {
+      await this.achievementsService.checkAndUpdateAchievements(userId);
+    } catch (error) {
+      // Log error pero no fallar el workout log
+      console.error('Error actualizando logros:', error);
+    }
+
     return savedLog;
   }
 
@@ -57,7 +80,11 @@ export class WorkoutLogsService {
   }
 
   // Obtener workout logs por rango de fechas
-  async findByDateRange(userId: string, startDate: string, endDate: string): Promise<WorkoutLog[]> {
+  async findByDateRange(
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<WorkoutLog[]> {
     return this.workoutLogRepository.find({
       where: {
         userId,
@@ -80,14 +107,20 @@ export class WorkoutLogsService {
     }
 
     if (workoutLog.userId !== userId) {
-      throw new ForbiddenException('No tienes permiso para ver este workout log');
+      throw new ForbiddenException(
+        'No tienes permiso para ver este workout log',
+      );
     }
 
     return workoutLog;
   }
 
   // Actualizar un workout log
-  async update(id: string, userId: string, updateWorkoutLogDto: UpdateWorkoutLogDto): Promise<WorkoutLog> {
+  async update(
+    id: string,
+    userId: string,
+    updateWorkoutLogDto: UpdateWorkoutLogDto,
+  ): Promise<WorkoutLog> {
     const workoutLog = await this.findOne(id, userId);
 
     const { sets, ...logData } = updateWorkoutLogDto;
@@ -109,7 +142,12 @@ export class WorkoutLogsService {
             workoutLogId: id,
           });
 
-          const isPR = await this.checkIfPR(userId, setDto.exerciseId, setDto.peso, setDto.repeticiones);
+          const isPR = await this.checkIfPR(
+            userId,
+            setDto.exerciseId,
+            setDto.peso,
+            setDto.repeticiones,
+          );
           set.esPR = isPR;
 
           return this.exerciseSetRepository.save(set);
@@ -187,16 +225,28 @@ export class WorkoutLogsService {
 
     const totalSets = sets.length;
     const totalReps = sets.reduce((sum, set) => sum + set.repeticiones, 0);
-    const volumeTotal = sets.reduce((sum, set) => sum + Number(set.peso) * set.repeticiones, 0);
+    const volumeTotal = sets.reduce(
+      (sum, set) => sum + Number(set.peso) * set.repeticiones,
+      0,
+    );
 
     // Encontrar PR (mejor peso x reps)
-    const pr = sets.reduce((best, set) => {
-      const current1RM = this.calculate1RM(Number(set.peso), set.repeticiones);
-      const best1RM = best ? this.calculate1RM(Number(best.peso), best.repeticiones) : 0;
-      return current1RM > best1RM ? set : best;
-    }, null as ExerciseSet | null);
+    const pr = sets.reduce(
+      (best, set) => {
+        const current1RM = this.calculate1RM(
+          Number(set.peso),
+          set.repeticiones,
+        );
+        const best1RM = best
+          ? this.calculate1RM(Number(best.peso), best.repeticiones)
+          : 0;
+        return current1RM > best1RM ? set : best;
+      },
+      null as ExerciseSet | null,
+    );
 
-    const pesoPromedio = sets.reduce((sum, set) => sum + Number(set.peso), 0) / totalSets;
+    const pesoPromedio =
+      sets.reduce((sum, set) => sum + Number(set.peso), 0) / totalSets;
     const repsPromedio = totalReps / totalSets;
 
     // Última sesión
@@ -221,7 +271,11 @@ export class WorkoutLogsService {
   }
 
   // Obtener gráfico de evolución de un ejercicio
-  async getExerciseChart(userId: string, exerciseId: string, limit: number = 10) {
+  async getExerciseChart(
+    userId: string,
+    exerciseId: string,
+    limit: number = 10,
+  ) {
     const sets = await this.exerciseSetRepository.find({
       where: {
         exerciseId,
@@ -236,14 +290,22 @@ export class WorkoutLogsService {
     const sessionMap = new Map<string, ExerciseSet>();
 
     sets.forEach((set) => {
-      const dateKey = new Date(set.workoutLog.fecha).toISOString().split('T')[0];
+      const dateKey = new Date(set.workoutLog.fecha)
+        .toISOString()
+        .split('T')[0];
       const existing = sessionMap.get(dateKey);
 
       if (!existing) {
         sessionMap.set(dateKey, set);
       } else {
-        const current1RM = this.calculate1RM(Number(set.peso), set.repeticiones);
-        const existing1RM = this.calculate1RM(Number(existing.peso), existing.repeticiones);
+        const current1RM = this.calculate1RM(
+          Number(set.peso),
+          set.repeticiones,
+        );
+        const existing1RM = this.calculate1RM(
+          Number(existing.peso),
+          existing.repeticiones,
+        );
 
         if (current1RM > existing1RM) {
           sessionMap.set(dateKey, set);
@@ -267,7 +329,12 @@ export class WorkoutLogsService {
   }
 
   // Verificar si un set es PR
-  private async checkIfPR(userId: string, exerciseId: string, peso: number, reps: number): Promise<boolean> {
+  private async checkIfPR(
+    userId: string,
+    exerciseId: string,
+    peso: number,
+    reps: number,
+  ): Promise<boolean> {
     const current1RM = this.calculate1RM(peso, reps);
 
     const bestSet = await this.exerciseSetRepository
@@ -282,7 +349,10 @@ export class WorkoutLogsService {
       return true; // Primer set del ejercicio siempre es PR
     }
 
-    const best1RM = this.calculate1RM(Number(bestSet.peso), bestSet.repeticiones);
+    const best1RM = this.calculate1RM(
+      Number(bestSet.peso),
+      bestSet.repeticiones,
+    );
     return current1RM > best1RM;
   }
 
@@ -346,12 +416,18 @@ export class WorkoutLogsService {
     const totalSets = logs.reduce((sum, log) => sum + log.sets.length, 0);
     const totalVolume = logs.reduce(
       (sum, log) =>
-        sum + log.sets.reduce((setSum, set) => setSum + Number(set.peso) * set.repeticiones, 0),
+        sum +
+        log.sets.reduce(
+          (setSum, set) => setSum + Number(set.peso) * set.repeticiones,
+          0,
+        ),
       0,
     );
 
     // Calcular racha actual
-    const sortedLogs = logs.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    const sortedLogs = logs.sort(
+      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime(),
+    );
     let currentStreak = 0;
     let lastDate: Date | null = null;
 
@@ -380,7 +456,10 @@ export class WorkoutLogsService {
       totalSets,
       totalVolume: Math.round(totalVolume),
       currentStreak,
-      avgSetsPerWorkout: totalWorkouts > 0 ? Math.round((totalSets / totalWorkouts) * 10) / 10 : 0,
+      avgSetsPerWorkout:
+        totalWorkouts > 0
+          ? Math.round((totalSets / totalWorkouts) * 10) / 10
+          : 0,
     };
   }
 }

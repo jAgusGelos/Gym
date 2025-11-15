@@ -9,7 +9,7 @@ export const Route = createFileRoute('/workouts/')({
   component: WorkoutsPage,
 });
 
-function WorkoutsPage() {
+export function WorkoutsPage() {
   const showToast = useToastStore((state) => state.showToast);
   const { data: workouts, isLoading } = useWorkoutLogs();
   const { data: stats } = useUserWorkoutStats();

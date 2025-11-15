@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { api } from '../services/api';
 import { useAuthStore } from '../stores/authStore';
+import { useToast } from '../stores/toastStore';
 import {
   LoginCredentials,
   RegisterData,
@@ -29,6 +30,7 @@ export const useAuth = () => {
 export const useLogin = () => {
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
@@ -37,7 +39,12 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
+      toast.success('¡Bienvenido!');
       navigate({ to: '/dashboard' });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || 'Credenciales inválidas. Por favor, verificá tu email y contraseña.';
+      toast.error(message);
     },
   });
 };
@@ -45,6 +52,7 @@ export const useLogin = () => {
 export const useRegister = () => {
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation({
     mutationFn: async (data: RegisterData) => {
@@ -53,7 +61,12 @@ export const useRegister = () => {
     },
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
+      toast.success('¡Cuenta creada exitosamente!');
       navigate({ to: '/dashboard' });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || 'Error al crear la cuenta. Por favor, intentá nuevamente.';
+      toast.error(message);
     },
   });
 };

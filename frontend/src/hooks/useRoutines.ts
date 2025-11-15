@@ -68,3 +68,13 @@ export const useToggleFavorite = () => {
     },
   });
 };
+
+export const useMyPlan = () => {
+  return useQuery({
+    queryKey: ['my-plan'],
+    queryFn: async () => {
+      const response = await api.get<Routine>('/workout-routines/my-plan/active');
+      return response.data;
+    },
+  });
+};

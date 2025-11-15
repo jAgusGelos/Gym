@@ -1,4 +1,7 @@
-import { AchievementCategory, AchievementCriterio } from './entities/achievement.entity';
+import {
+  AchievementCategory,
+  AchievementCriterio,
+} from './entities/achievement.entity';
 
 export const achievementsSeed = [
   // ASISTENCIA

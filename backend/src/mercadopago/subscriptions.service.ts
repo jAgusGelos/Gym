@@ -1,13 +1,27 @@
-import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Subscription, SubscriptionStatus, SubscriptionFrequency } from './entities/subscription.entity';
-import { Membership, MembershipStatus, MembershipType, PaymentMethod } from '../memberships/entities/membership.entity';
+import {
+  Subscription,
+  SubscriptionStatus,
+  SubscriptionFrequency,
+} from './entities/subscription.entity';
+import {
+  Membership,
+  MembershipStatus,
+  MembershipType,
+  PaymentMethod,
+} from '../memberships/entities/membership.entity';
 import { MembershipPlan } from './entities/membership-plan.entity';
 import { OnlinePayment, PaymentStatus } from './entities/online-payment.entity';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
@@ -138,7 +152,10 @@ export class SubscriptionsService {
     // Incrementar contador de pagos exitosos
     subscription.successfulPayments++;
     subscription.lastPaymentDate = new Date();
-    subscription.nextBillingDate = this.calculateNextBillingDate(new Date(), subscription.frequency);
+    subscription.nextBillingDate = this.calculateNextBillingDate(
+      new Date(),
+      subscription.frequency,
+    );
     subscription.failedPayments = 0; // Resetear contador de fallos
 
     await this.subscriptionRepository.save(subscription);
@@ -206,7 +223,9 @@ export class SubscriptionsService {
     const subscription = await this.getSubscriptionById(id);
 
     if (subscription.userId !== userId) {
-      throw new BadRequestException('No tienes permiso para cancelar esta suscripción');
+      throw new BadRequestException(
+        'No tienes permiso para cancelar esta suscripción',
+      );
     }
 
     if (subscription.status === SubscriptionStatus.CANCELLED) {
@@ -216,7 +235,7 @@ export class SubscriptionsService {
     subscription.status = SubscriptionStatus.CANCELLED;
     subscription.cancelledAt = new Date();
     subscription.endDate = new Date();
-    subscription.cancelReason = cancelReason || null;
+    subscription.cancelReason = cancelReason || '';
 
     return this.subscriptionRepository.save(subscription);
   }
@@ -226,11 +245,15 @@ export class SubscriptionsService {
     const subscription = await this.getSubscriptionById(id);
 
     if (subscription.userId !== userId) {
-      throw new BadRequestException('No tienes permiso para pausar esta suscripción');
+      throw new BadRequestException(
+        'No tienes permiso para pausar esta suscripción',
+      );
     }
 
     if (subscription.status !== SubscriptionStatus.ACTIVE) {
-      throw new BadRequestException('Solo se pueden pausar suscripciones activas');
+      throw new BadRequestException(
+        'Solo se pueden pausar suscripciones activas',
+      );
     }
 
     subscription.status = SubscriptionStatus.PAUSED;
@@ -243,22 +266,32 @@ export class SubscriptionsService {
     const subscription = await this.getSubscriptionById(id);
 
     if (subscription.userId !== userId) {
-      throw new BadRequestException('No tienes permiso para reanudar esta suscripción');
+      throw new BadRequestException(
+        'No tienes permiso para reanudar esta suscripción',
+      );
     }
 
     if (subscription.status !== SubscriptionStatus.PAUSED) {
-      throw new BadRequestException('Solo se pueden reanudar suscripciones pausadas');
+      throw new BadRequestException(
+        'Solo se pueden reanudar suscripciones pausadas',
+      );
     }
 
     subscription.status = SubscriptionStatus.ACTIVE;
-    subscription.nextBillingDate = this.calculateNextBillingDate(new Date(), subscription.frequency);
+    subscription.nextBillingDate = this.calculateNextBillingDate(
+      new Date(),
+      subscription.frequency,
+    );
 
     return this.subscriptionRepository.save(subscription);
   }
 
   // ==================== HELPERS ====================
 
-  private calculateSubscriptionPrice(basePrice: number, frequency: SubscriptionFrequency): number {
+  private calculateSubscriptionPrice(
+    basePrice: number,
+    frequency: SubscriptionFrequency,
+  ): number {
     switch (frequency) {
       case SubscriptionFrequency.MONTHLY:
         return basePrice;
@@ -317,7 +350,10 @@ export class SubscriptionsService {
     let fechaInicio: Date;
     let fechaVencimiento: Date;
 
-    if (existingMembership && new Date(existingMembership.fechaVencimiento) > now) {
+    if (
+      existingMembership &&
+      new Date(existingMembership.fechaVencimiento) > now
+    ) {
       // Extender desde la fecha de vencimiento actual
       fechaInicio = new Date(existingMembership.fechaVencimiento);
       fechaVencimiento = this.calculateNextBillingDate(fechaInicio, frequency);
@@ -353,7 +389,7 @@ export class SubscriptionsService {
       fechaInicio,
       fechaVencimiento,
       estado: MembershipStatus.ACTIVA,
-      precio: this.calculateSubscriptionPrice(plan.precio, frequency),
+      precio: this.calculateSubscriptionPrice(plan?.precio || 0, frequency),
       metodoPago: PaymentMethod.MERCADOPAGO,
       notas: `Renovación automática - Suscripción ${frequency}`,
     });
@@ -368,7 +404,9 @@ export class SubscriptionsService {
 
     return this.subscriptionRepository
       .createQueryBuilder('subscription')
-      .where('subscription.status = :status', { status: SubscriptionStatus.ACTIVE })
+      .where('subscription.status = :status', {
+        status: SubscriptionStatus.ACTIVE,
+      })
       .andWhere('subscription.nextBillingDate <= :today', { today })
       .getMany();
   }

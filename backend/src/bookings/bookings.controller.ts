@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   Delete,
+  Patch,
   UseGuards,
   Query,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole, User } from '../users/entities/user.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { parseLocalDate } from '../common/utils/date.utils';
 
 @Controller('bookings')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -36,6 +38,12 @@ export class BookingsController {
     return { message: 'Reserva cancelada exitosamente' };
   }
 
+  @Patch(':id/cancel')
+  async cancelBooking(@Param('id') id: string, @CurrentUser() user: User) {
+    await this.bookingsService.cancel(id, user.id);
+    return { message: 'Reserva cancelada exitosamente' };
+  }
+
   @Get('my-bookings')
   async getMyBookings(
     @CurrentUser() user: User,
@@ -49,16 +57,30 @@ export class BookingsController {
     );
   }
 
-  @Get('class/:classId')
+  @Get('schedule/:scheduleId')
   @Roles(UserRole.ADMIN, UserRole.ENTRENADOR, UserRole.RECEPCIONISTA)
-  async getClassBookings(@Param('classId') classId: string) {
-    return this.bookingsService.findClassBookings(classId);
+  async getScheduleBookings(
+    @Param('scheduleId') scheduleId: string,
+    @Query('classDate') classDate: string,
+  ) {
+    return this.bookingsService.findScheduleBookings(
+      scheduleId,
+      classDate ? parseLocalDate(classDate) : undefined,
+    );
   }
 
-  @Post(':id/check-in')
+  @Post('check-in')
   @Roles(UserRole.ADMIN, UserRole.RECEPCIONISTA)
-  async checkIn(@Param('id') classId: string, @Body('qrCode') qrCode: string) {
-    return this.bookingsService.checkInWithQR(qrCode, classId);
+  async checkIn(
+    @Body('qrCode') qrCode: string,
+    @Body('scheduleId') scheduleId: string,
+    @Body('classDate') classDate: string,
+  ) {
+    return this.bookingsService.checkInWithQR(
+      qrCode,
+      scheduleId,
+      parseLocalDate(classDate),
+    );
   }
 
   @Get('history')

@@ -8,11 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import {
-  MembershipType,
-  MembershipStatus,
-  PaymentMethod,
-} from '../entities/membership.entity';
+import { MembershipType, PaymentMethod } from '../entities/membership.entity';
 
 export class CreateMembershipDto {
   @IsUUID()

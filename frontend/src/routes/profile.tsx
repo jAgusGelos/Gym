@@ -1,11 +1,15 @@
 import { useAuth } from '../hooks/useAuth';
 import { Button, Card, CardHeader, CardTitle, CardContent } from '../components/ui';
-import { Mail, Phone, User as UserIcon, Calendar, Award, LogOut } from 'lucide-react';
+import { Mail, Phone, User as UserIcon, Calendar, Award, LogOut, Settings } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { UserRole } from '../types/user.types';
 
 export const ProfilePage = () => {
   const { user, logout } = useAuth();
 
   if (!user) return null;
+
+  const isStaff = [UserRole.ADMIN, UserRole.RECEPCIONISTA, UserRole.ENTRENADOR].includes(user.rol as UserRole);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -104,6 +108,30 @@ export const ProfilePage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Panel de Administración */}
+        {isStaff && (
+          <Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">Panel de Administración</h3>
+                  <p className="text-sm text-indigo-100">
+                    Gestionar {user.rol === UserRole.ADMIN ? 'todo el gimnasio' :
+                              user.rol === UserRole.ENTRENADOR ? 'ejercicios y rutinas' :
+                              'socios y clases'}
+                  </p>
+                </div>
+                <Settings className="w-8 h-8 text-indigo-100" />
+              </div>
+              <Link to="/admin">
+                <Button className="w-full mt-4 bg-white text-indigo-600 hover:bg-indigo-50">
+                  Ir al Panel
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Acciones */}
         <div className="space-y-2">

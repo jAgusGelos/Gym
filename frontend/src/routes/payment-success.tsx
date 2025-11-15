@@ -9,7 +9,6 @@ export const PaymentSuccessPage = () => {
   const search = useSearch({ from: '/payment/success' }) as any;
 
   const paymentId = search?.payment_id;
-  const preferenceId = search?.preference_id;
   const status = search?.status;
 
   useEffect(() => {

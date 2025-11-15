@@ -56,9 +56,24 @@ export class Routine {
   @Column()
   creadorId: string;
 
-  @OneToMany(() => RoutineExercise, (routineExercise) => routineExercise.routine, {
-    cascade: true,
-  })
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column({ nullable: true })
+  userId: string;
+
+  // Alias para mantener compatibilidad
+  @Column({ nullable: true })
+  creadoPor: string;
+
+  @OneToMany(
+    () => RoutineExercise,
+    (routineExercise) => routineExercise.routine,
+    {
+      cascade: true,
+    },
+  )
   ejercicios: RoutineExercise[];
 
   @Column({ type: 'int', nullable: true })

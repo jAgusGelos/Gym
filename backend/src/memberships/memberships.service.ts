@@ -171,10 +171,7 @@ export class MembershipsService {
       .getMany();
   }
 
-  private calculateExpirationDate(
-    startDate: Date,
-    type: MembershipType,
-  ): Date {
+  private calculateExpirationDate(startDate: Date, type: MembershipType): Date {
     const expirationDate = new Date(startDate);
 
     switch (type) {

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import {
   Scale,
@@ -7,7 +6,6 @@ import {
   TrendingDown,
   Calendar,
   Trash2,
-  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -18,6 +16,7 @@ import {
 } from '../hooks/useBodyMeasurements';
 import { useToastStore } from '../stores/toastStore';
 import { cn } from '../utils/cn';
+import { Button } from '../components/ui';
 
 export default function MeasurementsIndexPage() {
   const { data: measurements = [], isLoading } = useBodyMeasurements();
@@ -68,10 +67,10 @@ export default function MeasurementsIndexPage() {
         </div>
 
         <Link to="/measurements/new">
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+          <Button>
             <Plus className="w-5 h-5" />
             Nueva
-          </button>
+          </Button>
         </Link>
       </div>
 
@@ -164,10 +163,10 @@ export default function MeasurementsIndexPage() {
               Comienza a registrar tus medidas corporales
             </p>
             <Link to="/measurements/new">
-              <button className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+              <Button size="lg">
                 <Plus className="w-5 h-5" />
                 Nueva Medición
-              </button>
+              </Button>
             </Link>
           </div>
         ) : (
@@ -238,14 +237,16 @@ export default function MeasurementsIndexPage() {
                     </div>
 
                     <div className="flex gap-2 ml-4">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleDelete(measurement.id)}
                         disabled={deleteMutation.isPending}
-                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                        className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>

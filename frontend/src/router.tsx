@@ -5,6 +5,7 @@ import { DashboardPage } from './routes/dashboard';
 import { ProfilePage } from './routes/profile';
 import { QRPage } from './routes/qr';
 import { ClassesPage } from './routes/classes';
+import { ClassHistoryPage } from './routes/classes.history';
 import { RoutinesPage } from './routes/routines';
 import { NewsPage } from './routes/news';
 import { PlansPage } from './routes/plans';
@@ -29,6 +30,10 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { MobileLayout } from './components/layouts/MobileLayout';
 import { AdminLayout } from './components/layouts/AdminLayout';
 import { UserRole } from './types/user.types';
+import { WorkoutsPage } from './routes/workouts.index';
+import { NewWorkoutPage } from './routes/workouts.new';
+import { PersonalRecordsPage } from './routes/workouts.prs';
+import ExercisesIndexPage from './routes/exercises.index';
 
 // Root route
 const rootRoute = createRootRoute({
@@ -98,6 +103,18 @@ const classesRoute = createRoute({
     <ProtectedRoute>
       <MobileLayout>
         <ClassesPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const classesHistoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/classes/history',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <ClassHistoryPage />
       </MobileLayout>
     </ProtectedRoute>
   ),
@@ -175,6 +192,54 @@ const goalsRoute = createRoute({
   ),
 });
 
+const workoutsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workouts',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <WorkoutsPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const workoutsNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workouts/new',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <NewWorkoutPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const workoutsPrsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workouts/prs',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <PersonalRecordsPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
+const exercisesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/exercises',
+  component: () => (
+    <ProtectedRoute>
+      <MobileLayout>
+        <ExercisesIndexPage />
+      </MobileLayout>
+    </ProtectedRoute>
+  ),
+});
+
 const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
@@ -237,8 +302,8 @@ const adminRoute = createRoute({
 });
 
 const adminMembersRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/members',
+  getParentRoute: () => rootRoute,
+  path: '/adm/members',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
       <AdminLayout>
@@ -249,8 +314,8 @@ const adminMembersRoute = createRoute({
 });
 
 const adminClassesRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/classes',
+  getParentRoute: () => rootRoute,
+  path: '/adm/classes',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
       <AdminLayout>
@@ -261,8 +326,8 @@ const adminClassesRoute = createRoute({
 });
 
 const adminAttendanceRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/attendance',
+  getParentRoute: () => rootRoute,
+  path: '/adm/attendance',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.RECEPCIONISTA]}>
       <AdminLayout>
@@ -273,8 +338,8 @@ const adminAttendanceRoute = createRoute({
 });
 
 const adminPaymentsRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/payments',
+  getParentRoute: () => rootRoute,
+  path: '/adm/payments',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <AdminLayout>
@@ -285,8 +350,8 @@ const adminPaymentsRoute = createRoute({
 });
 
 const adminPlansRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/plans',
+  getParentRoute: () => rootRoute,
+  path: '/adm/plans',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <AdminLayout>
@@ -297,8 +362,8 @@ const adminPlansRoute = createRoute({
 });
 
 const adminExercisesRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/exercises',
+  getParentRoute: () => rootRoute,
+  path: '/adm/exercises',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.ENTRENADOR]}>
       <AdminLayout>
@@ -309,8 +374,8 @@ const adminExercisesRoute = createRoute({
 });
 
 const adminRoutinesRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/routines',
+  getParentRoute: () => rootRoute,
+  path: '/adm/routines',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.ENTRENADOR]}>
       <AdminLayout>
@@ -321,8 +386,8 @@ const adminRoutinesRoute = createRoute({
 });
 
 const adminAnnouncementsRoute = createRoute({
-  getParentRoute: () => adminRoute,
-  path: '/announcements',
+  getParentRoute: () => rootRoute,
+  path: '/adm/announcements',
   component: () => (
     <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <AdminLayout>
@@ -341,27 +406,31 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   qrRoute,
   classesRoute,
+  classesHistoryRoute,
   routinesRoute,
   newsRoute,
   plansRoute,
   progressRoute,
   achievementsRoute,
   goalsRoute,
+  workoutsRoute,
+  workoutsNewRoute,
+  workoutsPrsRoute,
+  exercisesRoute,
   notificationsRoute,
   measurementsRoute,
   newMeasurementRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
-  adminRoute.addChildren([
-    adminMembersRoute,
-    adminClassesRoute,
-    adminAttendanceRoute,
-    adminPaymentsRoute,
-    adminPlansRoute,
-    adminExercisesRoute,
-    adminRoutinesRoute,
-    adminAnnouncementsRoute,
-  ]),
+  adminRoute,
+  adminMembersRoute,
+  adminClassesRoute,
+  adminAttendanceRoute,
+  adminPaymentsRoute,
+  adminPlansRoute,
+  adminExercisesRoute,
+  adminRoutinesRoute,
+  adminAnnouncementsRoute,
 ]);
 
 // Create router

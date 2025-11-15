@@ -10,26 +10,26 @@ interface PaginatedResult<T> {
   totalPages: number;
 }
 
+import { ClassSchedule } from '../types/class.types';
+
 export interface CreateClassDto {
   nombre: string;
   descripcion: string;
-  duracion: number;
   cupoMaximo: number;
-  fechaHora: string;
-  instructorId: string;
+  imagenUrl?: string;
+  schedules: Omit<ClassSchedule, 'id' | 'instructor'>[];
 }
 
 export interface UpdateClassDto {
   nombre?: string;
   descripcion?: string;
-  duracion?: number;
   cupoMaximo?: number;
-  fechaHora?: string;
-  instructorId?: string;
+  imagenUrl?: string;
   activo?: boolean;
+  schedules?: Omit<ClassSchedule, 'id' | 'instructor'>[];
 }
 
-export const useAdminClasses = (page = 1, limit = 20) => {
+export const useAdminClasses = (page = 1, limit = 1000) => {
   return useQuery({
     queryKey: ['admin-classes', page, limit],
     queryFn: async () => {

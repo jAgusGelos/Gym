@@ -1,8 +1,19 @@
-import { ReactNode } from 'react';
-import { Link, useLocation } from '@tanstack/react-router';
-import { Home, Calendar, Dumbbell, QrCode, User, Megaphone, TrendingUp, Trophy } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { NotificationBell } from '../notifications/NotificationBell';
+import { ReactNode } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
+import {
+  Home,
+  Calendar,
+  Dumbbell,
+  User,
+  Megaphone,
+  TrendingUp,
+  Trophy,
+  Target,
+  Scale,
+  Activity,
+} from "lucide-react";
+import { cn } from "../../utils/cn";
+import { NotificationBell } from "../notifications/NotificationBell";
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -13,39 +24,54 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
 
   const navItems = [
     {
-      path: '/dashboard',
+      path: "/dashboard",
       icon: Home,
-      label: 'Inicio',
+      label: "Inicio",
     },
     {
-      path: '/news',
+      path: "/news",
       icon: Megaphone,
-      label: 'Noticias',
+      label: "Noticias",
     },
     {
-      path: '/classes',
+      path: "/classes",
       icon: Calendar,
-      label: 'Clases',
+      label: "Clases",
     },
     {
-      path: '/routines',
+      path: "/routines",
       icon: Dumbbell,
-      label: 'Rutinas',
+      label: "Rutinas",
     },
     {
-      path: '/progress',
+      path: "/workouts/new",
+      icon: Activity,
+      label: "Entrenar",
+    },
+    {
+      path: "/measurements",
+      icon: Scale,
+      label: "Mediciones",
+    },
+    {
+      path: "/goals",
+      icon: Target,
+      label: "Objetivos",
+    },
+    {
+      path: "/progress",
       icon: TrendingUp,
-      label: 'Progreso',
+      label: "Progreso",
     },
     {
-      path: '/achievements',
+      path: "/achievements",
       icon: Trophy,
-      label: 'Logros',
+      label: "Logros",
     },
     {
-      path: '/profile',
+      path: "/profile",
       icon: User,
-      label: 'Perfil',
+      label: "Perfil",
     },
   ];
 
@@ -62,13 +88,11 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-20">
-        {children}
-      </main>
+      <main className="flex-1 overflow-y-auto pb-20">{children}</main>
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-area-inset-bottom">
-        <div className="grid grid-cols-7 h-16">
+        <div className="grid grid-cols-10 h-16">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -78,10 +102,10 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 transition-colors',
+                  "flex flex-col items-center justify-center gap-1 transition-colors",
                   isActive
-                    ? 'text-primary-600 dark:text-primary-500'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    ? "text-primary-600 dark:text-primary-500"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                 )}
               >
                 <Icon className="w-6 h-6" />

@@ -15,7 +15,7 @@ export const useAttendances = (page = 1, limit = 50, date?: string) => {
     queryKey: ['attendances', page, limit, date],
     queryFn: async () => {
       const response = await api.get<PaginatedResult<Attendance>>('/attendance', {
-        params: { page, limit, date },
+        params: { page, limit, fecha: date },
       });
       return response.data;
     },

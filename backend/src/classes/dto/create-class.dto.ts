@@ -1,13 +1,15 @@
 import {
   IsNotEmpty,
   IsString,
-  IsUUID,
-  IsDateString,
   IsNumber,
   IsPositive,
   IsOptional,
   IsUrl,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import { CreateClassScheduleDto } from './class-schedule.dto';
 
 export class CreateClassDto {
   @IsString()
@@ -18,24 +20,18 @@ export class CreateClassDto {
   @IsNotEmpty()
   descripcion: string;
 
-  @IsUUID()
-  @IsNotEmpty()
-  instructorId: string;
-
-  @IsDateString()
-  @IsNotEmpty()
-  fechaHoraInicio: string;
-
-  @IsDateString()
-  @IsNotEmpty()
-  fechaHoraFin: string;
-
   @IsNumber()
   @IsPositive()
   @IsNotEmpty()
   cupoMaximo: number;
 
-  @IsUrl()
+  @Transform(({ value }) => value === '' || value === null ? null : value)
   @IsOptional()
-  imagenUrl?: string;
+  @IsString()
+  imagenUrl?: string | null;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateClassScheduleDto)
+  schedules: CreateClassScheduleDto[];
 }

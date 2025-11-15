@@ -1,19 +1,12 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CheckInDto, ManualCheckInDto, CheckOutDto } from './dto/check-in.dto';
+import { AttendanceFiltersDto } from './dto/attendance-filters.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { UserRole } from '../users/entities/user.entity';
-import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Controller('attendance')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -40,12 +33,12 @@ export class AttendanceController {
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.RECEPCIONISTA)
-  async findAll(
-    @Query() paginationDto: PaginationDto,
-    @Query('fecha') fecha?: string,
-    @Query('userId') userId?: string,
-  ) {
-    return this.attendanceService.findAll(paginationDto, { fecha, userId });
+  async findAll(@Query() filters: AttendanceFiltersDto) {
+    const { page, limit, offset, fecha, userId } = filters;
+    return this.attendanceService.findAll(
+      { page, limit, offset },
+      { fecha, userId },
+    );
   }
 
   @Get('today')

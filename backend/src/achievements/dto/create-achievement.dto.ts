@@ -1,5 +1,16 @@
-import { IsEnum, IsNotEmpty, IsString, IsInt, Min, IsBoolean, IsOptional } from 'class-validator';
-import { AchievementCategory, AchievementCriterio } from '../entities/achievement.entity';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  IsInt,
+  Min,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
+import {
+  AchievementCategory,
+  AchievementCriterio,
+} from '../entities/achievement.entity';
 
 export class CreateAchievementDto {
   @IsNotEmpty()

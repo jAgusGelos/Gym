@@ -32,4 +32,4 @@ async function bootstrap() {
 
   logger.log(`🚀 Aplicación corriendo en: http://localhost:${port}/api`);
 }
-bootstrap();
+void bootstrap();

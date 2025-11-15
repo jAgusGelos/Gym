@@ -13,16 +13,24 @@ import {
 import { BodyMeasurementsService } from './body-measurements.service';
 import { CreateBodyMeasurementDto } from './dto/create-body-measurement.dto';
 import { UpdateBodyMeasurementDto } from './dto/update-body-measurement.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @Controller('body-measurements')
 @UseGuards(JwtAuthGuard)
 export class BodyMeasurementsController {
-  constructor(private readonly bodyMeasurementsService: BodyMeasurementsService) {}
+  constructor(
+    private readonly bodyMeasurementsService: BodyMeasurementsService,
+  ) {}
 
   @Post()
-  create(@Request() req, @Body() createBodyMeasurementDto: CreateBodyMeasurementDto) {
-    return this.bodyMeasurementsService.create(req.user.userId, createBodyMeasurementDto);
+  create(
+    @Request() req,
+    @Body() createBodyMeasurementDto: CreateBodyMeasurementDto,
+  ) {
+    return this.bodyMeasurementsService.create(
+      req.user.userId,
+      createBodyMeasurementDto,
+    );
   }
 
   @Get()
@@ -31,7 +39,11 @@ export class BodyMeasurementsController {
   }
 
   @Get('history')
-  findHistory(@Request() req, @Query('page') page?: string, @Query('limit') limit?: string) {
+  findHistory(
+    @Request() req,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     return this.bodyMeasurementsService.findUserHistory(
       req.user.userId,
       page ? parseInt(page) : 1,
@@ -58,8 +70,16 @@ export class BodyMeasurementsController {
   }
 
   @Get('compare/:id1/:id2')
-  compareMeasurements(@Request() req, @Param('id1') id1: string, @Param('id2') id2: string) {
-    return this.bodyMeasurementsService.compareMeasurements(req.user.userId, id1, id2);
+  compareMeasurements(
+    @Request() req,
+    @Param('id1') id1: string,
+    @Param('id2') id2: string,
+  ) {
+    return this.bodyMeasurementsService.compareMeasurements(
+      req.user.userId,
+      id1,
+      id2,
+    );
   }
 
   @Get(':id')
@@ -73,7 +93,11 @@ export class BodyMeasurementsController {
     @Param('id') id: string,
     @Body() updateBodyMeasurementDto: UpdateBodyMeasurementDto,
   ) {
-    return this.bodyMeasurementsService.update(id, req.user.userId, updateBodyMeasurementDto);
+    return this.bodyMeasurementsService.update(
+      id,
+      req.user.userId,
+      updateBodyMeasurementDto,
+    );
   }
 
   @Delete(':id')

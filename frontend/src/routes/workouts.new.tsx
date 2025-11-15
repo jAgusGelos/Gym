@@ -56,7 +56,6 @@ function NewWorkoutPage() {
     remove: removeExercise,
   } = useFieldArray({
     control,
-    // @ts-expect-error - useFieldArray type issues
     name: "exercises",
   });
 
@@ -178,7 +177,9 @@ function NewWorkoutPage() {
         {/* Ejercicios */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ejercicios</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Ejercicios
+            </h2>
             <button
               type="button"
               onClick={handleAddExercise}
@@ -205,7 +206,7 @@ function NewWorkoutPage() {
                   exerciseIndex={exerciseIndex}
                   register={register}
                   control={control}
-                  exercises={exercises || []}
+                  exercises={exercises?.data || []}
                   removeExercise={removeExercise}
                   errors={errors}
                 />
@@ -312,7 +313,9 @@ function ExerciseSetForm({
       {/* Sets */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Series</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Series
+          </label>
           <button
             type="button"
             onClick={handleAddSet}

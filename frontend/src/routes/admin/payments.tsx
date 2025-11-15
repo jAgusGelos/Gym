@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { usePayments, useCreatePayment } from "../../hooks/useAdmin";
 import { Button, Card, CardContent, Loading, Modal } from "../../components/ui";
+import { StatCard } from "../../components/ui/StatCard";
 import { PaymentForm } from "../../components/forms/PaymentForm";
 import { useToast } from "../../stores/toastStore";
 import {
@@ -105,59 +106,26 @@ export const PaymentsPage = () => {
 
       {/* Resumen financiero */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  Ingresos Totales
-                </p>
-                <p className="text-2xl font-bold text-green-600">
-                  ${totalIngresos.toLocaleString("es-AR")}
-                </p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Ingresos Totales"
+          value={`$${totalIngresos.toLocaleString("es-AR")}`}
+          icon={DollarSign}
+          iconColor="green"
+        />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  Pendientes
-                </p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  ${totalPendientes.toLocaleString("es-AR")}
-                </p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Pendientes"
+          value={`$${totalPendientes.toLocaleString("es-AR")}`}
+          icon={Clock}
+          iconColor="amber"
+        />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  Total Pagos
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {paymentsData?.total || 0}
-                </p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-primary-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Total Pagos"
+          value={paymentsData?.total || 0}
+          icon={CreditCard}
+          iconColor="blue"
+        />
       </div>
 
       {/* Filtros */}

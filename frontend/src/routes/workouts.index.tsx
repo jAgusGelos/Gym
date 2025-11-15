@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Plus, Calendar, Dumbbell, TrendingUp, Award, Trash2, Clock } from 'lucide-react';
+import { StatCard } from '../components/ui/StatCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useWorkoutLogs, useUserWorkoutStats, useDeleteWorkoutLog } from '../hooks/useWorkoutLogs';
@@ -61,55 +62,39 @@ export function WorkoutsPage() {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Dumbbell className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Entrenamientos</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalWorkouts}</p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Total Entrenamientos"
+            value={stats.totalWorkouts}
+            icon={Dumbbell}
+            iconColor="blue"
+            size="sm"
+          />
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Series</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalSets}</p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Total Series"
+            value={stats.totalSets}
+            icon={TrendingUp}
+            iconColor="green"
+            size="sm"
+          />
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Award className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Volumen Total</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.totalVolume.toLocaleString()} kg
-                </p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Volumen Total"
+            value={stats.totalVolume.toLocaleString()}
+            icon={Award}
+            iconColor="purple"
+            size="sm"
+            suffix="kg"
+          />
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Calendar className="w-5 h-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Racha Actual</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.currentStreak} días</p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Racha Actual"
+            value={stats.currentStreak}
+            icon={Calendar}
+            iconColor="orange"
+            size="sm"
+            suffix="días"
+          />
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAnnouncements, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../../hooks/useAnnouncements';
 import { Button, Card, CardContent, Input, Loading, Modal } from '../../components/ui';
+import { StatCard } from '../../components/ui/StatCard';
 import { AnnouncementForm } from '../../components/forms/AnnouncementForm';
 import { useToast } from '../../stores/toastStore';
 import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, Megaphone, Calendar } from 'lucide-react';
@@ -180,59 +181,37 @@ export const AnnouncementsPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{announcementsData?.total || 0}</p>
-              </div>
-              <Megaphone className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Total"
+          value={announcementsData?.total || 0}
+          icon={Megaphone}
+          iconColor="blue"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Activos</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {announcementsData?.data.filter(a => a.activo).length || 0}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Activos"
+          value={announcementsData?.data.filter(a => a.activo).length || 0}
+          icon={CheckCircle}
+          iconColor="green"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Eventos</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {announcementsData?.data.filter(a => a.tipo === AnnouncementType.EVENTO).length || 0}
-                </p>
-              </div>
-              <Calendar className="w-8 h-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Eventos"
+          value={announcementsData?.data.filter(a => a.tipo === AnnouncementType.EVENTO).length || 0}
+          icon={Calendar}
+          iconColor="purple"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Promociones</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {announcementsData?.data.filter(a => a.tipo === AnnouncementType.PROMOCION).length || 0}
-                </p>
-              </div>
-              <Megaphone className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Promociones"
+          value={announcementsData?.data.filter(a => a.tipo === AnnouncementType.PROMOCION).length || 0}
+          icon={Megaphone}
+          iconColor="green"
+          size="sm"
+        />
       </div>
 
       {/* Announcements List */}

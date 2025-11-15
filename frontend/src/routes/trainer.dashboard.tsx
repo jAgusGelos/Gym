@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Users, Calendar, TrendingUp, Award, BookOpen, ChevronRight } from 'lucide-react';
+import { StatCard } from '../components/ui/StatCard';
 import { useMyClients, useTrainerStats, useMyTrainerClasses } from '../hooks/useTrainers';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -37,41 +38,26 @@ function TrainerDashboardPage() {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Mis Clientes</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalClients}</p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Mis Clientes"
+            value={stats.totalClients}
+            icon={Users}
+            iconColor="blue"
+          />
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <BookOpen className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Rutinas Activas</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.activeRoutines}</p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Rutinas Activas"
+            value={stats.activeRoutines}
+            icon={BookOpen}
+            iconColor="green"
+          />
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Clases</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalClasses}</p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="Total Clases"
+            value={stats.totalClasses}
+            icon={Calendar}
+            iconColor="purple"
+          />
         </div>
       )}
 
@@ -193,35 +179,32 @@ function TrainerDashboardPage() {
       {/* Additional Stats */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-100 text-sm mb-1">Total Rutinas Creadas</p>
-                <p className="text-4xl font-bold">{stats.totalRoutines}</p>
-              </div>
-              <BookOpen className="w-12 h-12 text-indigo-200 opacity-50" />
-            </div>
-          </div>
+          <StatCard
+            label="Total Rutinas Creadas"
+            value={stats.totalRoutines}
+            icon={BookOpen}
+            iconColor="indigo"
+            variant="gradient"
+            size="lg"
+          />
 
-          <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm mb-1">Total Asistencias</p>
-                <p className="text-4xl font-bold">{stats.totalAttendance}</p>
-              </div>
-              <Award className="w-12 h-12 text-green-200 opacity-50" />
-            </div>
-          </div>
+          <StatCard
+            label="Total Asistencias"
+            value={stats.totalAttendance}
+            icon={Award}
+            iconColor="green"
+            variant="gradient"
+            size="lg"
+          />
 
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100 text-sm mb-1">Clases Activas</p>
-                <p className="text-4xl font-bold">{stats.upcomingClasses}</p>
-              </div>
-              <TrendingUp className="w-12 h-12 text-orange-200 opacity-50" />
-            </div>
-          </div>
+          <StatCard
+            label="Clases Activas"
+            value={stats.upcomingClasses}
+            icon={TrendingUp}
+            iconColor="orange"
+            variant="gradient"
+            size="lg"
+          />
         </div>
       )}
     </div>

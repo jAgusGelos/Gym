@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usePlans, useCreatePlan, useUpdatePlan, useDeletePlan, useAdminPayments } from '../../hooks/usePlans';
 import { Button, Card, CardContent, Loading, Modal } from '../../components/ui';
+import { StatCard } from '../../components/ui/StatCard';
 import { PlanForm } from '../../components/forms/PlanForm';
 import { useToast } from '../../stores/toastStore';
 import { Plus, Edit, Trash2, CheckCircle, XCircle, CreditCard, TrendingUp, DollarSign, Star } from 'lucide-react';
@@ -136,57 +137,37 @@ export const AdminPlansPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Planes</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{plans?.length || 0}</p>
-              </div>
-              <CreditCard className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Total Planes"
+          value={plans?.length || 0}
+          icon={CreditCard}
+          iconColor="blue"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Planes Activos</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {plans?.filter(p => p.activo).length || 0}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Planes Activos"
+          value={plans?.filter(p => p.activo).length || 0}
+          icon={CheckCircle}
+          iconColor="green"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Ventas Totales</p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{approvedPayments}</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Ventas Totales"
+          value={approvedPayments}
+          icon={TrendingUp}
+          iconColor="purple"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Ingresos</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  ${totalRevenue.toLocaleString('es-AR')}
-                </p>
-              </div>
-              <DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Ingresos"
+          value={`$${totalRevenue.toLocaleString('es-AR')}`}
+          icon={DollarSign}
+          iconColor="green"
+          size="sm"
+        />
       </div>
 
       {/* Plans Grid */}

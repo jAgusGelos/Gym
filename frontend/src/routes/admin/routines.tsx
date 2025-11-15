@@ -13,6 +13,7 @@ import {
   Loading,
   Modal,
 } from "../../components/ui";
+import { StatCard } from "../../components/ui/StatCard";
 import { RoutineForm } from "../../components/forms/RoutineForm";
 import { useToast } from "../../stores/toastStore";
 import {
@@ -217,47 +218,29 @@ export const AdminRoutinesPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total de Rutinas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {routinesData?.total || 0}
-                </p>
-              </div>
-              <ClipboardList className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Total de Rutinas"
+          value={routinesData?.total || 0}
+          icon={ClipboardList}
+          iconColor="blue"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Públicas</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {routinesData?.data.filter((r) => r.publico).length || 0}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Públicas"
+          value={routinesData?.data.filter((r) => r.publico).length || 0}
+          icon={CheckCircle}
+          iconColor="green"
+          size="sm"
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Privadas</p>
-                <p className="text-2xl font-bold text-gray-600">
-                  {routinesData?.data.filter((r) => !r.publico).length || 0}
-                </p>
-              </div>
-              <XCircle className="w-8 h-8 text-gray-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          label="Privadas"
+          value={routinesData?.data.filter((r) => !r.publico).length || 0}
+          icon={XCircle}
+          iconColor="gray"
+          size="sm"
+        />
       </div>
 
       {/* Routines Grid */}

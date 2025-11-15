@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Award, TrendingUp, ArrowLeft } from 'lucide-react';
+import { StatCard } from '../components/ui/StatCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { usePersonalRecords } from '../hooks/useWorkoutLogs';
@@ -51,15 +52,14 @@ export function PersonalRecordsPage() {
       </div>
 
       {/* Stats Summary */}
-      <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-amber-100 text-sm mb-1">Total de Records</p>
-            <p className="text-4xl font-bold">{prs?.length || 0}</p>
-          </div>
-          <Award className="w-16 h-16 text-amber-200 opacity-50" />
-        </div>
-      </div>
+      <StatCard
+        label="Total de Records"
+        value={prs?.length || 0}
+        icon={Award}
+        iconColor="amber"
+        variant="gradient"
+        size="lg"
+      />
 
       {/* PRs by Muscle Group */}
       {!prsByMuscleGroup || Object.keys(prsByMuscleGroup).length === 0 ? (

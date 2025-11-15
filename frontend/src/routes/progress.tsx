@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useMyProgress, useProgressStats, useCreateProgressEntry, useDeleteProgressEntry } from '../hooks/useProgress';
 import { Card, CardContent, Button, Input, Loading } from '../components/ui';
+import { StatCard } from '../components/ui/StatCard';
 import { useToast } from '../stores/toastStore';
-import { Plus, TrendingUp, TrendingDown, Calendar, Trash2, Scale, Activity } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Calendar, Trash2, Scale, Activity, Percent } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -158,77 +159,42 @@ export const ProgressPage = () => {
         {/* Stats */}
         {stats && stats.totalEntries > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Peso Actual</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {stats.latestWeight?.toFixed(1)}
-                    </p>
-                    <p className="text-xs text-gray-500">kg</p>
-                  </div>
-                  <Scale className="w-8 h-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              label="Peso Actual"
+              value={stats.latestWeight?.toFixed(1) || '-'}
+              icon={Scale}
+              iconColor="blue"
+              size="sm"
+              suffix="kg"
+            />
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Cambio</p>
-                    <p className={`text-2xl font-bold ${
-                      stats.weightChange && stats.weightChange < 0 ? 'text-green-600' : 'text-orange-600'
-                    }`}>
-                      {stats.weightChange !== null ? (
-                        <span>
-                          {stats.weightChange > 0 ? '+' : ''}
-                          {stats.weightChange.toFixed(1)}
-                        </span>
-                      ) : '-'}
-                    </p>
-                    <p className="text-xs text-gray-500">kg</p>
-                  </div>
-                  {stats.weightChange !== null && (
-                    stats.weightChange < 0 ? (
-                      <TrendingDown className="w-8 h-8 text-green-600" />
-                    ) : (
-                      <TrendingUp className="w-8 h-8 text-orange-600" />
-                    )
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              label="Cambio"
+              value={stats.weightChange !== null ? (
+                `${stats.weightChange > 0 ? '+' : ''}${stats.weightChange.toFixed(1)}`
+              ) : '-'}
+              icon={stats.weightChange !== null && stats.weightChange < 0 ? TrendingDown : TrendingUp}
+              iconColor={stats.weightChange !== null && stats.weightChange < 0 ? 'green' : 'orange'}
+              size="sm"
+              suffix="kg"
+            />
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Grasa</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {stats.latestBodyFat?.toFixed(1) || '-'}
-                    </p>
-                    <p className="text-xs text-gray-500">%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              label="Grasa"
+              value={stats.latestBodyFat?.toFixed(1) || '-'}
+              icon={Percent}
+              iconColor="purple"
+              size="sm"
+              suffix="%"
+            />
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Registros</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {stats.totalEntries}
-                    </p>
-                    <p className="text-xs text-gray-500">total</p>
-                  </div>
-                  <Calendar className="w-8 h-8 text-purple-600" />
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              label="Registros"
+              value={stats.totalEntries}
+              icon={Calendar}
+              iconColor="indigo"
+              size="sm"
+            />
           </div>
         )}
 

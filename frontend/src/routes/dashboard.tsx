@@ -7,6 +7,8 @@ import {
   CardContent,
   Loading,
 } from "../components/ui";
+import { StatCard } from "../components/ui/StatCard";
+import { QuickActionCard } from "../components/ui/QuickActionCard";
 import { Link } from "@tanstack/react-router";
 import {
   Calendar,
@@ -16,6 +18,7 @@ import {
   ChevronRight,
   Settings,
   Clock,
+  BookCheck,
 } from "lucide-react";
 import { UserRole } from "../types/user.types";
 import { format } from "date-fns";
@@ -71,67 +74,39 @@ export const DashboardPage = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
           <Link to="/qr">
-            <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="pt-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center mx-auto mb-3">
-                  <QrCode className="w-6 h-6 text-primary-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Mi QR
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Check-in rápido
-                </p>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              title="Mi QR"
+              description="Check-in rápido"
+              icon={QrCode}
+              iconColor="primary"
+            />
           </Link>
 
           <Link to="/classes">
-            <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="pt-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-3">
-                  <Calendar className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Clases
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Reservar ahora
-                </p>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              title="Clases"
+              description="Reservar ahora"
+              icon={Calendar}
+              iconColor="green"
+            />
           </Link>
 
           <Link to="/routines">
-            <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="pt-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mx-auto mb-3">
-                  <Dumbbell className="w-6 h-6 text-purple-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Rutinas
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Ver entrenamientos
-                </p>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              title="Rutinas"
+              description="Ver entrenamientos"
+              icon={Dumbbell}
+              iconColor="purple"
+            />
           </Link>
 
           <Link to="/workouts">
-            <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="pt-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="w-6 h-6 text-orange-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Entrenamientos
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Registrar progreso
-                </p>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              title="Entrenamientos"
+              description="Registrar progreso"
+              icon={TrendingUp}
+              iconColor="orange"
+            />
           </Link>
         </div>
 
@@ -213,34 +188,29 @@ export const DashboardPage = () => {
 
         {/* Estadísticas */}
         <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-primary-600">
-                {activeBookings.length}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Reservas activas
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Reservas activas"
+            value={activeBookings.length}
+            icon={BookCheck}
+            iconColor="blue"
+            size="sm"
+          />
 
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-green-600">0</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Check-ins
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Check-ins"
+            value={0}
+            icon={Calendar}
+            iconColor="green"
+            size="sm"
+          />
 
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-purple-600">0</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Rutinas
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Rutinas"
+            value={0}
+            icon={Dumbbell}
+            iconColor="purple"
+            size="sm"
+          />
         </div>
       </div>
     </div>

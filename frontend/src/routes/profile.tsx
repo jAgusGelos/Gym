@@ -3,6 +3,8 @@ import { Button, Card, CardHeader, CardTitle, CardContent } from '../components/
 import { Mail, Phone, User as UserIcon, Calendar, Award, LogOut, Settings } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { UserRole } from '../types/user.types';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export const ProfilePage = () => {
   const { user, logout } = useAuth();
@@ -76,11 +78,7 @@ export const ProfilePage = () => {
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Miembro desde</p>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {new Date(user.createdAt).toLocaleDateString('es-AR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {format(new Date(user.fechaRegistro), "d 'de' MMMM, yyyy", { locale: es })}
                 </p>
               </div>
             </div>

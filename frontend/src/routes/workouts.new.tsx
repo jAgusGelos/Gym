@@ -106,18 +106,18 @@ function NewWorkoutPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-indigo-100 rounded-lg">
-            <Dumbbell className="w-6 h-6 text-indigo-600" />
+          <div className="p-3 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
+            <Dumbbell className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Registrar Entrenamiento
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Registra tu sesión de entrenamiento
             </p>
           </div>
@@ -127,19 +127,19 @@ function NewWorkoutPage() {
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Datos generales */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Información General
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Fecha <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
                 {...register("fecha", { required: "La fecha es requerida" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
               {errors.fecha && (
                 <p className="mt-1 text-sm text-red-600">
@@ -149,19 +149,19 @@ function NewWorkoutPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Título (opcional)
               </label>
               <input
                 type="text"
                 {...register("titulo")}
                 placeholder="ej: Día de pierna"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Duración (minutos)
               </label>
               <input
@@ -169,16 +169,16 @@ function NewWorkoutPage() {
                 {...register("duracionMinutos")}
                 placeholder="60"
                 min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
           </div>
         </div>
 
         {/* Ejercicios */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Ejercicios</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ejercicios</h2>
             <button
               type="button"
               onClick={handleAddExercise}
@@ -190,8 +190,8 @@ function NewWorkoutPage() {
           </div>
 
           {exerciseFields.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Dumbbell className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <Dumbbell className="w-12 h-12 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
               <p>No hay ejercicios agregados</p>
               <p className="text-sm">
                 Haz clic en "Agregar Ejercicio" para comenzar
@@ -275,17 +275,17 @@ function ExerciseSetForm({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900/50">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Ejercicio <span className="text-red-500">*</span>
           </label>
           <select
             {...register(`exercises.${exerciseIndex}.exerciseId`, {
               required: "Selecciona un ejercicio",
             })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           >
             <option value="">Seleccionar ejercicio...</option>
             {exercises.map((exercise) => (
@@ -312,11 +312,11 @@ function ExerciseSetForm({
       {/* Sets */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Series</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Series</label>
           <button
             type="button"
             onClick={handleAddSet}
-            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
           >
             + Agregar Serie
           </button>
@@ -325,7 +325,7 @@ function ExerciseSetForm({
         <div className="space-y-2">
           {setFields.map((field, setIndex) => (
             <div key={field.id} className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-600 w-6">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-6">
                 {setIndex + 1}.
               </span>
 
@@ -341,11 +341,11 @@ function ExerciseSetForm({
                       min: 0,
                     }
                   )}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
 
-              <span className="text-gray-400">x</span>
+              <span className="text-gray-400 dark:text-gray-500">x</span>
 
               <div className="flex-1">
                 <input
@@ -358,7 +358,7 @@ function ExerciseSetForm({
                       min: 1,
                     }
                   )}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -373,7 +373,7 @@ function ExerciseSetForm({
                       max: 10,
                     }
                   )}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
 

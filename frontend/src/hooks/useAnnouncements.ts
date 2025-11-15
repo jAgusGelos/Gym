@@ -10,12 +10,12 @@ interface PaginatedResult<T> {
   totalPages: number;
 }
 
-export const useAnnouncements = (page = 1, limit = 20, tipo?: string) => {
+export const useAnnouncements = (page = 1, limit = 20) => {
   return useQuery({
-    queryKey: ['announcements', page, limit, tipo],
+    queryKey: ['announcements', page, limit],
     queryFn: async () => {
       const response = await api.get<PaginatedResult<Announcement>>('/announcements', {
-        params: { page, limit, tipo },
+        params: { page, limit },
       });
       return response.data;
     },

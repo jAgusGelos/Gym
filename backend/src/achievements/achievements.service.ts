@@ -57,14 +57,14 @@ export class AchievementsService {
   async getUserAchievements(userId: string) {
     const allAchievements = await this.findAll();
     const userAchievements = await this.userAchievementRepository.find({
-      where: { userId },
+      where: { user: { id: userId } },
       relations: ['achievement'],
     });
 
     // Mapear todos los achievements con el progreso del usuario
     return allAchievements.map((achievement) => {
       const userAchievement = userAchievements.find(
-        (ua) => ua.achievementId === achievement.id,
+        (ua) => ua.achievement.id === achievement.id,
       );
 
       return {
@@ -261,15 +261,18 @@ export class AchievementsService {
     objetivo: number,
   ): Promise<UserAchievement> {
     const existing = await this.userAchievementRepository.findOne({
-      where: { userId, achievementId },
+      where: {
+        user: { id: userId },
+        achievement: { id: achievementId }
+      },
     });
 
     const completado = progresoActual >= objetivo;
 
     if (!existing) {
       const userAchievement = this.userAchievementRepository.create({
-        userId,
-        achievementId,
+        user: { id: userId } as any,
+        achievement: { id: achievementId } as any,
         progresoActual,
         completado,
         fechaCompletado: completado ? new Date() : undefined,

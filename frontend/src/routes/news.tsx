@@ -8,11 +8,16 @@ import { es } from 'date-fns/locale';
 
 export const NewsPage = () => {
   const [filterType, setFilterType] = useState<AnnouncementType | 'all'>('all');
-  const { data: announcementsData, isLoading } = useAnnouncements(1, 50, filterType === 'all' ? undefined : filterType);
+  const { data: announcementsData, isLoading } = useAnnouncements(1, 50);
 
   // Filter only active announcements and not expired
   const activeAnnouncements = announcementsData?.data.filter((announcement) => {
     if (!announcement.activo) return false;
+
+    // Filter by type
+    if (filterType !== 'all' && announcement.tipo !== filterType) {
+      return false;
+    }
 
     // Check if not expired
     if (announcement.fechaExpiracion) {
@@ -29,12 +34,12 @@ export const NewsPage = () => {
 
   const getTypeColor = (type: AnnouncementType) => {
     const colors = {
-      [AnnouncementType.NOVEDAD]: 'bg-blue-100 text-blue-800 border-blue-200',
-      [AnnouncementType.EVENTO]: 'bg-purple-100 text-purple-800 border-purple-200',
-      [AnnouncementType.PROMOCION]: 'bg-green-100 text-green-800 border-green-200',
-      [AnnouncementType.MANTENIMIENTO]: 'bg-orange-100 text-orange-800 border-orange-200',
+      [AnnouncementType.NOVEDAD]: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700',
+      [AnnouncementType.EVENTO]: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-700',
+      [AnnouncementType.PROMOCION]: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700',
+      [AnnouncementType.MANTENIMIENTO]: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-700',
     };
-    return colors[type] || 'bg-gray-100 text-gray-800 border-gray-200';
+    return colors[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600';
   };
 
   const getTypeIcon = (type: AnnouncementType) => {
@@ -69,21 +74,21 @@ export const NewsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Megaphone className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">Novedades</h1>
-          </div>
-          <p className="text-blue-100">
-            Mantente al día con las últimas noticias del gimnasio
-          </p>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+            <Megaphone className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Novedades</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Mantente al día con las últimas noticias del gimnasio
+            </p>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="flex gap-2 overflow-x-auto pb-2">
           <button
@@ -91,7 +96,7 @@ export const NewsPage = () => {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               filterType === 'all'
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Todas
@@ -101,7 +106,7 @@ export const NewsPage = () => {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               filterType === AnnouncementType.NOVEDAD
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Novedades
@@ -111,7 +116,7 @@ export const NewsPage = () => {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               filterType === AnnouncementType.EVENTO
                 ? 'bg-purple-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Eventos
@@ -121,7 +126,7 @@ export const NewsPage = () => {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               filterType === AnnouncementType.PROMOCION
                 ? 'bg-green-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Promociones
@@ -131,7 +136,7 @@ export const NewsPage = () => {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               filterType === AnnouncementType.MANTENIMIENTO
                 ? 'bg-orange-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Mantenimiento
@@ -141,69 +146,67 @@ export const NewsPage = () => {
         {/* Announcements List */}
         <div className="space-y-4">
           {activeAnnouncements?.map((announcement) => (
-            <Card key={announcement.id} className="overflow-hidden">
-              <CardContent className="p-0">
-                {announcement.imagenUrl && (
-                  <div className="w-full h-48 bg-gray-200 overflow-hidden">
-                    <img
-                      src={announcement.imagenUrl}
-                      alt={announcement.titulo}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+            <div key={announcement.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {announcement.imagenUrl && (
+                <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                  <img
+                    src={announcement.imagenUrl}
+                    alt={announcement.titulo}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
 
-                <div className="p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${getTypeColor(announcement.tipo).split(' ')[0]}`}>
-                      {getTypeIcon(announcement.tipo)}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <h2 className="text-xl font-bold text-gray-900">
-                          {announcement.titulo}
-                        </h2>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(announcement.tipo)}`}>
-                          {getTypeName(announcement.tipo)}
-                        </span>
-                      </div>
-
-                      <p className="text-sm text-gray-500 mt-1">
-                        {format(new Date(announcement.fechaPublicacion), "d 'de' MMMM, yyyy", { locale: es })}
-                        {announcement.fechaExpiracion && (
-                          <span className="ml-2">
-                            · Válido hasta {format(new Date(announcement.fechaExpiracion), "d 'de' MMMM", { locale: es })}
-                          </span>
-                        )}
-                      </p>
-                    </div>
+              <div className="p-6 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${getTypeColor(announcement.tipo).split(' ')[0]} ${getTypeColor(announcement.tipo).split(' ')[1]}`}>
+                    {getTypeIcon(announcement.tipo)}
                   </div>
 
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                    {announcement.contenido}
-                  </p>
-
-                  {announcement.autor && (
-                    <div className="flex items-center gap-2 text-xs text-gray-500 pt-2 border-t border-gray-100">
-                      <span>
-                        Publicado por {announcement.autor.nombre} {announcement.autor.apellido}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {announcement.titulo}
+                      </h2>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(announcement.tipo)}`}>
+                        {getTypeName(announcement.tipo)}
                       </span>
                     </div>
-                  )}
+
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {format(new Date(announcement.fechaPublicacion), "d 'de' MMMM, yyyy", { locale: es })}
+                      {announcement.fechaExpiracion && (
+                        <span className="ml-2">
+                          · Válido hasta {format(new Date(announcement.fechaExpiracion), "d 'de' MMMM", { locale: es })}
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                  {announcement.contenido}
+                </p>
+
+                {announcement.autor && (
+                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <span>
+                      Publicado por {announcement.autor.nombre} {announcement.autor.apellido}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           ))}
         </div>
 
         {activeAnnouncements?.length === 0 && (
-          <div className="text-center py-16">
-            <Megaphone className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center py-16">
+            <Megaphone className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No hay anuncios disponibles
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Por el momento no hay novedades para mostrar
             </p>
           </div>

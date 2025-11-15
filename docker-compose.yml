@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gym_postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: gym_user
+      POSTGRES_PASSWORD: gym_password
+      POSTGRES_DB: gym_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gym_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  gym_network:
+    driver: bridge

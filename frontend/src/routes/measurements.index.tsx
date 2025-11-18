@@ -17,6 +17,7 @@ import {
 import { useToastStore } from '../stores/toastStore';
 import { cn } from '../utils/cn';
 import { Button } from '../components/ui';
+import { AxiosErrorType } from '../types/error.types';
 
 export default function MeasurementsIndexPage() {
   const { data: measurements = [], isLoading } = useBodyMeasurements();
@@ -30,7 +31,7 @@ export default function MeasurementsIndexPage() {
     try {
       await deleteMutation.mutateAsync(id);
       showToast('Medición eliminada', 'success');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || 'Error al eliminar', 'error');
     }
   };

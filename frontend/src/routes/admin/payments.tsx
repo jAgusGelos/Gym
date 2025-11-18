@@ -14,6 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { PaymentStatus, PaymentMethod } from "../../types/payment.types";
+import { AxiosErrorType } from "../../types/error.types";
 
 export const PaymentsPage = () => {
   const [filterStatus, setFilterStatus] = useState<"all" | PaymentStatus>(
@@ -67,12 +68,20 @@ export const PaymentsPage = () => {
     return <CreditCard className="w-4 h-4" />;
   };
 
-  const handleCreatePayment = async (data: any) => {
+  interface PaymentFormData {
+    userId: string;
+    monto: number;
+    metodoPago: PaymentMethod;
+    concepto: string;
+    fechaPago?: string;
+  }
+
+  const handleCreatePayment = async (data: PaymentFormData) => {
     try {
       await createPayment.mutateAsync(data);
       setIsModalOpen(false);
       toast.success("Pago registrado correctamente");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(
         error.response?.data?.message || "Error al registrar el pago"
       );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTodayAttendances, useCheckIn } from '../../hooks/useAttendance';
 import { Button, Card, CardHeader, CardTitle, CardContent, Input, Loading } from '../../components/ui';
 import { QrCode, UserCheck, Clock, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { AxiosErrorType } from '../../types/error.types';
 
 export const AttendancePage = () => {
   const [qrCode, setQrCode] = useState('');
@@ -31,7 +32,7 @@ export const AttendancePage = () => {
         setCheckInStatus('idle');
         setMessage('');
       }, 3000);
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       setCheckInStatus('error');
       setMessage(error.response?.data?.message || 'Error al registrar check-in');
 

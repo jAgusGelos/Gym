@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useWorkoutLogs, useUserWorkoutStats, useDeleteWorkoutLog } from '../hooks/useWorkoutLogs';
 import { useToastStore } from '../stores/toastStore';
+import { AxiosErrorType } from '../types/error.types';
+import { ExerciseSet } from '../types/workout-log.types';
 
 export const Route = createFileRoute('/workouts/')({
   component: WorkoutsPage,
@@ -24,7 +26,7 @@ export function WorkoutsPage() {
     try {
       await deleteWorkout.mutateAsync(id);
       showToast('Entrenamiento eliminado exitosamente', 'success');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || 'Error al eliminar entrenamiento', 'error');
     }
   };
@@ -206,8 +208,22 @@ export function WorkoutsPage() {
   );
 }
 
-function getExercisesSummary(sets: any[]) {
-  const exerciseMap = new Map();
+interface ExerciseSummary {
+  nombre: string;
+  sets: number;
+  avgReps: number;
+  avgWeight: number;
+  hasPR: boolean;
+}
+
+function getExercisesSummary(sets: ExerciseSet[]): ExerciseSummary[] {
+  const exerciseMap = new Map<string, {
+    nombre: string;
+    sets: number;
+    totalReps: number;
+    totalWeight: number;
+    hasPR: boolean;
+  }>();
 
   sets.forEach((set) => {
     if (!set.exercise) return;
@@ -223,7 +239,7 @@ function getExercisesSummary(sets: any[]) {
       });
     }
 
-    const exercise = exerciseMap.get(key);
+    const exercise = exerciseMap.get(key)!;
     exercise.sets++;
     exercise.totalReps += set.repeticiones;
     exercise.totalWeight += Number(set.peso);
@@ -231,8 +247,10 @@ function getExercisesSummary(sets: any[]) {
   });
 
   return Array.from(exerciseMap.values()).map((ex) => ({
-    ...ex,
+    nombre: ex.nombre,
+    sets: ex.sets,
     avgReps: Math.round(ex.totalReps / ex.sets),
     avgWeight: Math.round((ex.totalWeight / ex.sets) * 10) / 10,
+    hasPR: ex.hasPR,
   }));
 }

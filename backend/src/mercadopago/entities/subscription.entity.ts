@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { MembershipPlan } from './membership-plan.entity';
+import { SubscriptionMetadata } from '../types/mercadopago-metadata.types';
 
 export enum SubscriptionStatus {
   ACTIVE = 'active',
@@ -96,7 +97,7 @@ export class Subscription {
   lastPaymentDate: Date;
 
   @Column({ type: 'jsonb', nullable: true })
-  metadata: any;
+  metadata: SubscriptionMetadata | null;
 
   @CreateDateColumn()
   createdAt: Date;

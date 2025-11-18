@@ -9,6 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { NotificationData } from '../types/notification-data.types';
 
 export enum NotificationType {
   CLASS_REMINDER = 'class_reminder',
@@ -70,7 +71,7 @@ export class Notification {
   message: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  data: any; // Datos adicionales (IDs, enlaces, etc.)
+  data: NotificationData | null; // Datos adicionales (IDs, enlaces, etc.)
 
   @Column({ nullable: true })
   actionUrl: string; // URL para navegar al hacer clic

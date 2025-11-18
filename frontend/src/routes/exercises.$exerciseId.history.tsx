@@ -8,6 +8,7 @@ import {
   useExerciseChart,
 } from '../hooks/useWorkoutLogs';
 import { useExercise } from '../hooks/useExercises';
+import { ExerciseChartData } from '../types/workout-log.types';
 
 export const Route = createFileRoute('/exercises/$exerciseId/history')({
   component: ExerciseHistoryPage,
@@ -183,7 +184,7 @@ function ExerciseHistoryPage() {
   );
 }
 
-function ProgressChart({ data }: { data: any[] }) {
+function ProgressChart({ data }: { data: ExerciseChartData[] }) {
   if (data.length === 0) return null;
 
   const maxValue = Math.max(...data.map((d) => d.estimado1RM));

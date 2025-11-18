@@ -22,6 +22,7 @@ import {
 import { DayOfWeek } from "../types/class.types";
 import { addDays, startOfWeek, format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
+import { AxiosErrorType } from "../types/error.types";
 
 const DAY_NAMES = {
   [DayOfWeek.SUNDAY]: 'Domingo',
@@ -83,7 +84,7 @@ export const ClassesPage = () => {
         classDate: formattedDate,
       });
       toast.success(`Reserva confirmada para ${className}`);
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al reservar la clase');
     }
   };
@@ -93,7 +94,7 @@ export const ClassesPage = () => {
       try {
         await cancelBooking.mutateAsync(bookingId);
         toast.success('Reserva cancelada correctamente');
-      } catch (error: any) {
+      } catch (error: AxiosErrorType) {
         toast.error(error.response?.data?.message || 'Error al cancelar la reserva');
       }
     }

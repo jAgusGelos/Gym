@@ -23,6 +23,7 @@ import {
 import { useToastStore } from "../stores/toastStore";
 import { cn } from "../utils/cn";
 import { Button, FilterButton } from "../components/ui";
+import { AxiosErrorType } from "../types/error.types";
 
 type FilterType = "all" | "unread" | "read";
 
@@ -48,7 +49,7 @@ export default function NotificationsPage() {
     try {
       await markAsReadMutation.mutateAsync(id);
       showToast("Notificación marcada como leída", "success");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(
         error.response?.data?.message || "Error al marcar como leída",
         "error"
@@ -62,7 +63,7 @@ export default function NotificationsPage() {
     try {
       await markAllAsReadMutation.mutateAsync();
       showToast("Todas las notificaciones marcadas como leídas", "success");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(
         error.response?.data?.message || "Error al marcar como leídas",
         "error"
@@ -76,7 +77,7 @@ export default function NotificationsPage() {
     try {
       await deleteNotificationMutation.mutateAsync(id);
       showToast("Notificación eliminada", "success");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || "Error al eliminar", "error");
     }
   };
@@ -87,7 +88,7 @@ export default function NotificationsPage() {
     try {
       await deleteAllReadMutation.mutateAsync();
       showToast("Notificaciones leídas eliminadas", "success");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || "Error al eliminar", "error");
     }
   };

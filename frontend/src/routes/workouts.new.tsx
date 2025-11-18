@@ -8,6 +8,7 @@ import type {
   CreateWorkoutLogDto,
   CreateExerciseSetDto,
 } from "../types/workout-log.types";
+import { AxiosErrorType } from "../types/error.types";
 
 export const Route = createFileRoute("/workouts/new")({
   component: NewWorkoutPage,
@@ -89,7 +90,7 @@ function NewWorkoutPage() {
       await createWorkoutLog.mutateAsync(workoutData);
       showToast("Entrenamiento registrado exitosamente", "success");
       navigate({ to: "/workouts" });
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(
         error.response?.data?.message || "Error al registrar entrenamiento",
         "error"

@@ -6,6 +6,7 @@ import { ExerciseForm } from '../../components/forms/ExerciseForm';
 import { useToast } from '../../stores/toastStore';
 import { Plus, Edit, Trash2, Dumbbell } from 'lucide-react';
 import { Exercise, MuscleGroup, DifficultyLevel } from '../../types/workout.types';
+import { AxiosErrorType } from '../../types/error.types';
 
 export const ExercisesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,17 +47,27 @@ export const ExercisesPage = () => {
     }
   };
 
-  const handleCreateExercise = async (data: any) => {
+  interface ExerciseFormData {
+    nombre: string;
+    descripcion: string;
+    grupoMuscular: MuscleGroup;
+    equipamiento?: string;
+    nivelDificultad: DifficultyLevel;
+    videoUrl?: string;
+    imagenUrl?: string;
+  }
+
+  const handleCreateExercise = async (data: ExerciseFormData) => {
     try {
       await createExercise.mutateAsync(data);
       setIsModalOpen(false);
       toast.success('Ejercicio creado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al crear el ejercicio');
     }
   };
 
-  const handleEditExercise = async (data: any) => {
+  const handleEditExercise = async (data: ExerciseFormData) => {
     if (!editingExercise) return;
     try {
       await updateExercise.mutateAsync({
@@ -66,7 +77,7 @@ export const ExercisesPage = () => {
       setIsModalOpen(false);
       setEditingExercise(null);
       toast.success('Ejercicio actualizado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al actualizar el ejercicio');
     }
   };

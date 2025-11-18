@@ -6,6 +6,8 @@ import { PlanForm } from '../../components/forms/PlanForm';
 import { useToast } from '../../stores/toastStore';
 import { Plus, Edit, Trash2, CheckCircle, XCircle, CreditCard, TrendingUp, DollarSign, Star } from 'lucide-react';
 import { MembershipPlan } from '../../types/plan.types';
+import { AxiosErrorType } from '../../types/error.types';
+import { MembershipType } from '../../types/membership.types';
 
 export const AdminPlansPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,17 +61,28 @@ export const AdminPlansPage = () => {
     }
   };
 
-  const handleCreatePlan = async (data: any) => {
+  interface PlanFormData {
+    nombre: string;
+    descripcion: string;
+    tipo: MembershipType;
+    precio: number;
+    duracionDias: number;
+    beneficios: string[];
+    destacado: boolean;
+    orden: number;
+  }
+
+  const handleCreatePlan = async (data: PlanFormData) => {
     try {
       await createPlan.mutateAsync(data);
       setIsModalOpen(false);
       toast.success('Plan creado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al crear el plan');
     }
   };
 
-  const handleEditPlan = async (data: any) => {
+  const handleEditPlan = async (data: PlanFormData) => {
     if (!editingPlan) return;
     try {
       await updatePlan.mutateAsync({
@@ -79,7 +92,7 @@ export const AdminPlansPage = () => {
       setIsModalOpen(false);
       setEditingPlan(null);
       toast.success('Plan actualizado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al actualizar el plan');
     }
   };

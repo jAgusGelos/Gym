@@ -8,6 +8,8 @@ import {
 } from './entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
+import { NotificationData } from './types/notification-data.types';
+import { MinimalClassData } from '../classes/types/class-data.types';
 
 @Injectable()
 export class NotificationsService {
@@ -34,7 +36,7 @@ export class NotificationsService {
     message: string,
     options?: {
       priority?: NotificationPriority;
-      data?: any;
+      data?: NotificationData;
       actionUrl?: string;
       actionLabel?: string;
     },
@@ -167,7 +169,7 @@ export class NotificationsService {
 
   async notifyClassReminder(
     userId: string,
-    classData: any,
+    classData: MinimalClassData,
   ): Promise<Notification> {
     return this.create({
       userId,
@@ -175,7 +177,7 @@ export class NotificationsService {
       priority: NotificationPriority.MEDIUM,
       title: 'Recordatorio de Clase',
       message: `Tu clase "${classData.nombre}" comienza pronto`,
-      data: { classId: classData.id },
+      data: { classId: classData.id, className: classData.nombre },
       actionUrl: `/classes`,
       actionLabel: 'Ver Clase',
     });

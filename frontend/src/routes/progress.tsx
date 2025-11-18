@@ -7,6 +7,8 @@ import { Plus, TrendingUp, TrendingDown, Calendar, Trash2, Scale, Activity, Perc
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AxiosErrorType } from '../types/error.types';
+import { ProgressEntryFormData } from '../types/form-data.types';
 
 export const ProgressPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -28,21 +30,27 @@ export const ProgressPage = () => {
     },
   });
 
-  const handleCreateEntry = async (data: any) => {
+  const handleCreateEntry = async (data: ProgressEntryFormData) => {
     try {
-      // Convert empty strings to undefined
-      const cleanedData = Object.entries(data).reduce((acc, [key, value]) => {
-        if (value === '') return acc;
-        if (key === 'fecha') return { ...acc, [key]: value };
-        if (key === 'notas') return { ...acc, [key]: value };
-        return { ...acc, [key]: parseFloat(value as string) };
-      }, {});
+      // Convert empty strings to undefined and strings to numbers
+      const cleanedData: Record<string, string | number | undefined> = {};
 
-      await createEntry.mutateAsync(cleanedData as any);
+      for (const [key, value] of Object.entries(data)) {
+        if (value === '') continue;
+        if (key === 'fecha' || key === 'notas') {
+          cleanedData[key] = value as string;
+        } else if (typeof value === 'string') {
+          cleanedData[key] = parseFloat(value);
+        } else {
+          cleanedData[key] = value;
+        }
+      }
+
+      await createEntry.mutateAsync(cleanedData);
       toast.success('Progreso registrado correctamente');
       reset();
       setShowForm(false);
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al registrar progreso');
     }
   };

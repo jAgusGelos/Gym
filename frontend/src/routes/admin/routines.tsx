@@ -27,6 +27,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Routine, RoutineLevel, RoutineGoal } from "../../types/routine.types";
+import { AxiosErrorType } from "../../types/error.types";
 
 export const AdminRoutinesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,17 +86,35 @@ export const AdminRoutinesPage = () => {
     }
   };
 
-  const handleCreateRoutine = async (data: any) => {
+  interface RoutineFormData {
+    nombre: string;
+    descripcion: string;
+    nivel: RoutineLevel;
+    objetivo: RoutineGoal;
+    duracionEstimada?: number;
+    publico: boolean;
+    userId?: string;
+    ejercicios: Array<{
+      exerciseId: string;
+      orden: number;
+      series: number;
+      repeticiones: string;
+      descanso: number;
+      notas?: string;
+    }>;
+  }
+
+  const handleCreateRoutine = async (data: RoutineFormData) => {
     try {
       await createRoutine.mutateAsync(data);
       setIsModalOpen(false);
       toast.success("Rutina creada correctamente");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || "Error al crear la rutina");
     }
   };
 
-  const handleEditRoutine = async (data: any) => {
+  const handleEditRoutine = async (data: RoutineFormData) => {
     if (!editingRoutine) return;
     try {
       await updateRoutine.mutateAsync({
@@ -105,7 +124,7 @@ export const AdminRoutinesPage = () => {
       setIsModalOpen(false);
       setEditingRoutine(null);
       toast.success("Rutina actualizada correctamente");
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(
         error.response?.data?.message || "Error al actualizar la rutina"
       );
@@ -190,7 +209,7 @@ export const AdminRoutinesPage = () => {
 
             <select
               value={filterLevel}
-              onChange={(e) => setFilterLevel(e.target.value as any)}
+              onChange={(e) => setFilterLevel(e.target.value as RoutineLevel | "all")}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Todos los niveles</option>
@@ -201,7 +220,7 @@ export const AdminRoutinesPage = () => {
 
             <select
               value={filterGoal}
-              onChange={(e) => setFilterGoal(e.target.value as any)}
+              onChange={(e) => setFilterGoal(e.target.value as RoutineGoal | "all")}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Todos los objetivos</option>

@@ -1,4 +1,5 @@
 import { MembershipType } from './membership.types';
+import { PaymentMetadata } from './mercadopago-metadata.types';
 
 export interface MembershipPlan {
   id: string;
@@ -37,7 +38,7 @@ export interface OnlinePayment {
   amount: number;
   paymentType?: string;
   paymentMethod?: string;
-  metadata?: any;
+  metadata?: PaymentMetadata | null;
   approvedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

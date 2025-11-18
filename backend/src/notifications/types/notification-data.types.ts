@@ -1,41 +1,23 @@
-export enum NotificationType {
-  CLASS_REMINDER = 'class_reminder',
-  CLASS_CANCELLED = 'class_cancelled',
-  MEMBERSHIP_EXPIRING = 'membership_expiring',
-  MEMBERSHIP_EXPIRED = 'membership_expired',
-  PAYMENT_SUCCESS = 'payment_success',
-  PAYMENT_FAILED = 'payment_failed',
-  SUBSCRIPTION_RENEWED = 'subscription_renewed',
-  SUBSCRIPTION_PAUSED = 'subscription_paused',
-  NEW_ROUTINE = 'new_routine',
-  ACHIEVEMENT_UNLOCKED = 'achievement_unlocked',
-  GOAL_COMPLETED = 'goal_completed',
-  SYSTEM_ANNOUNCEMENT = 'system_announcement',
-  TRAINER_MESSAGE = 'trainer_message',
-  BOOKING_CONFIRMED = 'booking_confirmed',
-  WAITLIST_PROMOTED = 'waitlist_promoted',
-}
+/**
+ * Tipos específicos para el campo 'data' de las notificaciones
+ * Cada tipo de notificación tiene su propio tipo de datos
+ */
 
-export enum NotificationPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  URGENT = 'urgent',
-}
-
-// Tipos específicos para el campo 'data' de las notificaciones
+// Datos para notificaciones de clases
 export interface ClassNotificationData {
   classId: string;
   className?: string;
   startTime?: string;
 }
 
+// Datos para notificaciones de membresía
 export interface MembershipNotificationData {
   membershipId?: string;
   daysRemaining?: number;
   expiryDate?: string;
 }
 
+// Datos para notificaciones de pago
 export interface PaymentNotificationData {
   paymentId?: string;
   amount?: number;
@@ -43,6 +25,7 @@ export interface PaymentNotificationData {
   transactionId?: string;
 }
 
+// Datos para notificaciones de suscripción
 export interface SubscriptionNotificationData {
   subscriptionId?: string;
   planName?: string;
@@ -50,12 +33,14 @@ export interface SubscriptionNotificationData {
   amount?: number;
 }
 
+// Datos para notificaciones de logros
 export interface AchievementNotificationData {
   achievementId?: string;
   achievementName?: string;
   points?: number;
 }
 
+// Datos para notificaciones de objetivos
 export interface GoalNotificationData {
   goalId: string;
   goalName?: string;
@@ -63,18 +48,21 @@ export interface GoalNotificationData {
   currentValue?: number;
 }
 
+// Datos para notificaciones de rutinas
 export interface RoutineNotificationData {
   routineId: string;
   routineName?: string;
   trainerId?: string;
 }
 
+// Datos para mensajes del entrenador
 export interface TrainerMessageNotificationData {
   trainerId: string;
   trainerName?: string;
   messageId?: string;
 }
 
+// Datos para reservas
 export interface BookingNotificationData {
   bookingId: string;
   classId?: string;
@@ -82,6 +70,7 @@ export interface BookingNotificationData {
   startTime?: string;
 }
 
+// Union type para todos los tipos de datos de notificaciones
 export type NotificationData =
   | ClassNotificationData
   | MembershipNotificationData
@@ -92,23 +81,4 @@ export type NotificationData =
   | RoutineNotificationData
   | TrainerMessageNotificationData
   | BookingNotificationData
-  | Record<string, unknown>;
-
-export interface Notification {
-  id: string;
-  userId: string;
-  type: NotificationType;
-  priority: NotificationPriority;
-  title: string;
-  message: string;
-  data: NotificationData | null;
-  actionUrl: string | null;
-  actionLabel: string | null;
-  read: boolean;
-  readAt: string | null;
-  emailSent: boolean;
-  pushSent: boolean;
-  expiresAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+  | Record<string, unknown>; // Fallback para datos genéricos

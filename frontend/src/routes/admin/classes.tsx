@@ -6,6 +6,7 @@ import { useToast } from '../../stores/toastStore';
 import { Calendar, Plus, Edit, Trash2, Clock, Zap } from 'lucide-react';
 import { Class, DayOfWeek } from '../../types/class.types';
 import { compressSchedulesToRanges } from '../../utils/scheduleHelpers';
+import { AxiosErrorType } from '../../types/error.types';
 
 const DAY_NAMES = {
   [DayOfWeek.SUNDAY]: 'Dom',
@@ -54,17 +55,32 @@ export const AdminClassesPage = () => {
     }
   };
 
-  const handleCreateClass = async (data: any) => {
+  interface ClassFormData {
+    nombre: string;
+    descripcion: string;
+    cupoMaximo: number;
+    imagenUrl?: string;
+    schedules: Array<{
+      dayOfWeek: number;
+      startTime: string;
+      endTime: string;
+      instructorId: string;
+      cupoMaximo?: number | null;
+      activo?: boolean;
+    }>;
+  }
+
+  const handleCreateClass = async (data: ClassFormData) => {
     try {
       await createClass.mutateAsync(data);
       setIsModalOpen(false);
       toast.success('Clase creada correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al crear la clase');
     }
   };
 
-  const handleEditClass = async (data: any) => {
+  const handleEditClass = async (data: ClassFormData) => {
     if (!editingClass) return;
     try {
       await updateClass.mutateAsync({
@@ -74,7 +90,7 @@ export const AdminClassesPage = () => {
       setIsModalOpen(false);
       setEditingClass(null);
       toast.success('Clase actualizada correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al actualizar la clase');
     }
   };

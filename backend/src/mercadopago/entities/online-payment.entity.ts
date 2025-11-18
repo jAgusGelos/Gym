@@ -10,6 +10,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { MembershipPlan } from './membership-plan.entity';
 import { Membership } from '../../memberships/entities/membership.entity';
+import { PaymentMetadata } from '../types/mercadopago-metadata.types';
 
 export enum PaymentStatus {
   PENDING = 'pending',
@@ -73,7 +74,7 @@ export class OnlinePayment {
   paymentMethod: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  metadata: any;
+  metadata: PaymentMetadata | null;
 
   @Column({ type: 'timestamp', nullable: true })
   approvedAt: Date;

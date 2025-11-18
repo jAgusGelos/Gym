@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { Routine } from '../types/routine.types';
+import type { RoutineFilters } from '../types/query-filters.types';
 
 interface PaginatedResult<T> {
   data: T[];
@@ -33,7 +34,7 @@ export interface UpdateRoutineDto extends Partial<CreateRoutineDto> {
   activo?: boolean;
 }
 
-export const useAdminRoutines = (page = 1, limit = 20, filters?: any) => {
+export const useAdminRoutines = (page = 1, limit = 20, filters?: RoutineFilters) => {
   return useQuery({
     queryKey: ['admin-routines', page, limit, filters],
     queryFn: async () => {

@@ -10,12 +10,13 @@ import type {
   PersonalRecord,
   UserWorkoutStats,
 } from '../types/workout-log.types';
+import type { WorkoutLogFilters } from '../types/query-filters.types';
 
 // Query keys
 export const workoutLogsKeys = {
   all: ['workout-logs'] as const,
   lists: () => [...workoutLogsKeys.all, 'list'] as const,
-  list: (filters?: any) => [...workoutLogsKeys.lists(), filters] as const,
+  list: (filters?: WorkoutLogFilters) => [...workoutLogsKeys.lists(), filters] as const,
   details: () => [...workoutLogsKeys.all, 'detail'] as const,
   detail: (id: string) => [...workoutLogsKeys.details(), id] as const,
   exercise: (exerciseId: string) => [...workoutLogsKeys.all, 'exercise', exerciseId] as const,

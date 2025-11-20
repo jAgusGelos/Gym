@@ -9,6 +9,7 @@ import {
   NotificationType,
   NotificationPriority,
 } from '../entities/notification.entity';
+import { NotificationData } from '../types/notification-data.types';
 
 export class CreateNotificationDto {
   @IsNotEmpty()
@@ -33,7 +34,7 @@ export class CreateNotificationDto {
 
   @IsOptional()
   @IsObject()
-  data?: any;
+  data?: NotificationData;
 
   @IsOptional()
   @IsString()

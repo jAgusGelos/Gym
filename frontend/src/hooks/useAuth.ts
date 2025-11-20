@@ -8,6 +8,7 @@ import {
   RegisterData,
   AuthResponse,
 } from '../types/auth.types';
+import { AxiosErrorType, getErrorMessage } from '../types/error.types';
 
 export const useAuth = () => {
   const { user, isAuthenticated, clearAuth } = useAuthStore();
@@ -42,7 +43,7 @@ export const useLogin = () => {
       toast.success('¡Bienvenido!');
       navigate({ to: '/dashboard' });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosErrorType) => {
       const message = error.response?.data?.message || 'Credenciales inválidas. Por favor, verificá tu email y contraseña.';
       toast.error(message);
     },
@@ -64,7 +65,7 @@ export const useRegister = () => {
       toast.success('¡Cuenta creada exitosamente!');
       navigate({ to: '/dashboard' });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosErrorType) => {
       const message = error.response?.data?.message || 'Error al crear la cuenta. Por favor, intentá nuevamente.';
       toast.error(message);
     },

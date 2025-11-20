@@ -20,6 +20,7 @@ import {
 } from '../hooks/useSubscriptions';
 import { SubscriptionStatus, SubscriptionFrequency } from '../types/subscription.types';
 import { useToastStore } from '../stores/toastStore';
+import { AxiosErrorType } from '../types/error.types';
 
 export const Route = createFileRoute('/subscriptions/')({
   component: SubscriptionsPage,
@@ -45,7 +46,7 @@ function SubscriptionsPage() {
       showToast('Suscripción cancelada exitosamente', 'success');
       setShowCancelModal(null);
       setCancelReason('');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || 'Error al cancelar suscripción', 'error');
     }
   };
@@ -56,7 +57,7 @@ function SubscriptionsPage() {
     try {
       await pauseMutation.mutateAsync(id);
       showToast('Suscripción pausada exitosamente', 'success');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || 'Error al pausar suscripción', 'error');
     }
   };
@@ -67,7 +68,7 @@ function SubscriptionsPage() {
     try {
       await resumeMutation.mutateAsync(id);
       showToast('Suscripción reanudada exitosamente', 'success');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || 'Error al reanudar suscripción', 'error');
     }
   };

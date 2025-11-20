@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { GoalType, goalTypeLabels, goalTypeIcons, UserGoal } from '../../types/goal.types';
+import { GoalFormSubmitData } from '../../types/form-data.types';
 
 const goalSchema = z.object({
   tipo: z.nativeEnum(GoalType),
@@ -18,7 +19,7 @@ type GoalFormData = z.infer<typeof goalSchema>;
 
 interface GoalFormProps {
   goal?: UserGoal;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: GoalFormSubmitData) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -36,9 +37,9 @@ export const GoalForm = ({ goal, onSubmit, onCancel, isSubmitting }: GoalFormPro
           tipo: goal.tipo,
           titulo: goal.titulo,
           descripcion: goal.descripcion || '',
-          pesoObjetivo: goal.pesoObjetivo || ('' as any),
-          grasaCorporalObjetivo: goal.grasaCorporalObjetivo || ('' as any),
-          masaMuscularObjetivo: goal.masaMuscularObjetivo || ('' as any),
+          pesoObjetivo: goal.pesoObjetivo || '' as '' | number,
+          grasaCorporalObjetivo: goal.grasaCorporalObjetivo || '' as '' | number,
+          masaMuscularObjetivo: goal.masaMuscularObjetivo || '' as '' | number,
           fechaInicio: new Date(goal.fechaInicio).toISOString().split('T')[0],
           fechaObjetivo: goal.fechaObjetivo
             ? new Date(goal.fechaObjetivo).toISOString().split('T')[0]

@@ -11,6 +11,7 @@ import { GoalCard } from "../components/goals/GoalCard";
 import { GoalForm } from "../components/goals/GoalForm";
 import { UserGoal, GoalStatus } from "../types/goal.types";
 import { useToastStore } from "../stores/toast.store";
+import { GoalFormSubmitData } from "../types/form-data.types";
 
 export const GoalsPage = () => {
   const { data: goals = [], isLoading } = useGoals();
@@ -24,7 +25,7 @@ export const GoalsPage = () => {
   const [editingGoal, setEditingGoal] = useState<UserGoal | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: GoalFormSubmitData) => {
     try {
       await createGoal.mutateAsync(data);
       showToast("Objetivo creado exitosamente", "success");
@@ -34,7 +35,7 @@ export const GoalsPage = () => {
     }
   };
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: GoalFormSubmitData) => {
     if (!editingGoal) return;
 
     try {

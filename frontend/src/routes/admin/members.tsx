@@ -6,6 +6,7 @@ import { MemberForm } from '../../components/forms/MemberForm';
 import { useToast } from '../../stores/toastStore';
 import { UserPlus, Edit, Trash2, CheckCircle, XCircle, Mail, Phone } from 'lucide-react';
 import { User, UserRole } from '../../types/user.types';
+import { AxiosErrorType } from '../../types/error.types';
 
 export const MembersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,17 +70,26 @@ export const MembersPage = () => {
     }
   };
 
-  const handleCreateUser = async (data: any) => {
+  interface MemberFormData {
+    email: string;
+    password?: string;
+    nombre: string;
+    apellido: string;
+    telefono?: string;
+    rol: UserRole;
+  }
+
+  const handleCreateUser = async (data: MemberFormData) => {
     try {
       await createUser.mutateAsync(data);
       setIsModalOpen(false);
       toast.success('Socio creado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al crear el socio');
     }
   };
 
-  const handleEditUser = async (data: any) => {
+  const handleEditUser = async (data: MemberFormData) => {
     if (!editingUser) return;
     try {
       await updateUser.mutateAsync({
@@ -89,7 +99,7 @@ export const MembersPage = () => {
       setIsModalOpen(false);
       setEditingUser(null);
       toast.success('Socio actualizado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al actualizar el socio');
     }
   };

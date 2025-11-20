@@ -1,3 +1,5 @@
+import { SubscriptionMetadata } from './mercadopago-metadata.types';
+
 export enum SubscriptionStatus {
   ACTIVE = 'active',
   PAUSED = 'paused',
@@ -36,7 +38,7 @@ export interface Subscription {
   successfulPayments: number;
   failedPayments: number;
   lastPaymentDate: string | null;
-  metadata: any;
+  metadata: SubscriptionMetadata | null;
   createdAt: string;
   updatedAt: string;
 }

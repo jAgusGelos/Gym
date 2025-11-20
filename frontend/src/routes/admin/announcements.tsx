@@ -8,12 +8,18 @@ import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, Megaphone, Calendar }
 import { Announcement, AnnouncementType } from '../../types/announcement.types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AxiosErrorType } from '../../types/error.types';
+
+interface FormattedAnnouncement extends Omit<Announcement, 'fechaPublicacion' | 'fechaExpiracion'> {
+  fechaPublicacion: string;
+  fechaExpiracion: string;
+}
 
 export const AnnouncementsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<AnnouncementType | 'all'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<FormattedAnnouncement | null>(null);
 
   const { data: announcementsData, isLoading } = useAnnouncements(1, 100);
   const createAnnouncement = useCreateAnnouncement();
@@ -59,17 +65,26 @@ export const AnnouncementsPage = () => {
     }
   };
 
-  const handleCreateAnnouncement = async (data: any) => {
+  interface AnnouncementFormData {
+    titulo: string;
+    contenido: string;
+    tipo: AnnouncementType;
+    imagenUrl?: string;
+    fechaPublicacion: string;
+    fechaExpiracion?: string;
+  }
+
+  const handleCreateAnnouncement = async (data: AnnouncementFormData) => {
     try {
       await createAnnouncement.mutateAsync(data);
       setIsModalOpen(false);
       toast.success('Anuncio creado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al crear el anuncio');
     }
   };
 
-  const handleEditAnnouncement = async (data: any) => {
+  const handleEditAnnouncement = async (data: AnnouncementFormData) => {
     if (!editingAnnouncement) return;
     try {
       await updateAnnouncement.mutateAsync({
@@ -79,7 +94,7 @@ export const AnnouncementsPage = () => {
       setIsModalOpen(false);
       setEditingAnnouncement(null);
       toast.success('Anuncio actualizado correctamente');
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       toast.error(error.response?.data?.message || 'Error al actualizar el anuncio');
     }
   };
@@ -91,7 +106,12 @@ export const AnnouncementsPage = () => {
 
   const openEditModal = (announcement: Announcement) => {
     // Convert dates to datetime-local format for the form
-    const formattedAnnouncement = {
+    interface FormattedAnnouncement extends Omit<Announcement, 'fechaPublicacion' | 'fechaExpiracion'> {
+      fechaPublicacion: string;
+      fechaExpiracion: string;
+    }
+
+    const formattedAnnouncement: FormattedAnnouncement = {
       ...announcement,
       fechaPublicacion: announcement.fechaPublicacion
         ? new Date(announcement.fechaPublicacion).toISOString().slice(0, 16)
@@ -100,7 +120,7 @@ export const AnnouncementsPage = () => {
         ? new Date(announcement.fechaExpiracion).toISOString().slice(0, 16)
         : '',
     };
-    setEditingAnnouncement(formattedAnnouncement as any);
+    setEditingAnnouncement(formattedAnnouncement);
     setIsModalOpen(true);
   };
 
@@ -174,7 +194,7 @@ export const AnnouncementsPage = () => {
 
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as AnnouncementType | 'all')}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Todos los tipos</option>

@@ -4,6 +4,8 @@ import { ArrowLeft, Save, Scale, Ruler, Percent, User2 } from 'lucide-react';
 import { useCreateMeasurement } from '../hooks/useBodyMeasurements';
 import { CreateBodyMeasurementDto } from '../types/body-measurement.types';
 import { useToastStore } from '../stores/toastStore';
+import { AxiosErrorType } from '../types/error.types';
+import { InputChangeValue } from '../types/form-data.types';
 
 export default function NewMeasurementPage() {
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ export default function NewMeasurementPage() {
     height: 0,
   });
 
-  const handleInputChange = (field: keyof CreateBodyMeasurementDto, value: any) => {
+  const handleInputChange = (field: keyof CreateBodyMeasurementDto, value: InputChangeValue) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value === '' ? undefined : value,
@@ -37,7 +39,7 @@ export default function NewMeasurementPage() {
       await createMutation.mutateAsync(formData);
       showToast('Medición registrada exitosamente', 'success');
       navigate({ to: '/measurements' });
-    } catch (error: any) {
+    } catch (error: AxiosErrorType) {
       showToast(error.response?.data?.message || 'Error al registrar medición', 'error');
     }
   };
